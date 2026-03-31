@@ -1,0 +1,106 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+const joinClasses = (...classes: Array<string | undefined>) => classes.filter(Boolean).join(" ");
+
+type PageSectionHeroProps = {
+  currentLabel: string;
+  title: ReactNode;
+  intro: ReactNode;
+  variant?: "compact" | "feature";
+  sectionClassName?: string;
+  innerClassName?: string;
+  titleWrapClassName?: string;
+  titleClassName?: string;
+  introWrapClassName?: string;
+  introClassName?: string;
+  currentLabelClassName?: string;
+  introColor?: string;
+};
+
+export function PageSectionHero({
+  currentLabel,
+  title,
+  intro,
+  sectionClassName,
+  innerClassName,
+  titleWrapClassName,
+  titleClassName,
+  introWrapClassName,
+  introClassName,
+  currentLabelClassName,
+  introColor = "rgba(255,255,255,0.8)",
+}: PageSectionHeroProps) {
+  return (
+    <section
+      className={joinClasses(
+        "w-full overflow-hidden rounded-b-[30px] bg-[rgba(17,40,62,1)] sm:rounded-b-[36px] lg:rounded-b-[45px]",
+        sectionClassName,
+      )}
+    >
+      <div
+        className={joinClasses(
+          "mx-auto w-full max-w-[1360px] pb-[32px] pl-14 pr-6 pt-[26px] sm:pb-[38px] sm:pl-[92px] sm:pr-10 sm:pt-[32px] min-[1025px]:min-h-[219px] min-[1025px]:pb-[36px] min-[1025px]:pl-[230px] min-[1025px]:pr-[125px] min-[1025px]:pt-[38px]",
+          innerClassName,
+        )}
+      >
+        <div className="flex flex-col gap-[20px] min-[1025px]:grid min-[1025px]:grid-cols-[minmax(0,1fr)_340px] min-[1025px]:gap-x-[54px] min-[1025px]:gap-y-0">
+          <div className={joinClasses("max-w-[794px]", titleWrapClassName)}>
+            <div className="flex items-center gap-[8px] text-[12.5px] font-normal leading-[20px] tracking-[0] text-white min-[1025px]:text-[13.5px] min-[1025px]:leading-[21px]">
+              <Link className="text-white" href="/" style={{ color: "#ffffff" }}>
+                Home
+              </Link>
+              <svg
+                aria-hidden="true"
+                className="h-[10px] w-[10px] text-white"
+                fill="none"
+                viewBox="0 0 10 10"
+              >
+                <path
+                  d="M1.5 5h6M5.5 2l3 3-3 3"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.2"
+                />
+              </svg>
+              <span
+                className={joinClasses("text-[rgba(191,147,117,1)]", currentLabelClassName)}
+                style={{ color: "rgba(191,147,117,1)" }}
+              >
+                {currentLabel}
+              </span>
+            </div>
+
+            <h1
+              className={joinClasses(
+                "mt-[24px] text-[32px] font-bold leading-[1.08] tracking-[-0.04em] text-white sm:mt-[26px] sm:text-[38px] min-[1025px]:mt-[30px] min-[1025px]:max-w-[794px] min-[1025px]:text-[30.5px] min-[1025px]:leading-[42px] min-[1025px]:tracking-[0]",
+                titleClassName,
+              )}
+              style={{ color: "#ffffff" }}
+            >
+              {title}
+            </h1>
+          </div>
+
+          <div
+            className={joinClasses(
+              "max-w-[520px] min-[1025px]:w-[340px] min-[1025px]:justify-self-end min-[1025px]:pt-[38px]",
+              introWrapClassName,
+            )}
+          >
+            <p
+              className={joinClasses(
+                "text-[14px] font-normal leading-[1.6] tracking-[0] text-white/80 sm:text-[15px] min-[1025px]:text-[11.5px] min-[1025px]:leading-[19px]",
+                introClassName,
+              )}
+              style={{ color: introColor }}
+            >
+              {intro}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

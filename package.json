@@ -1,0 +1,37 @@
+{
+  "name": "pryceless-venture",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "next typegen && node -e \"const fs=require('fs');const path=require('path');const target='.next/types/cache-life.d.ts';fs.mkdirSync(path.dirname(target),{recursive:true});if(!fs.existsSync(target)){fs.copyFileSync('node_modules/next/dist/server/use-cache/cache-life.d.ts', target)}\" && tsc --noEmit --incremental false",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.31.0",
+    "@prisma/adapter-mssql": "^7.5.0",
+    "@prisma/client": "^7.5.0",
+    "@tailwindcss/postcss": "^4.2.2",
+    "next": "^16.2.1",
+    "next-auth": "^5.0.0-beta.30",
+    "prisma": "^7.5.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwindcss": "^4.2.2",
+    "tsx": "^4.21.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "typescript": "5.9.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

@@ -1,0 +1,366 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model AdminProfile {
+  id          String   @id @default(cuid())
+  azureAdId   String?  @unique
+  email       String   @unique
+  name        String?
+  avatarUrl   String?
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model HomePage {
+  id                    String              @id
+  heroHeadline          String
+  heroSubheadline       String              @db.NVarChar(Max)
+  heroPrimaryCtaLabel   String
+  heroPrimaryCtaHref    String
+  heroSecondaryCtaLabel String?
+  heroSecondaryCtaHref  String?
+  metricsDisclaimer     String?             @db.NVarChar(Max)
+  portfolioValueDisplay String?
+  portfolioCaption      String?             @db.NVarChar(Max)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  metrics               HomeMetric[]
+  segments              HomeSegment[]
+  platformCards         HomePlatformCard[]
+  caseHighlights        HomeCaseHighlight[]
+  testimonials          HomeTestimonial[]
+}
+
+model HomeMetric {
+  id         String   @id @default(cuid())
+  homePageId String
+  metricValue String
+  metricLabel String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  homePage   HomePage @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+
+  @@index([homePageId, sortOrder])
+}
+
+model HomeSegment {
+  id         String   @id @default(cuid())
+  homePageId String
+  title      String
+  body       String   @db.NVarChar(Max)
+  ctaLabel   String
+  ctaHref    String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  homePage   HomePage @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+
+  @@index([homePageId, sortOrder])
+}
+
+model HomePlatformCard {
+  id         String   @id @default(cuid())
+  homePageId String
+  title      String
+  body       String   @db.NVarChar(Max)
+  ctaLabel   String
+  ctaHref    String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  homePage   HomePage @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+
+  @@index([homePageId, sortOrder])
+}
+
+model HomeCaseHighlight {
+  id         String   @id @default(cuid())
+  homePageId String
+  title      String
+  body       String   @db.NVarChar(Max)
+  ctaLabel   String
+  ctaHref    String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  homePage   HomePage @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+
+  @@index([homePageId, sortOrder])
+}
+
+model HomeTestimonial {
+  id         String   @id @default(cuid())
+  homePageId String
+  name       String
+  city       String
+  quote      String   @db.NVarChar(Max)
+  avatarUrl  String?  @db.NVarChar(2000)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  homePage   HomePage @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+
+  @@index([homePageId, sortOrder])
+}
+
+model SingletonPage {
+  id              String                  @id @default(cuid())
+  key             String                  @unique
+  routePath       String                  @unique
+  pageTitle       String
+  intro           String?                 @db.NVarChar(Max)
+  disclaimer      String?                 @db.NVarChar(Max)
+  ctaLabel        String?
+  ctaHref         String?
+  lifecycleStatus String                  @default("PUBLISHED")
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  items           SingletonPageItem[]
+}
+
+model SingletonPageItem {
+  id        String        @id @default(cuid())
+  pageId     String
+  groupKey   String
+  title      String
+  body       String?      @db.NVarChar(Max)
+  ctaLabel   String?
+  ctaHref    String?
+  sortOrder  Int          @default(0)
+  createdAt  DateTime     @default(now())
+  page       SingletonPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, groupKey, sortOrder])
+}
+
+model MediaFile {
+  id              String             @id @default(cuid())
+  blobUrl         String
+  blobPath        String             @unique
+  fileName        String
+  mimeType        String
+  fileSize        Int?
+  altText         String?            @db.NVarChar(1000)
+  metadata        String?            @db.NVarChar(Max)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  propertyImages  PropertyImage[]
+  investmentImages InvestmentImage[]
+}
+
+model Property {
+  id             String                  @id @default(cuid())
+  title          String
+  slug           String                  @unique
+  lifecycleStatus String                 @default("DRAFT")
+  status         String
+  locationCity   String?
+  locationState  String?
+  propertyType   String
+  strategy       String
+  summary        String                  @db.NVarChar(Max)
+  buyerFit       String?                 @db.NVarChar(Max)
+  inquiryFormId  String?
+  primaryImageId String?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  inquiryForm    FormDefinition?         @relation("PropertyInquiryForm", fields: [inquiryFormId], references: [id], onDelete: SetNull)
+  primaryImage   PropertyImage?          @relation("PropertyPrimaryImage", fields: [primaryImageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  highlights     PropertyHighlight[]
+  images         PropertyImage[]         @relation("PropertyImages")
+
+  @@index([lifecycleStatus, createdAt])
+}
+
+model PropertyHighlight {
+  id         String   @id @default(cuid())
+  propertyId  String
+  highlight   String
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, sortOrder])
+}
+
+model PropertyImage {
+  id                 String    @id @default(cuid())
+  propertyId         String
+  mediaFileId        String
+  caption            String?   @db.NVarChar(Max)
+  altText            String?   @db.NVarChar(1000)
+  sortOrder          Int       @default(0)
+  createdAt          DateTime  @default(now())
+  mediaFile          MediaFile @relation(fields: [mediaFileId], references: [id], onDelete: Cascade)
+  property           Property  @relation("PropertyImages", fields: [propertyId], references: [id], onDelete: Cascade)
+  primaryForProperty Property[] @relation("PropertyPrimaryImage")
+
+  @@unique([propertyId, mediaFileId])
+  @@index([propertyId, sortOrder])
+}
+
+model Investment {
+  id                       String                  @id @default(cuid())
+  title                    String
+  slug                     String                  @unique
+  lifecycleStatus          String                  @default("DRAFT")
+  status                   String
+  assetType                String
+  strategy                 String
+  summary                  String                  @db.NVarChar(Max)
+  minimumInvestmentDisplay String?
+  returnsDisclaimer        String?                 @db.NVarChar(Max)
+  dealPacketFormId         String?
+  primaryImageId           String?
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  dealPacketForm           FormDefinition?         @relation("InvestmentDealPacketForm", fields: [dealPacketFormId], references: [id], onDelete: SetNull)
+  primaryImage             InvestmentImage?        @relation("InvestmentPrimaryImage", fields: [primaryImageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  highlights               InvestmentHighlight[]
+  images                   InvestmentImage[]       @relation("InvestmentImages")
+
+  @@index([lifecycleStatus, createdAt])
+}
+
+model InvestmentHighlight {
+  id           String      @id @default(cuid())
+  investmentId String
+  highlight    String
+  sortOrder    Int         @default(0)
+  createdAt    DateTime    @default(now())
+  investment   Investment  @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+
+  @@index([investmentId, sortOrder])
+}
+
+model InvestmentImage {
+  id                    String      @id @default(cuid())
+  investmentId          String
+  mediaFileId           String
+  caption               String?     @db.NVarChar(Max)
+  altText               String?     @db.NVarChar(1000)
+  sortOrder             Int         @default(0)
+  createdAt             DateTime    @default(now())
+  mediaFile             MediaFile   @relation(fields: [mediaFileId], references: [id], onDelete: Cascade)
+  investment            Investment  @relation("InvestmentImages", fields: [investmentId], references: [id], onDelete: Cascade)
+  primaryForInvestment  Investment[] @relation("InvestmentPrimaryImage")
+
+  @@unique([investmentId, mediaFileId])
+  @@index([investmentId, sortOrder])
+}
+
+model CaseStudy {
+  id              String                  @id @default(cuid())
+  title           String
+  slug            String                  @unique
+  lifecycleStatus String                  @default("DRAFT")
+  category        String
+  overview        String                  @db.NVarChar(Max)
+  businessPlan    String                  @db.NVarChar(Max)
+  execution       String                  @db.NVarChar(Max)
+  outcomeSummary  String                  @db.NVarChar(Max)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  assetProfile    CaseStudyAssetProfile[]
+  takeaways       CaseStudyTakeaway[]
+
+  @@index([lifecycleStatus, createdAt])
+}
+
+model CaseStudyAssetProfile {
+  id          String    @id @default(cuid())
+  caseStudyId String
+  label       String
+  value       String
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  caseStudy   CaseStudy @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+
+  @@index([caseStudyId, sortOrder])
+}
+
+model CaseStudyTakeaway {
+  id          String    @id @default(cuid())
+  caseStudyId String
+  takeaway    String
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  caseStudy   CaseStudy @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+
+  @@index([caseStudyId, sortOrder])
+}
+
+model Calculator {
+  id              String                  @id @default(cuid())
+  title           String
+  slug            String                  @unique
+  lifecycleStatus String                  @default("DRAFT")
+  calculatorType  String
+  shortDescription String?                @db.NVarChar(Max)
+  disclaimer      String                  @db.NVarChar(Max)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@index([lifecycleStatus, createdAt])
+}
+
+model FormDefinition {
+  id               String              @id @default(cuid())
+  slug             String              @unique
+  formName         String
+  destination      String
+  successMessage   String              @db.NVarChar(Max)
+  isActive         Boolean             @default(true)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  fields           FormField[]
+  submissions      FormSubmission[]
+  investmentLinks  Investment[]        @relation("InvestmentDealPacketForm")
+  propertyLinks    Property[]          @relation("PropertyInquiryForm")
+}
+
+model FormField {
+  id               String         @id @default(cuid())
+  formDefinitionId String
+  fieldKey         String
+  label            String
+  type             String
+  required         Boolean        @default(false)
+  placeholder      String?
+  sortOrder        Int            @default(0)
+  createdAt        DateTime       @default(now())
+  formDefinition   FormDefinition @relation(fields: [formDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([formDefinitionId, fieldKey])
+  @@index([formDefinitionId, sortOrder])
+}
+
+model FormSubmission {
+  id                  String                @id @default(cuid())
+  formDefinitionId    String
+  submitterName       String?
+  submitterEmail      String?
+  submitterPhone      String?
+  sourcePath          String?
+  submissionEmailStatus String               @default("PENDING")
+  emailError          String?               @db.NVarChar(Max)
+  submittedAt         DateTime              @default(now())
+  formDefinition      FormDefinition        @relation(fields: [formDefinitionId], references: [id], onDelete: NoAction)
+  values              FormSubmissionValue[]
+
+  @@index([formDefinitionId, submittedAt])
+}
+
+model FormSubmissionValue {
+  id           String          @id @default(cuid())
+  submissionId String
+  label        String
+  value        String          @db.NVarChar(Max)
+  sortOrder    Int             @default(0)
+  submission   FormSubmission  @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId, sortOrder])
+}

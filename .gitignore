@@ -1,0 +1,20 @@
+node_modules/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Generated Prisma client output
+/generated/prisma/
+
+# Next.js build output
+.next/
+.next_stale/
+out/
+
+# TypeScript and local tooling
+tsconfig.tsbuildinfo
+.codex_tmp/
+_doc_extracts/
+package-lock.backup.json
