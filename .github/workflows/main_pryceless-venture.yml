@@ -52,4 +52,4 @@ jobs:
           app-name: 'pryceless-venture'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3AD7B7C65B05439AA78DE9EE3D7D3458 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_71718BC1F8A44066A9816D2B900CEB62 }}
