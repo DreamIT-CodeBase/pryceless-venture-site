@@ -13,16 +13,40 @@ const parseEmails = (value: string | undefined) =>
     .filter(Boolean);
 
 export const env = {
-  databaseUrl: requireEnv("DATABASE_URL"),
-  azureStorageConnectionString: requireEnv("AZURE_STORAGE_CONNECTION_STRING"),
-  azureContainerName: requireEnv("AZURE_CONTAINER_NAME"),
-  azureClientId: requireEnv("AZURE_CLIENT_ID"),
-  azureTenantId: requireEnv("AZURE_TENANT_ID"),
-  azureClientSecret: requireEnv("AZURE_CLIENT_SECRET"),
-  nextAuthUrl: process.env.NEXTAUTH_URL ?? "http://localhost:3000",
-  nextAuthSecret: requireEnv("NEXTAUTH_SECRET"),
-  redirectUri: process.env.REDIRECT_URI ?? "/admin",
-  adminAllowedEmails: parseEmails(process.env.ADMIN_ALLOWED_EMAILS),
-  senderMail: requireEnv("SENDER_MAIL"),
-  recipientMail: requireEnv("RECIPIENT_MAIL"),
+  get databaseUrl() {
+    return requireEnv("DATABASE_URL");
+  },
+  get azureStorageConnectionString() {
+    return requireEnv("AZURE_STORAGE_CONNECTION_STRING");
+  },
+  get azureContainerName() {
+    return requireEnv("AZURE_CONTAINER_NAME");
+  },
+  get azureClientId() {
+    return requireEnv("AZURE_CLIENT_ID");
+  },
+  get azureTenantId() {
+    return requireEnv("AZURE_TENANT_ID");
+  },
+  get azureClientSecret() {
+    return requireEnv("AZURE_CLIENT_SECRET");
+  },
+  get nextAuthUrl() {
+    return process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  },
+  get nextAuthSecret() {
+    return requireEnv("NEXTAUTH_SECRET");
+  },
+  get redirectUri() {
+    return process.env.REDIRECT_URI ?? "/admin";
+  },
+  get adminAllowedEmails() {
+    return parseEmails(process.env.ADMIN_ALLOWED_EMAILS);
+  },
+  get senderMail() {
+    return requireEnv("SENDER_MAIL");
+  },
+  get recipientMail() {
+    return requireEnv("RECIPIENT_MAIL");
+  },
 };
