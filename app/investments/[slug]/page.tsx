@@ -23,20 +23,12 @@ import { SiteShell } from "@/components/public/site-shell";
 import {
   getActiveFormBySlug,
   getPublishedInvestment,
-  getPublishedInvestments,
   getSingletonPage,
 } from "@/lib/data/public";
 import { resolvePrimaryImage } from "@/lib/media";
 
 export const revalidate = 300;
-
-export async function generateStaticParams() {
-  const investments = await getPublishedInvestments();
-
-  return investments.map((investment) => ({
-    slug: investment.slug,
-  }));
-}
+export const dynamic = "force-dynamic";
 
 const formatDisplayValue = (value: string | null | undefined) =>
   String(value ?? "")

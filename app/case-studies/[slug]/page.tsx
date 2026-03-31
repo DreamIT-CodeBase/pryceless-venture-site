@@ -16,17 +16,10 @@ import {
   detailSecondaryButtonClassName,
 } from "@/components/public/slug-detail-ui";
 import { SiteShell } from "@/components/public/site-shell";
-import { getPublishedCaseStudies, getPublishedCaseStudy } from "@/lib/data/public";
+import { getPublishedCaseStudy } from "@/lib/data/public";
 
 export const revalidate = 300;
-
-export async function generateStaticParams() {
-  const caseStudies = await getPublishedCaseStudies();
-
-  return caseStudies.map((caseStudy) => ({
-    slug: caseStudy.slug,
-  }));
-}
+export const dynamic = "force-dynamic";
 
 const formatDisplayValue = (value: string | null | undefined) =>
   String(value ?? "")

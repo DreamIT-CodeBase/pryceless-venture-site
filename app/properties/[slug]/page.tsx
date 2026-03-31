@@ -20,18 +20,11 @@ import {
   detailSecondaryButtonClassName,
 } from "@/components/public/slug-detail-ui";
 import { SiteShell } from "@/components/public/site-shell";
-import { getPublishedProperties, getPublishedProperty, getSingletonPage } from "@/lib/data/public";
+import { getPublishedProperty, getSingletonPage } from "@/lib/data/public";
 import { resolvePrimaryImage } from "@/lib/media";
 
 export const revalidate = 300;
-
-export async function generateStaticParams() {
-  const properties = await getPublishedProperties();
-
-  return properties.map((property) => ({
-    slug: property.slug,
-  }));
-}
+export const dynamic = "force-dynamic";
 
 const formatDisplayValue = (value: string | null | undefined) =>
   String(value ?? "")

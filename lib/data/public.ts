@@ -18,6 +18,7 @@ const isConnectionFailure = (error: unknown) => {
     errorWithCode.code === "ELOGIN" ||
     errorWithCode.code === "ESOCKET" ||
     errorWithCode.code === "P1001" ||
+    message.includes("Missing required environment variable: DATABASE_URL") ||
     message.includes("Client with IP address") ||
     message.includes("not allowed to access the server") ||
     message.includes("Can't reach database server") ||
