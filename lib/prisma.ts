@@ -6,10 +6,20 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  createPrismaClient();
+const getPrismaClient = () => {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = createPrismaClient();
+  }
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+  return globalForPrisma.prisma;
+};
+
+// Delay Prisma creation until a route or page actually performs a database call.
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, property, receiver) {
+    const client = getPrismaClient();
+    const value = Reflect.get(client as unknown as object, property, receiver);
+
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});
