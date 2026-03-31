@@ -24,6 +24,19 @@ jobs:
           node-version: '24.x'
 
       - name: npm install, build, and test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+          ADMIN_ALLOWED_EMAILS: ${{ secrets.ADMIN_ALLOWED_EMAILS }}
+          SENDER_MAIL: ${{ secrets.SENDER_MAIL }}
+          RECIPIENT_MAIL: ${{ secrets.RECIPIENT_MAIL }}
         run: |
           npm install
           npm run build --if-present
