@@ -1,0 +1,27 @@
+name: Seed production database
+
+on:
+  workflow_dispatch:
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: "24.x"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Seed database
+        run: npm run db:seed
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ADMIN_ALLOWED_EMAILS: ${{ secrets.ADMIN_ALLOWED_EMAILS }}
