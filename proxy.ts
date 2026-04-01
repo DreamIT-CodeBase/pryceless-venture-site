@@ -1,14 +1,22 @@
+import { NextResponse } from "next/server";
+
 import { auth } from "@/auth";
 
-export const proxy = auth((req) => {
+const adminProxy = auth((req) => {
   if (req.nextUrl.pathname === "/admin/login") {
-    return;
+    return NextResponse.next();
   }
 
   if (!req.auth?.user?.isAdmin) {
-    return Response.redirect(new URL("/admin/login", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/admin/login", req.url));
   }
+
+  return NextResponse.next();
 });
+
+export default function proxy(...args: Parameters<typeof adminProxy>) {
+  return adminProxy(...args);
+}
 
 export const config = {
   matcher: ["/admin/:path*", "/api/admin/:path*"],
