@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/copy-prisma-runtime.js",
     "start": "node ./node_modules/next/dist/bin/next start",
     "typecheck": "next typegen && node -e \"const fs=require('fs');const path=require('path');const target='build/types/cache-life.d.ts';fs.mkdirSync(path.dirname(target),{recursive:true});if(!fs.existsSync(target)){fs.copyFileSync('node_modules/next/dist/server/use-cache/cache-life.d.ts', target)}\" && tsc --noEmit --incremental false",
     "db:generate": "prisma generate",
