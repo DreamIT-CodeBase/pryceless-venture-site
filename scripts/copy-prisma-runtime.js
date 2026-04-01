@@ -1,27 +1,33 @@
 const fs = require("fs");
 const path = require("path");
 
-const sourceDir = path.join(process.cwd(), "node_modules", ".prisma");
-const targetDir = path.join(process.cwd(), "build", "node_modules", ".prisma");
-const sourceClientEntry = path.join(sourceDir, "client", "default.js");
-const targetClientEntry = path.join(targetDir, "client", "default.js");
+const nodeModules = path.join(process.cwd(), "node_modules");
+const buildNodeModules = path.join(process.cwd(), "build", "node_modules");
 
-if (!fs.existsSync(sourceDir) || !fs.existsSync(sourceClientEntry)) {
-  console.error(
-    `[copy-prisma-runtime] Prisma runtime is missing after build. Expected ${sourceClientEntry}`,
-  );
+fs.mkdirSync(buildNodeModules, { recursive: true });
+
+// Copy .prisma
+const dotPrisma = path.join(nodeModules, ".prisma");
+if (fs.existsSync(dotPrisma)) {
+  const dest = path.join(buildNodeModules, ".prisma");
+  fs.rmSync(dest, { recursive: true, force: true });
+  fs.cpSync(dotPrisma, dest, { recursive: true });
+  console.log("[copy-prisma-runtime] Copied .prisma ✓");
+} else {
+  console.error("[copy-prisma-runtime] ERROR: .prisma not found!");
   process.exit(1);
 }
 
-fs.mkdirSync(path.dirname(targetDir), { recursive: true });
-fs.rmSync(targetDir, { recursive: true, force: true });
-fs.cpSync(sourceDir, targetDir, { recursive: true });
-
-if (!fs.existsSync(targetClientEntry)) {
-  console.error(
-    `[copy-prisma-runtime] Prisma runtime copy is incomplete. Expected ${targetClientEntry}`,
-  );
+// Copy @prisma (Prisma 7.x puts generated client here)
+const atPrisma = path.join(nodeModules, "@prisma");
+if (fs.existsSync(atPrisma)) {
+  const dest = path.join(buildNodeModules, "@prisma");
+  fs.rmSync(dest, { recursive: true, force: true });
+  fs.cpSync(atPrisma, dest, { recursive: true });
+  console.log("[copy-prisma-runtime] Copied @prisma ✓");
+} else {
+  console.error("[copy-prisma-runtime] ERROR: @prisma not found!");
   process.exit(1);
 }
 
-console.log(`[copy-prisma-runtime] Copied Prisma runtime to ${targetDir}`);
+console.log("[copy-prisma-runtime] Done! All Prisma files copied.");
