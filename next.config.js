@@ -8,6 +8,12 @@ const nextConfig = {
   devIndicators: {
     buildActivity: false,
   },
+  outputFileTracingIncludes: {
+    "/*": [
+      "node_modules/.prisma/**/*",
+      "node_modules/@prisma/client/**/*",
+    ],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 604800,
