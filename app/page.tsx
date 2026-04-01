@@ -27,6 +27,7 @@ import {
   ShowcaseActionCard,
   ShowcasePanelCard,
 } from "@/components/public/showcase-action-card";
+import { MobileLogoCarousel } from "@/components/public/mobile-logo-carousel";
 import { SiteShell } from "@/components/public/site-shell";
 import { TestimonialsCarousel } from "@/components/public/testimonials-carousel";
 import { getHomePage, getPublishedProperties } from "@/lib/data/public";
@@ -78,6 +79,8 @@ const trustLogos = [
     panelClassName: "px-[9px] py-[5px] sm:px-[10px] sm:py-[5px] lg:px-[7px] lg:py-[5px]",
   },
 ];
+
+const trustLogoCarouselItems = trustLogos.slice(0, 6);
 
 const fallbackMetrics = [
   { value: "$250M+", label: "Total Transaction Volume", color: "#56acf7" },
@@ -252,8 +255,8 @@ const investmentOpportunityShowcaseCards = [
     title: "Investments",
     body: (
       <>
-        <span className="block whitespace-nowrap">Curated passive and active</span>
-        <span className="block whitespace-nowrap">investment opportunities.</span>
+        <span className="block">Curated passive and active</span>
+        <span className="block">investment opportunities.</span>
       </>
     ),
     ctaLabel: "More Details",
@@ -266,8 +269,8 @@ const investmentOpportunityShowcaseCards = [
     title: "Properties",
     body: (
       <>
-        <span className="block whitespace-nowrap">Curated passive and active</span>
-        <span className="block whitespace-nowrap">investment opportunities.</span>
+        <span className="block">Curated passive and active</span>
+        <span className="block">investment opportunities.</span>
       </>
     ),
     ctaLabel: "More Details",
@@ -280,8 +283,8 @@ const investmentOpportunityShowcaseCards = [
     title: "ROI Calculators",
     body: (
       <>
-        <span className="block whitespace-nowrap">Curated passive and active</span>
-        <span className="block whitespace-nowrap">investment opportunities.</span>
+        <span className="block">Curated passive and active</span>
+        <span className="block">investment opportunities.</span>
       </>
     ),
     ctaLabel: "More Details",
@@ -463,34 +466,33 @@ export default async function Home() {
         ]
       : null;
   const homeSectionTitleClassName =
-    "text-[34px] font-bold leading-[1.04] tracking-[-0.035em] sm:text-[38px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]";
+    "text-[30px] font-bold leading-[1.06] tracking-[-0.035em] sm:text-[38px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]";
   const homeSectionSubtitleClassName =
-    "text-[15px] font-normal leading-[1.45] tracking-[-0.01em] sm:text-[16px] lg:max-w-none lg:whitespace-nowrap lg:text-[14px] lg:leading-[20px] lg:tracking-[0]";
+    "text-[15px] font-normal leading-[1.5] tracking-[-0.01em] sm:text-[16px] lg:max-w-none lg:text-[14px] lg:leading-[20px] lg:tracking-[0]";
 
 
   return (
     <SiteShell cta={primaryCta}>
       <section className="w-full">
         <div
-          className="relative isolate overflow-hidden bg-[#09152d] min-h-[620px] sm:min-h-[700px] lg:min-h-0"
-          style={{ aspectRatio: `${heroSectionImage.width} / ${heroSectionImage.height}` }}
+          className="relative isolate overflow-hidden bg-[#09152d] min-h-[560px] sm:min-h-[640px] lg:min-h-0 lg:aspect-[1492/684]"
         >
           <Image
             src={heroSectionImage}
             alt="Luxury property exterior"
             fill
             priority
-            className="object-cover object-center"
+            className="object-cover object-[68%_center] sm:object-center"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,18,39,0.95)_0%,rgba(7,18,39,0.92)_15%,rgba(7,18,39,0.8)_27%,rgba(7,18,39,0.54)_39%,rgba(7,18,39,0.24)_52%,rgba(7,18,39,0.06)_64%,rgba(7,18,39,0)_74%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,14,31,0.12)_0%,rgba(5,14,31,0.02)_36%,rgba(5,14,31,0.12)_100%)]" />
-          <div className="absolute inset-y-0 left-0 w-[44%] bg-[linear-gradient(90deg,rgba(9,20,42,0.56)_0%,rgba(9,20,42,0.36)_36%,rgba(9,20,42,0.12)_70%,rgba(9,20,42,0)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,18,39,0.9)_0%,rgba(7,18,39,0.78)_34%,rgba(7,18,39,0.56)_65%,rgba(7,18,39,0.82)_100%)] lg:bg-[linear-gradient(90deg,rgba(7,18,39,0.95)_0%,rgba(7,18,39,0.92)_15%,rgba(7,18,39,0.8)_27%,rgba(7,18,39,0.54)_39%,rgba(7,18,39,0.24)_52%,rgba(7,18,39,0.06)_64%,rgba(7,18,39,0)_74%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,14,31,0.26)_0%,rgba(5,14,31,0.08)_42%,rgba(5,14,31,0.42)_100%)] lg:bg-[linear-gradient(180deg,rgba(5,14,31,0.12)_0%,rgba(5,14,31,0.02)_36%,rgba(5,14,31,0.12)_100%)]" />
+          <div className="absolute inset-y-0 left-0 hidden w-[62%] bg-[linear-gradient(90deg,rgba(9,20,42,0.56)_0%,rgba(9,20,42,0.36)_36%,rgba(9,20,42,0.12)_70%,rgba(9,20,42,0)_100%)] sm:w-[52%] lg:block lg:w-[44%]" />
 
-          <div className="relative z-10 flex h-full w-full items-start px-6 pt-20 sm:px-10 sm:pt-24 lg:pl-[135px] lg:pr-[135px] lg:pt-[128px]">
-            <div className="flex w-full max-w-[440px] flex-col gap-[18px] sm:gap-[22px] lg:max-w-[650px] lg:gap-[24px]">
+          <div className="relative z-10 flex h-full w-full items-center px-4 py-[44px] sm:px-10 sm:py-[64px] lg:items-start lg:pl-[135px] lg:pr-[135px] lg:pt-[128px]">
+            <div className="flex w-full max-w-[360px] flex-col gap-[18px] sm:max-w-[520px] sm:gap-[22px] lg:max-w-[650px] lg:gap-[24px]">
               <h1
-                className="font-normal text-[30px] leading-[1.16] tracking-[-0.016em] sm:text-[35px] sm:leading-[1.14] lg:text-[46px] lg:leading-[1.2]"
+                className="font-semibold text-[28px] leading-[1.06] tracking-[-0.04em] sm:text-[35px] sm:leading-[1.08] lg:text-[46px] lg:font-normal lg:leading-[1.2] lg:tracking-[-0.016em]"
                 style={{ color: "#ffffff", wordSpacing: "0.02em" }}
               >
                 {heroHeadingLines.map((line) => (
@@ -502,7 +504,7 @@ export default async function Home() {
 
               <div className="flex flex-col gap-[18px] sm:gap-[22px] lg:gap-[24px]">
                 <p
-                  className="max-w-[470px] text-[19px] font-normal leading-[1.58] tracking-[-0.01em] text-white/95 sm:text-[20px] lg:w-[560px] lg:max-w-none lg:text-[14.5px] lg:leading-[1.62] lg:tracking-[0]"
+                  className="max-w-[330px] text-[15px] font-normal leading-[1.65] tracking-[-0.01em] text-white/95 sm:max-w-[470px] sm:text-[20px] lg:w-[560px] lg:max-w-none lg:text-[14.5px] lg:leading-[1.62] lg:tracking-[0]"
                   style={{ color: "rgba(255,255,255,0.94)", wordSpacing: "0.03em" }}
                 >
                   {heroSubheadlineLines ? (
@@ -519,17 +521,17 @@ export default async function Home() {
                   )}
                 </p>
 
-                <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center lg:gap-[10px]">
+                <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:w-auto lg:gap-[10px]">
                   <Link
                     href={primaryCta.href}
-                    className="inline-flex h-[60px] w-[244px] items-center justify-center rounded-[8px] bg-white text-[18px] font-semibold tracking-[-0.02em] text-[#111827] shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-colors hover:bg-white sm:h-[56px] sm:w-[214px] sm:text-[17px] lg:h-[38px] lg:w-[154px] lg:rounded-[4px] lg:text-[14px] lg:tracking-[-0.02em] lg:shadow-[0_2px_5px_rgba(6,18,37,0.12)]"
+                    className="inline-flex min-h-[58px] w-full items-center justify-center rounded-[16px] bg-white px-6 py-3 text-[17px] font-semibold tracking-[-0.02em] text-[#111827] shadow-[0_14px_32px_rgba(0,0,0,0.16)] transition-colors hover:bg-white sm:h-[56px] sm:w-[214px] sm:text-[17px] lg:h-[38px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[14px] lg:tracking-[-0.02em] lg:shadow-[0_2px_5px_rgba(6,18,37,0.12)]"
                   >
                     {primaryCta.label}
                   </Link>
 
                   <Link
                     href={secondaryCta.href}
-                    className="inline-flex h-[60px] w-[241px] items-center justify-center rounded-[8px] bg-[#c79872] text-[18px] font-semibold tracking-[-0.02em] text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-colors hover:bg-[#c79872] hover:text-white sm:h-[56px] sm:w-[214px] sm:text-[17px] lg:h-[38px] lg:w-[154px] lg:rounded-[4px] lg:text-[14px] lg:tracking-[-0.02em] lg:shadow-[0_2px_5px_rgba(35,18,10,0.1)]"
+                    className="inline-flex min-h-[58px] w-full items-center justify-center rounded-[16px] bg-[#c79872] px-6 py-3 text-[17px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_32px_rgba(35,18,10,0.18)] transition-colors hover:bg-[#c79872] hover:text-white sm:h-[56px] sm:w-[214px] sm:text-[17px] lg:h-[38px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[14px] lg:tracking-[-0.02em] lg:shadow-[0_2px_5px_rgba(35,18,10,0.1)]"
                     style={{ color: "#ffffff" }}
                   >
                     <span style={{ color: "#ffffff" }}>{secondaryCta.label}</span>
@@ -545,10 +547,14 @@ export default async function Home() {
         style={{ backgroundColor: "rgba(245, 245, 245, 1)" }}
       >
         <div className="w-full px-4 sm:px-6 lg:flex lg:h-full lg:items-center lg:px-[145px]">
-          <div className="flex flex-wrap items-center justify-center gap-[14px] sm:gap-[18px] lg:mx-auto lg:grid lg:w-full lg:max-w-[1540px] lg:grid-cols-7 lg:justify-items-center lg:gap-[16px]">
+          <div className="lg:hidden">
+            <MobileLogoCarousel items={trustLogoCarouselItems} />
+          </div>
+
+          <div className="hidden lg:mx-auto lg:grid lg:w-full lg:max-w-[1540px] lg:grid-cols-7 lg:justify-items-center lg:gap-[16px]">
             {trustLogos.map((item, index) => (
               <div
-                className="flex h-[68px] w-[124px] shrink-0 items-center justify-center rounded-[10px] bg-[#f5f5f5] px-[16px] shadow-[0_0_0_1px_rgba(230,222,212,0.96)] sm:h-[78px] sm:w-[146px] sm:px-[18px] lg:h-[66px] lg:w-full lg:min-w-0 lg:rounded-[12px] lg:px-[10px]"
+                className="flex h-[66px] w-full min-w-0 items-center justify-center rounded-[12px] bg-[#f5f5f5] px-[10px] shadow-[0_0_0_1px_rgba(230,222,212,0.96)]"
                 key={`${item.alt}-${index}`}
               >
                 <div
@@ -558,7 +564,7 @@ export default async function Home() {
                     alt={item.alt}
                     className={`h-auto object-contain ${item.logoClassName}`}
                     priority={index < 4}
-                    sizes="(max-width: 639px) 124px, (max-width: 1023px) 146px, 160px"
+                    sizes="160px"
                     src={item.logo}
                   />
                 </div>
@@ -568,22 +574,22 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="bg-white py-[62px] sm:py-[72px] lg:py-[56px]">
+      <section className="bg-white py-[54px] sm:py-[72px] lg:py-[56px]">
         <div className="mx-auto w-full max-w-[1905px] px-4 sm:px-6 lg:px-[135px]">
-          <div className="grid gap-y-12 lg:grid-cols-[610px_minmax(0,1fr)_520px] lg:items-start">
+          <div className="grid gap-y-8 lg:grid-cols-[610px_minmax(0,1fr)_520px] lg:items-start lg:gap-y-12">
             <div className="lg:col-start-1 lg:w-[610px] lg:pt-[2px]">
-            <h2 className="max-w-none text-[52px] font-bold leading-[1.05] tracking-[-0.052em] text-[#16203b] sm:text-[48px] lg:text-[42px] lg:leading-[54px] lg:tracking-[0] lg:text-[#0f172a] lg:whitespace-nowrap">
+            <h2 className="max-w-[10ch] text-[33px] font-bold leading-[1.02] tracking-[-0.05em] text-[#16203b] sm:max-w-none sm:text-[48px] lg:text-[42px] lg:leading-[54px] lg:tracking-[0] lg:text-[#0f172a]">
               Why Pryceless Ventures, LLC
             </h2>
 
-            <div className="mt-[20px] lg:mt-[21px] lg:w-[610px]">
-              <p className="max-w-[742px] text-[18px] font-normal leading-[1.56] tracking-[-0.024em] text-[#3b3f47] lg:max-w-[610px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48]">
+            <div className="mt-[18px] lg:mt-[21px] lg:w-[610px]">
+              <p className="max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[610px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48]">
                 Your leading real estate advocate, transforming houses into dreams. Trust us
                 to expertly guide you home. 45,000 apartments &amp; home for sell, rent &amp;
                 mortgage. Lorem ipsum dolor sit amet conse ctetur adip mscing.
               </p>
-              <div aria-hidden="true" className="h-[22px] lg:h-[12px]" />
-              <p className="max-w-[742px] text-[18px] font-normal leading-[1.56] tracking-[-0.024em] text-[#3b3f47] lg:max-w-[610px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48]">
+              <div aria-hidden="true" className="h-[18px] lg:h-[12px]" />
+              <p className="max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[610px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48]">
                 At pryceless Ventures, LLC, we believe finding a home should feel effortless.
                 Our platform combines cutting-edge design, intelligent property listings,
                 and reliable agent connections to make your real estate journey smooth,
@@ -591,15 +597,15 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="mt-[57px] flex flex-wrap items-end gap-x-[30px] gap-y-5 lg:mt-[39px] lg:gap-x-[18px]">
+            <div className="mt-[30px] flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-[30px] sm:gap-y-5 lg:mt-[39px] lg:gap-x-[18px]">
               <Link
-                className="inline-flex h-[60px] min-w-[238px] items-center justify-center rounded-full border border-[#95989f] bg-white px-[42px] text-[18px] font-semibold tracking-[-0.03em] text-[#131927] transition hover:bg-[#fafafa] lg:h-[35px] lg:w-[135px] lg:min-w-[135px] lg:rounded-[17.5px] lg:border lg:border-[#808080] lg:px-0 lg:text-[14px] lg:tracking-[0]"
+                className="inline-flex min-h-[54px] w-full items-center justify-center rounded-full border border-[#95989f] bg-white px-[32px] py-3 text-[16px] font-semibold tracking-[-0.02em] text-[#131927] transition hover:bg-[#fafafa] sm:min-w-[238px] sm:w-auto lg:h-[35px] lg:w-[135px] lg:min-w-[135px] lg:rounded-[17.5px] lg:border lg:border-[#808080] lg:px-0 lg:py-0 lg:text-[14px] lg:tracking-[0]"
                 href="/properties"
               >
                 Explore Listing
               </Link>
               <Link
-                className="inline-flex items-center gap-[16px] border-b-[1.5px] border-[#182138] pb-[10px] text-[18px] font-semibold tracking-[-0.03em] text-[#161d2e] lg:gap-[9px] lg:border-b lg:border-[#3c4250] lg:pb-[4px] lg:text-[14px] lg:tracking-[0] lg:text-[#131927]"
+                className="inline-flex w-full items-center justify-between gap-[16px] border-b-[1.5px] border-[#182138] pb-[10px] text-[16px] font-semibold tracking-[-0.02em] text-[#161d2e] sm:w-auto sm:justify-start lg:gap-[9px] lg:border-b lg:border-[#3c4250] lg:pb-[4px] lg:text-[14px] lg:tracking-[0] lg:text-[#131927]"
                 href="/cash-offer"
               >
                 <span>Request A Callback</span>
@@ -612,7 +618,7 @@ export default async function Home() {
           </div>
 
             <div
-              className="relative mx-auto w-full max-w-[632px] overflow-hidden rounded-[31px] lg:col-start-3 lg:mx-0 lg:h-[356px] lg:w-[520px] lg:max-w-none lg:justify-self-end lg:rounded-[14px]"
+              className="relative mx-auto w-full max-w-[420px] overflow-hidden rounded-[28px] shadow-[0_18px_40px_rgba(15,23,42,0.08)] lg:col-start-3 lg:mx-0 lg:h-[356px] lg:w-[520px] lg:max-w-none lg:justify-self-end lg:rounded-[14px] lg:shadow-none"
               style={{ aspectRatio: "520 / 356" }}
             >
               <Image
@@ -647,19 +653,19 @@ export default async function Home() {
                   />
                 ) : null}
                 <p
-                  className="whitespace-nowrap text-[40px] font-medium leading-[0.92] tracking-[-0.05em] sm:text-[48px] lg:text-[38px] lg:leading-[26px] lg:tracking-[0]"
+                  className="text-[34px] font-medium leading-[0.92] tracking-[-0.05em] sm:text-[48px] lg:text-[38px] lg:leading-[26px] lg:tracking-[0]"
                   style={{ color: item.color }}
                 >
                   {item.value}
                 </p>
-               <p
-  style={{
-    marginTop: "clamp(10px, 1.5vw, 16px)",
-  }}
-  className="whitespace-nowrap text-[15px] font-normal leading-none tracking-[-0.02em] text-[#2a2e35] sm:text-[16px] lg:text-[17px] lg:leading-[20px] lg:tracking-[0]"
->
-  {item.label}
-</p>
+                <p
+                  style={{
+                    marginTop: "clamp(10px, 1.5vw, 16px)",
+                  }}
+                  className="max-w-[150px] text-[14px] font-normal leading-[1.25] tracking-[-0.02em] text-[#2a2e35] sm:text-[16px] lg:max-w-[180px] lg:text-[17px] lg:leading-[20px] lg:tracking-[0]"
+                >
+                  {item.label}
+                </p>
               </div>
             ))}
           </div>
@@ -697,7 +703,7 @@ export default async function Home() {
           <div className="mx-auto mt-[-52px] max-w-[1000px] text-center lg:mt-[-48px] lg:max-w-[858px]">
             <div className="grid items-center gap-[16px] md:grid-cols-[1fr_auto_1fr] lg:grid-cols-[309px_214px_311px] lg:gap-[12px]">
               <span className="hidden h-px w-full bg-[#d8d8d4] md:block" />
-              <h2 className={`shrink-0 whitespace-nowrap text-[#182544] ${homeSectionTitleClassName} lg:w-[214px] lg:text-center lg:text-[rgba(15,23,42,1)]`}>
+              <h2 className={`shrink-0 text-[#182544] ${homeSectionTitleClassName} lg:w-[214px] lg:text-center lg:text-[rgba(15,23,42,1)]`}>
                 Who We Help
               </h2>
               <span className="hidden h-px w-full bg-[#d8d8d4] md:block" />
@@ -861,19 +867,19 @@ export default async function Home() {
                 ) : null}
 
                 <p
-                  className="whitespace-nowrap text-[44px] font-semibold leading-[0.96] tracking-[-0.05em] sm:text-[52px] lg:text-[31px] lg:font-medium lg:leading-[20px] lg:tracking-[0]"
+                  className="text-[36px] font-semibold leading-[0.96] tracking-[-0.05em] sm:text-[52px] lg:text-[31px] lg:font-medium lg:leading-[20px] lg:tracking-[0]"
                   style={{ color: item.color }}
                 >
                   {item.value}
                 </p>
-<p
-  style={{
-    marginTop: "clamp(10px, 1.5vw, 16px)",
-  }}
-  className="whitespace-nowrap text-[15px] font-normal leading-none tracking-[-0.02em] text-[#2a2e35] sm:text-[16px] lg:text-[17px] lg:leading-[20px] lg:tracking-[0]"
->
-  {item.label}
-</p>
+                <p
+                  style={{
+                    marginTop: "clamp(10px, 1.5vw, 16px)",
+                  }}
+                  className="max-w-[150px] text-[14px] font-normal leading-[1.25] tracking-[-0.02em] text-[#2a2e35] sm:text-[16px] lg:max-w-[180px] lg:text-[17px] lg:leading-[20px] lg:tracking-[0]"
+                >
+                  {item.label}
+                </p>
               </div>
             ))}
           </div>
@@ -1055,7 +1061,7 @@ export default async function Home() {
             sizes="100vw"
             src={testimonialBg}
           />
-          <div className="relative mx-auto flex max-w-[1110px] flex-col items-center px-4 py-[54px] text-center sm:px-6 sm:py-[60px] lg:min-h-[475px] lg:px-0 lg:pb-[52px] lg:pt-[46px]">
+          <div className="relative mx-auto flex max-w-[1110px] flex-col items-center px-4 py-[50px] text-center sm:px-6 sm:py-[60px] lg:min-h-[475px] lg:px-0 lg:pb-[52px] lg:pt-[46px]">
             <div className="mx-auto max-w-[645px]">
               <h2
                 className={`${homeSectionTitleClassName} text-[rgba(15,23,42,1)]`}
@@ -1072,7 +1078,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="mt-[30px] lg:mt-[34px]">
+            <div className="mt-[28px] w-full lg:mt-[34px]">
               <TestimonialsCarousel items={testimonials} />
             </div>
           </div>

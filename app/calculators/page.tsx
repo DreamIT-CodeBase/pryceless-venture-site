@@ -26,7 +26,7 @@ const calculatorCards = [
     backgroundColor: "#eed7ef",
     borderColor: "#d7bdd9",
     iconClassName: "max-h-[58px] max-w-[58px]",
-    titleClassName: "max-w-none whitespace-nowrap text-[19px]",
+    titleClassName: "max-w-none text-[19px]",
   },
   {
     title: "Mortgage Calculator",
@@ -37,8 +37,8 @@ const calculatorCards = [
     backgroundColor: "#f7e7bc",
     borderColor: "#e0c89b",
     iconClassName: "max-h-[50px] max-w-[50px]",
-    buttonTextClassName: "max-w-[140px] whitespace-nowrap",
-    titleClassName: "max-w-none whitespace-nowrap text-[19px]",
+    buttonTextClassName: "max-w-[140px]",
+    titleClassName: "max-w-none text-[19px]",
   },
   {
     title: "Value-Add Analysis",
@@ -49,7 +49,7 @@ const calculatorCards = [
     backgroundColor: "#c7ebe4",
     borderColor: "#acd6cd",
     iconClassName: "max-h-[50px] max-w-[50px]",
-    titleClassName: "max-w-none whitespace-nowrap text-[19px]",
+    titleClassName: "max-w-none text-[19px]",
   },
 ] as const;
 

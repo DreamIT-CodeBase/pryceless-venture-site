@@ -177,12 +177,12 @@ export default async function PropertiesPage() {
           }
         />
 
-        <section className="bg-white px-4 pt-[56px] sm:px-6 lg:px-0 lg:pt-[64px]">
+        <section className="bg-white px-4 pt-[48px] sm:px-6 lg:px-0 lg:pt-[64px]">
           <div className="mx-auto flex max-w-[662px] flex-col items-center text-center">
-            <p className="w-[118px] text-center text-[11.5px] font-normal uppercase leading-[19px] tracking-[0.02em] text-[#bf9375]">
+            <p className="text-center text-[11.5px] font-normal uppercase leading-[19px] tracking-[0.02em] text-[#bf9375]">
               Investment Deals
             </p>
-            <h2 className="mt-[8px] w-full text-[38px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[-0.02em]">
+            <h2 className="mt-[8px] w-full text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[-0.02em]">
               Explore property with Pryceless Ventures
             </h2>
           </div>

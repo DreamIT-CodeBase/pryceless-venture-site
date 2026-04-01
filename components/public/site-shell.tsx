@@ -113,11 +113,11 @@ export function SiteShell({
   return (
     <div className="min-h-screen bg-white text-[var(--pv-ink)]">
       <header className="relative z-50 bg-white">
-        <div className="mx-auto flex w-full max-w-[1478px] items-center gap-4 px-4 py-4 sm:px-6 sm:py-5 min-[1025px]:grid min-[1025px]:min-h-[92px] min-[1025px]:grid-cols-[160px_minmax(0,1fr)_196px] min-[1025px]:items-center min-[1025px]:gap-x-[34px] min-[1025px]:px-[72px] min-[1025px]:py-0 xl:px-[110px]">
-          <Link aria-label="Pryceless Ventures home" className="shrink-0" href="/">
+        <div className="mx-auto flex w-full max-w-[1478px] items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 sm:py-5 min-[1025px]:grid min-[1025px]:min-h-[92px] min-[1025px]:grid-cols-[160px_minmax(0,1fr)_196px] min-[1025px]:items-center min-[1025px]:gap-x-[34px] min-[1025px]:px-[72px] min-[1025px]:py-0 xl:px-[110px]">
+          <Link aria-label="Pryceless Ventures home" className="max-w-[calc(100%-72px)] shrink-0" href="/">
             <Image
               alt="Pryceless Ventures"
-              className="h-auto w-[138px] sm:w-[184px] min-[1025px]:w-[160px]"
+              className="h-auto w-[164px] sm:w-[184px] min-[1025px]:w-[160px]"
               priority
               sizes="(min-width: 1024px) 160px, (min-width: 640px) 200px, 200px"
               src={logoHeader}
@@ -185,7 +185,7 @@ export function SiteShell({
             <div className="min-w-0 xl:max-w-[286px]">
               <h3 className={footerHeadingClassName}>Useful link</h3>
               <div className={footerRuleClassName} />
-              <div className="mt-[14px] grid grid-cols-2 gap-x-6 sm:max-w-[320px]">
+              <div className="mt-[14px] grid gap-3 sm:max-w-[320px] sm:grid-cols-2 sm:gap-x-6">
                 {usefulLinkColumns.map((column, columnIndex) => (
                   <div key={`useful-column-${columnIndex}`}>
                     {column.map((item) => (

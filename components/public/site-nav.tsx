@@ -58,7 +58,7 @@ export function SiteNav({
           aria-controls={menuId}
           aria-expanded={mobileOpen}
           aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
-          className="relative z-[60] inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-[#111827] shadow-[0_8px_22px_rgba(15,23,42,0.08)] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#18357a]/30"
+          className="relative z-[60] inline-flex h-12 w-12 items-center justify-center rounded-[18px] border border-slate-200 bg-white text-[#111827] shadow-[0_12px_28px_rgba(15,23,42,0.1)] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#18357a]/30"
           onClick={() => setMobileOpen((current) => !current)}
           type="button"
         >
@@ -92,7 +92,7 @@ export function SiteNav({
 
         <div
           aria-hidden={!mobileOpen}
-          className={`fixed inset-x-4 top-[76px] z-50 rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_24px_70px_rgba(15,23,42,0.16)] transition-all duration-300 ease-out sm:inset-x-6 sm:top-[88px] ${
+          className={`fixed inset-x-4 top-[74px] z-50 rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_24px_70px_rgba(15,23,42,0.16)] transition-all duration-300 ease-out sm:inset-x-6 sm:top-[88px] ${
             mobileOpen ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
           }`}
           id={menuId}

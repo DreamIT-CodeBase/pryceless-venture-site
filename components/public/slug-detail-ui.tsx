@@ -171,9 +171,9 @@ export function DetailKeyValueList({
   return (
     <dl className="space-y-4">
       {items.map((item) => (
-        <div className="flex items-start justify-between gap-5 border-b border-slate-200 pb-4" key={`${item.label}-${item.value}`}>
+        <div className="flex flex-col gap-2 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between sm:gap-5" key={`${item.label}-${item.value}`}>
           <dt className="text-[11px] font-medium uppercase tracking-[0.24em] text-slate-500">{item.label}</dt>
-          <dd className="max-w-[62%] text-right text-[15px] leading-[1.65] text-slate-700 sm:text-[16px]">{item.value}</dd>
+          <dd className="text-left text-[15px] leading-[1.65] text-slate-700 sm:max-w-[62%] sm:text-right sm:text-[16px]">{item.value}</dd>
         </div>
       ))}
     </dl>

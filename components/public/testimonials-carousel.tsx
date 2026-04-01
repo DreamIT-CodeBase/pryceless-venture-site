@@ -35,7 +35,7 @@ const getGap = (width: number) => {
     return 26;
   }
 
-  return 22;
+  return 16;
 };
 
 export function TestimonialsCarousel({
@@ -98,19 +98,19 @@ export function TestimonialsCarousel({
 
   return (
     <div
-      className="mx-auto w-full max-w-full sm:max-w-[610px] lg:max-w-[944px]"
+      className="mx-auto w-full max-w-[380px] overflow-hidden sm:max-w-[610px] lg:max-w-[944px]"
       onBlurCapture={() => setIsPaused(false)}
       onFocusCapture={() => setIsPaused(true)}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div
-        className="pv-hide-scrollbar flex snap-x snap-mandatory gap-[22px] overflow-x-auto pb-[4px] sm:gap-[26px] lg:gap-[34px]"
+        className="pv-hide-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-[6px] sm:gap-[26px] lg:gap-[34px]"
         ref={viewportRef}
       >
         {safeItems.map((item, index) => (
           <div
-            className="min-w-full snap-start sm:min-w-[292px] lg:min-w-[292px]"
+            className="flex min-w-full snap-start justify-center sm:min-w-[292px]"
             data-testimonial-card="true"
             key={`${item.name}-${index}`}
           >
@@ -125,7 +125,7 @@ export function TestimonialsCarousel({
       </div>
 
       {safeItems.length > 1 ? (
-        <div className="mt-[16px] flex items-center justify-center gap-[8px]">
+        <div className="mt-[18px] flex items-center justify-center gap-[8px]">
           {Array.from({ length: maxIndex + 1 }).map((_, index) => (
             <button
               aria-label={`Show testimonial slide ${index + 1}`}

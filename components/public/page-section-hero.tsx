@@ -40,7 +40,7 @@ export function PageSectionHero({
     >
       <div
         className={joinClasses(
-          "mx-auto w-full max-w-[1360px] pb-[32px] pl-14 pr-6 pt-[26px] sm:pb-[38px] sm:pl-[92px] sm:pr-10 sm:pt-[32px] min-[1025px]:min-h-[219px] min-[1025px]:pb-[36px] min-[1025px]:pl-[230px] min-[1025px]:pr-[125px] min-[1025px]:pt-[38px]",
+          "mx-auto w-full max-w-[1360px] px-4 pb-[28px] pt-[24px] sm:px-6 sm:pb-[34px] sm:pt-[30px] min-[1025px]:min-h-[219px] min-[1025px]:pb-[36px] min-[1025px]:pl-[230px] min-[1025px]:pr-[125px] min-[1025px]:pt-[38px]",
           innerClassName,
         )}
       >
@@ -74,7 +74,7 @@ export function PageSectionHero({
 
             <h1
               className={joinClasses(
-                "mt-[24px] text-[32px] font-bold leading-[1.08] tracking-[-0.04em] text-white sm:mt-[26px] sm:text-[38px] min-[1025px]:mt-[30px] min-[1025px]:max-w-[794px] min-[1025px]:text-[30.5px] min-[1025px]:leading-[42px] min-[1025px]:tracking-[0]",
+                "mt-[22px] text-[28px] font-bold leading-[1.08] tracking-[-0.04em] text-white sm:mt-[26px] sm:text-[38px] min-[1025px]:mt-[30px] min-[1025px]:max-w-[794px] min-[1025px]:text-[30.5px] min-[1025px]:leading-[42px] min-[1025px]:tracking-[0]",
                 titleClassName,
               )}
               style={{ color: "#ffffff" }}
@@ -91,7 +91,7 @@ export function PageSectionHero({
           >
             <p
               className={joinClasses(
-                "text-[14px] font-normal leading-[1.6] tracking-[0] text-white/80 sm:text-[15px] min-[1025px]:text-[11.5px] min-[1025px]:leading-[19px]",
+                "text-[14px] font-normal leading-[1.65] tracking-[0] text-white/80 sm:text-[15px] min-[1025px]:text-[11.5px] min-[1025px]:leading-[19px]",
                 introClassName,
               )}
               style={{ color: introColor }}

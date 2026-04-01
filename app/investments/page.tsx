@@ -116,12 +116,12 @@ export default async function InvestmentsPage() {
           }
         />
 
-        <section className="bg-white px-4 pb-[34px] pt-[54px] sm:px-6 lg:px-[126px] lg:pb-[42px] lg:pt-[56px]">
+        <section className="bg-white px-4 pb-[34px] pt-[48px] sm:px-6 lg:px-[126px] lg:pb-[42px] lg:pt-[56px]">
           <div className="mx-auto flex w-full flex-col items-center text-center">
-            <p className="w-auto whitespace-nowrap text-center text-[13px] font-normal leading-[21px] tracking-[0] text-[var(--pv-sand)] lg:text-[14px] lg:leading-[22px]">
+            <p className="text-center text-[13px] font-normal leading-[21px] tracking-[0] text-[var(--pv-sand)] lg:text-[14px] lg:leading-[22px]">
               Opportunity Overview
             </p>
-            <h2 className="mt-[8px] max-w-[551px] text-center text-[36px] font-bold leading-[1.08] tracking-[-0.045em] text-[#0f172a] sm:text-[42px] lg:w-[551px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]">
+            <h2 className="mt-[8px] max-w-[551px] text-center text-[32px] font-bold leading-[1.08] tracking-[-0.045em] text-[#0f172a] sm:text-[42px] lg:w-[551px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]">
               Explore high-return Opportunities
               <br />
               in prime locations
@@ -135,7 +135,7 @@ export default async function InvestmentsPage() {
               videoSrc={featuredInvestmentVideoSrc}
             />
 
-            <article className="flex h-full flex-col rounded-[10px] bg-[#f5f5f5] px-[30px] pb-[30px] pt-[30px] lg:h-[330px] lg:w-[303px]">
+            <article className="flex h-full flex-col rounded-[10px] bg-[#f5f5f5] px-6 pb-6 pt-6 lg:h-[330px] lg:w-[303px] lg:px-[30px] lg:pb-[30px] lg:pt-[30px]">
               <div className="grid h-[38px] w-[38px] place-items-center rounded-full bg-[#1f1f1f]">
                 <Image
                   alt=""
@@ -143,18 +143,18 @@ export default async function InvestmentsPage() {
                   src={viewOpportunityHeaderIcon}
                 />
               </div>
-              <h3 className="mt-[18px] text-[20.5px] font-normal leading-[42px] tracking-[0] text-[#0f172a]">
+              <h3 className="mt-[18px] text-[20px] font-normal leading-[1.3] tracking-[0] text-[#0f172a] lg:text-[20.5px] lg:leading-[42px]">
                 Opportunity snapshot
               </h3>
-              <p className="mt-[-1px] max-w-[262px] text-[11.5px] font-normal leading-[19px] tracking-[0] text-[rgba(0,0,0,0.8)]">
+              <p className="mt-2 max-w-[262px] text-[12px] font-normal leading-[19px] tracking-[0] text-[rgba(0,0,0,0.8)] lg:mt-[-1px] lg:text-[11.5px]">
                 Here&apos;s a quick look at how we&apos;re creating consistent growth and value in real estate investment.
               </p>
 
-              <div className="mt-auto flex items-end gap-[24px] pt-[24px]">
-                <p className="text-[57px] font-semibold leading-none tracking-[-0.04em] text-[#2d2d2d]">
+              <div className="mt-auto flex items-end gap-4 pt-[24px]">
+                <p className="text-[48px] font-semibold leading-none tracking-[-0.04em] text-[#2d2d2d] sm:text-[57px]">
                   95%
                 </p>
-                <p className="max-w-[112px] pb-[6px] text-[11.5px] font-normal leading-[19px] tracking-[0] text-[rgba(0,0,0,0.8)]">
+                <p className="max-w-[132px] pb-[4px] text-[12px] font-normal leading-[19px] tracking-[0] text-[rgba(0,0,0,0.8)] sm:max-w-[112px] sm:pb-[6px] sm:text-[11.5px]">
                   Investment success rate
                 </p>
               </div>
@@ -165,10 +165,10 @@ export default async function InvestmentsPage() {
         <section className="bg-white px-4 sm:px-6 lg:px-0">
           <div className="mx-auto w-full max-w-[1080px]">
             <div className="text-left">
-              <p className="w-auto whitespace-nowrap text-[13px] font-normal uppercase leading-[20px] tracking-[0] text-[#bf9375]">
+              <p className="text-[13px] font-normal uppercase leading-[20px] tracking-[0] text-[#bf9375]">
                 Investment Deals
               </p>
-              <h2 className="mt-[8px] max-w-[489px] text-[38px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]">
+              <h2 className="mt-[8px] max-w-[489px] text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]">
                 Explore property investment
                 <br />
                 paths with Pryceless Ventures

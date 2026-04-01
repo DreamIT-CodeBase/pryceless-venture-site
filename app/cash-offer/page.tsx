@@ -32,7 +32,7 @@ export default async function CashOfferPage() {
 
   return (
     <SiteShell cta={{ href: "/properties", label: "View Properties" }}>
-      <div className="space-y-16 pb-16 sm:pb-20">
+      <div className="space-y-12 pb-16 sm:space-y-16 sm:pb-20">
         <PageSectionHero
           currentLabel="Get a Cash Offer"
           intro={
@@ -48,13 +48,13 @@ export default async function CashOfferPage() {
             title="Sell With Clarity"
           />
 
-          <div className="mt-12 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="mt-10 grid gap-8 lg:mt-12 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="space-y-6">
               <Surface className="overflow-hidden">
                 <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-                  <div className="p-7">
-                    <h2 className="text-[30px] font-bold">How It Works</h2>
-                    <ul className="mt-5 space-y-4 text-[17px] leading-8 text-[var(--pv-text)]">
+                  <div className="p-5 sm:p-7">
+                    <h2 className="text-[26px] font-bold sm:text-[30px]">How It Works</h2>
+                    <ul className="mt-5 space-y-4 text-[16px] leading-7 text-[var(--pv-text)] sm:text-[17px] sm:leading-8">
                       {(howItWorks.length
                         ? howItWorks.map((item) => item.title)
                         : fallbackHowItWorks).map((item) => (
@@ -62,7 +62,7 @@ export default async function CashOfferPage() {
                       ))}
                     </ul>
                   </div>
-                  <div className="relative min-h-[260px]">
+                  <div className="relative min-h-[220px] sm:min-h-[260px]">
                     <Image
                       alt="Styled bedroom"
                       className="object-cover"
@@ -74,14 +74,14 @@ export default async function CashOfferPage() {
                 </div>
               </Surface>
 
-              <Surface className="p-7">
-                <h2 className="text-[30px] font-bold">Seller Benefits</h2>
+              <Surface className="p-5 sm:p-7">
+                <h2 className="text-[26px] font-bold sm:text-[30px]">Seller Benefits</h2>
                 <ul className="mt-5 grid gap-4 sm:grid-cols-2">
                   {(sellerBenefits.length
                     ? sellerBenefits.map((item) => item.title)
                     : fallbackSellerBenefits).map((item) => (
                     <li
-                      className="rounded-[18px] bg-slate-50 px-4 py-4 text-[16px] leading-7 text-[var(--pv-text)]"
+                      className="rounded-[18px] bg-slate-50 px-4 py-4 text-[15px] leading-6 text-[var(--pv-text)] sm:text-[16px] sm:leading-7"
                       key={item}
                     >
                       {item}
@@ -95,7 +95,7 @@ export default async function CashOfferPage() {
               {form ? (
                 <PublicForm form={form} sourcePath="/cash-offer" />
               ) : (
-                <Surface className="p-7 text-[var(--pv-text)]">
+                <Surface className="p-5 text-[var(--pv-text)] sm:p-7">
                   Assign the cash offer form in the admin portal to collect submissions here.
                 </Surface>
               )}

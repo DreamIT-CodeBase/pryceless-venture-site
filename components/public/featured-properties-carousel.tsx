@@ -30,7 +30,7 @@ const FEATURED_PROPERTY_DESKTOP_GAP = 38;
 const FEATURED_PROPERTY_TABLET_GAP = 26;
 const FEATURED_PROPERTY_MOBILE_GAP = 16;
 const featuredPropertyButtonClassName =
-  "inline-flex h-[40px] min-w-[116px] items-center justify-center rounded-[8px] bg-[#18314b] px-[18px] text-[12px] font-semibold leading-none text-white transition-all duration-300 group-hover:bg-[#234766] hover:bg-[#234766]";
+  "inline-flex min-h-[40px] w-full max-w-[124px] items-center justify-center rounded-[8px] bg-[#18314b] px-[18px] py-2 text-center text-[12px] font-semibold leading-none text-white transition-all duration-300 group-hover:bg-[#234766] hover:bg-[#234766]";
 
 function LocationPinIcon({ className = "" }: { className?: string }) {
   return (
@@ -170,7 +170,7 @@ export function FeaturedPropertiesCarousel({
       >
         {safeItems.map((item) => (
           <StandardCollectionCardLink
-            className="!min-h-[454px] h-[454px] min-w-full snap-start rounded-[18px] sm:!min-h-[454px] sm:h-[454px] sm:min-w-[278px] lg:!min-h-[454px] lg:h-[454px] lg:min-w-[310px]"
+            className="!min-h-[430px] h-auto min-w-full snap-start rounded-[18px] sm:!min-h-[454px] sm:h-[454px] sm:min-w-[278px] lg:!min-h-[454px] lg:h-[454px] lg:min-w-[310px]"
             href={item.href}
             key={item.id}
           >
@@ -187,7 +187,7 @@ export function FeaturedPropertiesCarousel({
             </div>
 
             <div className="flex flex-1 flex-col px-[16px] pb-[15px] pt-[14px]">
-              <h3 className="truncate text-left text-[19px] font-bold leading-[1.12] tracking-[-0.02em] text-[rgba(15,23,42,1)]">
+              <h3 className="truncate text-left text-[18px] font-bold leading-[1.12] tracking-[-0.02em] text-[rgba(15,23,42,1)] sm:text-[19px]">
                 {item.title}
               </h3>
 
@@ -226,7 +226,7 @@ export function FeaturedPropertiesCarousel({
                 </div>
               </div>
 
-              <div className="mt-auto flex items-end justify-between gap-[14px] pt-[20px]">
+              <div className="mt-auto flex flex-col gap-3 pt-[20px] sm:flex-row sm:items-end sm:justify-between sm:gap-[14px]">
                 <div className="min-w-0">
                   <p className="text-left text-[10px] font-normal leading-[14px] tracking-[0] text-[rgba(97,97,97,1)]">
                     {item.timeLabel}

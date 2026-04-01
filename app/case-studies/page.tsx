@@ -52,12 +52,12 @@ export default async function CaseStudiesPage() {
           }
         />
 
-        <section className="bg-white px-4 pt-[84px] sm:px-6 lg:px-0 lg:pt-[76px]">
+        <section className="bg-white px-4 pt-[56px] sm:px-6 lg:px-0 lg:pt-[76px]">
           <div className="mx-auto flex max-w-[660px] flex-col items-center text-center">
             <p className="text-[13px] font-normal leading-[21px] tracking-[0] text-[var(--pv-sand)] lg:text-[14px] lg:leading-[22px]">
               Case Studies
             </p>
-            <h2 className="mt-[8px] text-[38px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]">
+            <h2 className="mt-[8px] text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]">
               From Acquisition to Acceleration
             </h2>
           </div>

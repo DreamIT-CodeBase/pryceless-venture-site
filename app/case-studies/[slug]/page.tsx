@@ -69,7 +69,7 @@ export default async function CaseStudyDetailPage({
               <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-slate-500">
                 Case Study Detail
               </p>
-              <h1 className="mt-4 text-[38px] font-semibold leading-[1.04] tracking-[-0.045em] text-[#111827] sm:text-[48px] lg:text-[62px]">
+              <h1 className="mt-4 text-[32px] font-semibold leading-[1.04] tracking-[-0.045em] text-[#111827] sm:text-[48px] lg:text-[62px]">
                 {caseStudy.title}
               </h1>
               <p className="mt-5 max-w-[620px] text-[16px] leading-[1.85] text-slate-700 sm:text-[17px]">

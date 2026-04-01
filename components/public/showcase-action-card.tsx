@@ -19,7 +19,7 @@ export function ShowcasePanelCard({
   return (
     <article
       className={joinClasses(
-        "flex min-h-[306px] w-full max-w-[260px] flex-col items-center rounded-[18px] px-[18px] pb-[18px] pt-[18px] text-center",
+        "flex min-h-[280px] w-full max-w-[320px] flex-col items-center rounded-[18px] px-4 pb-4 pt-4 text-center sm:min-h-[306px] sm:px-[18px] sm:pb-[18px] sm:pt-[18px]",
         className,
       )}
       style={style}
@@ -76,7 +76,7 @@ export function ShowcaseActionCard({
     >
       <div
         className={joinClasses(
-          "mx-auto mt-[10px] grid h-[106px] w-[120px] place-items-center rounded-[13px] border border-white/90",
+          "mx-auto mt-2.5 grid h-[94px] w-[108px] place-items-center rounded-[13px] border border-white/90 sm:mt-[10px] sm:h-[106px] sm:w-[120px]",
           panelClassName,
         )}
         style={panelStyle}
@@ -92,7 +92,7 @@ export function ShowcaseActionCard({
       <div className="flex w-full flex-1 flex-col items-center text-center">
         <h3
           className={joinClasses(
-            "mx-auto mt-[16px] w-full max-w-[208px] text-center text-[18px] font-semibold leading-[32px] tracking-[0] text-[#182544]",
+            "mx-auto mt-4 w-full max-w-[220px] text-center text-[18px] font-semibold leading-[1.2] tracking-[0] text-[#182544] sm:mt-[16px] sm:max-w-[208px] sm:leading-[32px]",
             titleClassName,
           )}
         >
@@ -101,7 +101,7 @@ export function ShowcaseActionCard({
 
         <p
           className={joinClasses(
-            "mx-auto mt-[7px] w-auto max-w-none whitespace-nowrap text-center text-[13px] font-normal leading-[17px] tracking-[0] text-[rgba(97,97,97,1)]",
+            "mx-auto mt-[7px] w-full max-w-[220px] text-center text-[13px] font-normal leading-[1.45] tracking-[0] text-[rgba(97,97,97,1)]",
             bodyClassName,
           )}
         >
@@ -111,7 +111,7 @@ export function ShowcaseActionCard({
         <div className={joinClasses("mt-auto flex w-full justify-center pt-[18px]", buttonWrapClassName)}>
           <Link
             className={joinClasses(
-              "inline-flex h-[44px] w-fit min-w-[154px] items-center justify-center rounded-[10px] border border-[#284868] bg-[linear-gradient(180deg,#1d3a59_0%,#11283e_100%)] px-[22px] text-[13px] font-semibold leading-[16px] tracking-[-0.01em] text-white shadow-[0_10px_22px_rgba(17,40,62,0.18)] transition-all duration-200 hover:-translate-y-[1px] hover:border-[#33577d] hover:shadow-[0_14px_26px_rgba(17,40,62,0.22)]",
+              "inline-flex min-h-[44px] w-full max-w-[182px] items-center justify-center rounded-[10px] border border-[#284868] bg-[linear-gradient(180deg,#1d3a59_0%,#11283e_100%)] px-5 py-3 text-center text-[13px] font-semibold leading-[16px] tracking-[-0.01em] text-white shadow-[0_10px_22px_rgba(17,40,62,0.18)] transition-all duration-200 hover:-translate-y-[1px] hover:border-[#33577d] hover:shadow-[0_14px_26px_rgba(17,40,62,0.22)]",
               buttonClassName,
             )}
             href={href}

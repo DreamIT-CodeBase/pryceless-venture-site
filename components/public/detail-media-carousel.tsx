@@ -157,7 +157,7 @@ export function DetailMediaCarousel({
 
             <button
               aria-label="Previous image"
-              className="absolute left-4 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/95 text-[#111827] shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:bg-white"
+              className="absolute left-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/95 text-[#111827] shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:bg-white sm:left-4 sm:h-11 sm:w-11"
               onClick={goToPrevious}
               type="button"
             >
@@ -168,7 +168,7 @@ export function DetailMediaCarousel({
 
             <button
               aria-label="Next image"
-              className="absolute right-4 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/95 text-[#111827] shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:bg-white"
+              className="absolute right-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/95 text-[#111827] shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:bg-white sm:right-4 sm:h-11 sm:w-11"
               onClick={goToNext}
               type="button"
             >
@@ -177,7 +177,7 @@ export function DetailMediaCarousel({
               </svg>
             </button>
 
-            <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
+            <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2 sm:bottom-4 sm:right-4">
               {safeItems.map((item, index) => (
                 <button
                   aria-label={`Show image ${index + 1}`}

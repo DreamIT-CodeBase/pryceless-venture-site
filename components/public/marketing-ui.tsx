@@ -24,12 +24,12 @@ export function SectionTitle({
 }) {
   return (
     <div className="mx-auto max-w-4xl text-center">
-      <div className="mb-4 flex items-center gap-6">
-        <span className={`h-px flex-1 ${dark ? "bg-white/30" : "bg-slate-300"}`} />
-        <h2 className={`text-[32px] font-bold sm:text-[54px] ${dark ? "text-white" : "text-[var(--pv-ink)]"}`}>
+      <div className="mb-4 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+        <span className={`hidden h-px flex-1 sm:block ${dark ? "bg-white/30" : "bg-slate-300"}`} />
+        <h2 className={`text-[28px] font-bold leading-[1.1] sm:text-[54px] ${dark ? "text-white" : "text-[var(--pv-ink)]"}`}>
           {title}
         </h2>
-        <span className={`h-px flex-1 ${dark ? "bg-white/30" : "bg-slate-300"}`} />
+        <span className={`hidden h-px flex-1 sm:block ${dark ? "bg-white/30" : "bg-slate-300"}`} />
       </div>
       {subtitle ? (
         <p className={`text-base sm:text-[17px] ${dark ? "text-white/80" : "text-[var(--pv-text)]"}`}>
@@ -220,12 +220,12 @@ export function MetricBand({
                   />
                 ) : null}
                 <p
-                  className="whitespace-nowrap text-[38px] font-semibold leading-[0.95] tracking-[-0.042em] sm:text-[44px] lg:text-[57px] lg:leading-[0.95]"
+                  className="text-[32px] font-semibold leading-[0.95] tracking-[-0.042em] sm:text-[44px] lg:text-[57px] lg:leading-[0.95]"
                   style={{ color: item.color }}
                 >
                   {item.value}
                 </p>
-                <p className="mt-[9px] whitespace-nowrap text-[13px] font-normal leading-none tracking-[-0.015em] text-[#2d3036] sm:text-[14px] lg:text-[16px]">
+                <p className="mt-[9px] max-w-[150px] text-[13px] font-normal leading-[1.3] tracking-[-0.015em] text-[#2d3036] sm:text-[14px] lg:max-w-[180px] lg:text-[16px]">
                   {item.label}
                 </p>
               </div>
@@ -266,7 +266,7 @@ export function MetricBand({
 
 export function EmptyCollectionCard({ message }: { message: string }) {
   return (
-    <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-8 py-16 text-center text-[var(--pv-text)]">
+    <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-5 py-12 text-center text-[var(--pv-text)] sm:px-8 sm:py-16">
       {message}
     </div>
   );
@@ -394,44 +394,44 @@ export function TestimonialCard({
     .join("");
 
   return (
-    <article className="relative flex min-h-[236px] flex-col rounded-[15px] border border-[#cfcfcf] bg-white px-[18px] pb-[17px] pt-[14px] lg:h-[236px] lg:w-[292px]">
+    <article className="relative flex min-h-[264px] w-full max-w-[380px] flex-col rounded-[22px] border border-[#d9e5f0] bg-white/92 px-[20px] pb-[20px] pt-[18px] shadow-[0_18px_38px_rgba(15,23,42,0.08)] backdrop-blur lg:h-[236px] lg:w-[292px] lg:max-w-none lg:rounded-[15px] lg:border-[#cfcfcf] lg:bg-white lg:px-[18px] lg:pb-[17px] lg:pt-[14px] lg:shadow-none">
       <span
         aria-hidden="true"
-        className="absolute right-[17px] top-[11px] text-[36px] font-bold leading-none tracking-[-0.16em] text-[#2496f0]"
+        className="absolute right-[18px] top-[14px] text-[42px] font-bold leading-none tracking-[-0.16em] text-[#2496f0] lg:right-[17px] lg:top-[11px] lg:text-[36px]"
       >
         &rdquo;&rdquo;
       </span>
 
-      <div className="flex items-start gap-[10px] pr-[40px]">
-        <div className="relative h-[69px] w-[69px] shrink-0 rounded-full border border-[#2496f0] p-[2px]">
+      <div className="flex items-start gap-[12px] pr-[44px] lg:gap-[10px] lg:pr-[40px]">
+        <div className="relative h-[72px] w-[72px] shrink-0 rounded-full border border-[#2496f0] p-[2px] lg:h-[69px] lg:w-[69px]">
           {avatar ? (
             <div className="relative h-full w-full overflow-hidden rounded-full border border-white bg-white">
               <Image
                 alt={name}
                 className="object-cover"
                 fill
-                sizes="69px"
+                sizes="72px"
                 src={avatar}
               />
             </div>
           ) : (
-            <div className="grid h-full w-full place-items-center rounded-full border border-white bg-[linear-gradient(180deg,#eef7ff_0%,#dcebfb_100%)] text-[20px] font-semibold tracking-[0.02em] text-[#2496f0]">
+            <div className="grid h-full w-full place-items-center rounded-full border border-white bg-[linear-gradient(180deg,#eef7ff_0%,#dcebfb_100%)] text-[21px] font-semibold tracking-[0.02em] text-[#2496f0] lg:text-[20px]">
               {initials || "PV"}
             </div>
           )}
         </div>
 
-        <div className="pt-[13px]">
-          <h3 className="text-[15px] font-bold leading-[20px] tracking-[0] text-[#252525]">
+        <div className="pt-[14px] lg:pt-[13px]">
+          <h3 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[#252525] lg:text-[15px]">
             - {name}
           </h3>
-          <p className="mt-[1px] text-[12px] font-medium italic leading-[16px] tracking-[0] text-[#2496f0]">
+          <p className="mt-[2px] text-[13px] font-medium italic leading-[16px] tracking-[0] text-[#2496f0] lg:mt-[1px] lg:text-[12px]">
             {city}
           </p>
         </div>
       </div>
 
-      <p className="mt-[23px] max-w-[246px] text-[12px] font-normal leading-[1.58] tracking-[0] text-[#676767]">
+      <p className="mt-[22px] max-w-none text-[14px] font-normal leading-[1.7] tracking-[0] text-[#5b6472] lg:mt-[23px] lg:max-w-[246px] lg:text-[12px] lg:leading-[1.58] lg:text-[#676767]">
         &ldquo;{normalizedQuote}&rdquo;
       </p>
     </article>
