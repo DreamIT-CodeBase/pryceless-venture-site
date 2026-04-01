@@ -26,6 +26,22 @@ const extractEmailCandidates = (
 export const { handlers, auth, signIn, signOut } = NextAuth(() => {
   const allowedEmails = new Set(env.adminAllowedEmails);
   const entraIssuer = `https://login.microsoftonline.com/${env.azureTenantId}/v2.0`;
+  const authOrigin = env.authOrigin;
+
+  if (process.env.NODE_ENV === "production") {
+    if (!authOrigin) {
+      throw new Error(
+        "Missing AUTH_URL or NEXTAUTH_URL in production. Set it to your deployed site origin, for example https://example.com.",
+      );
+    }
+
+    const authHostname = new URL(authOrigin).hostname;
+    if (authHostname === "localhost" || authHostname === "127.0.0.1") {
+      throw new Error(
+        "AUTH_URL or NEXTAUTH_URL cannot use localhost in production. Set it to your deployed site origin, for example https://example.com.",
+      );
+    }
+  }
 
   return {
     basePath: "/api/auth",

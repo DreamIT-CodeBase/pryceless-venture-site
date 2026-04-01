@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import logoHeader from "@/app/assets/headerlogo.svg";
+import adminLogo from "@/app/assets/pvwhite.png";
 import { AdminSidebarNav } from "@/components/admin/admin-sidebar-nav";
 
 export function AdminSidebar() {
@@ -14,9 +14,9 @@ export function AdminSidebar() {
       <div className="relative flex items-start justify-between gap-4">
         <Image
           alt="Pryceless Ventures"
-          className="h-auto w-[176px]"
+          className="h-auto w-[176px] object-contain"
           priority
-          src={logoHeader}
+          src={adminLogo}
         />
         <div className="grid h-11 w-11 place-items-center rounded-[14px] border border-white/16 bg-white/6 text-white/85">
           <span className="grid h-5 w-5 grid-cols-2 gap-1">

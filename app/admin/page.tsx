@@ -20,6 +20,7 @@ export default async function AdminDashboardPage() {
   const session = await requireAdminSession();
   const counts = await getDashboardCounts();
   const userName = session.user?.name?.trim() || session.user?.email?.trim() || "Admin";
+  const inlineUserName = userName.replace(/\s+/g, "\u00A0");
 
   const quickActions = [
     {
@@ -95,8 +96,8 @@ export default async function AdminDashboardPage() {
           className="absolute inset-0 bg-[linear-gradient(rgba(123,97,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(123,97,255,0.06)_1px,transparent_1px)] [background-size:30px_30px]"
         />
         <div className="relative">
-          <h2 className="text-[32px] font-semibold tracking-[-0.04em] text-slate-950 lg:text-[56px]">
-            Welcome to <span className="text-[#5b4af4]">Pryceless Venture CMS</span>, {userName}
+          <h2 className="text-[24px] font-semibold leading-[1.08] tracking-[-0.04em] text-slate-950 sm:text-[28px] lg:text-[40px] xl:whitespace-nowrap">
+            Welcome to <span className="text-[#5b4af4]">Pryceless CMS</span>, {inlineUserName}
           </h2>
         </div>
       </section>

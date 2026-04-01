@@ -12,6 +12,20 @@ const parseEmails = (value: string | undefined) =>
     .map((entry) => entry.trim().toLowerCase())
     .filter(Boolean);
 
+const parseOptionalUrl = (key: string) => {
+  const value = process.env[key]?.trim();
+
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    throw new Error(`Invalid URL in environment variable: ${key}`);
+  }
+};
+
 export const env = {
   get databaseUrl() {
     return requireEnv("DATABASE_URL");
@@ -31,8 +45,11 @@ export const env = {
   get azureClientSecret() {
     return requireEnv("AZURE_CLIENT_SECRET");
   },
+  get authOrigin() {
+    return parseOptionalUrl("AUTH_URL") ?? parseOptionalUrl("NEXTAUTH_URL");
+  },
   get nextAuthUrl() {
-    return process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    return this.authOrigin ?? "http://localhost:3000";
   },
   get nextAuthSecret() {
     return requireEnv("NEXTAUTH_SECRET");

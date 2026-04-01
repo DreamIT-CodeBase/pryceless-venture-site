@@ -40,14 +40,14 @@ export function PageSectionHero({
     >
       <div
         className={joinClasses(
-          "mx-auto w-full max-w-[1360px] px-4 pb-[28px] pt-[24px] sm:px-6 sm:pb-[34px] sm:pt-[30px] min-[1025px]:min-h-[219px] min-[1025px]:pb-[36px] min-[1025px]:pl-[320px] min-[1025px]:pr-[125px] min-[1025px]:pt-[38px]",
+          "mx-auto w-full max-w-[1360px] px-4 pb-[28px] pt-[24px] sm:px-6 sm:pb-[34px] sm:pt-[30px] min-[1025px]:min-h-[252px] min-[1025px]:pb-[42px] min-[1025px]:pl-[320px] min-[1025px]:pr-[125px] min-[1025px]:pt-[42px]",
           innerClassName,
         )}
       >
-        <div className="flex flex-col gap-[20px] min-[1025px]:grid min-[1025px]:grid-cols-[minmax(0,1fr)_340px] min-[1025px]:gap-x-[54px] min-[1025px]:gap-y-0">
+        <div className="flex flex-col gap-[18px]">
           <div
             className={joinClasses(
-              "flex max-w-[794px] flex-col gap-[24px] min-[1025px]:pl-[88px] sm:gap-[28px] min-[1025px]:gap-[42px]",
+              "flex max-w-[794px] flex-col gap-[24px] min-[1025px]:pl-[88px] sm:gap-[28px] min-[1025px]:gap-[34px]",
               titleWrapClassName,
             )}
           >
@@ -86,23 +86,23 @@ export function PageSectionHero({
             >
               {title}
             </h1>
-          </div>
 
-          <div
-            className={joinClasses(
-              "max-w-[520px] min-[1025px]:w-[340px] min-[1025px]:justify-self-end min-[1025px]:pt-[46px]",
-              introWrapClassName,
-            )}
-          >
-            <p
+            <div
               className={joinClasses(
-                "text-[14px] font-normal leading-[1.65] tracking-[0] text-white/80 sm:text-[15px] min-[1025px]:text-[11.5px] min-[1025px]:leading-[19px]",
-                introClassName,
+                "max-w-[794px]",
+                introWrapClassName,
               )}
-              style={{ color: introColor }}
             >
-              {intro}
-            </p>
+              <p
+                className={joinClasses(
+                  "text-[14px] font-normal leading-[1.65] tracking-[0] text-white/80 sm:text-[15px] min-[1025px]:text-[11.5px] min-[1025px]:leading-[19px]",
+                  introClassName,
+                )}
+                style={{ color: introColor }}
+              >
+                {intro}
+              </p>
+            </div>
           </div>
         </div>
       </div>

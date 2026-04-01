@@ -122,9 +122,9 @@ export default async function InvestmentsPage() {
               Opportunity Overview
             </p>
             <h2 className="mt-[8px] max-w-[551px] text-center text-[32px] font-bold leading-[1.08] tracking-[-0.045em] text-[#0f172a] sm:text-[42px] lg:w-[551px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]">
-              Explore high-return Opportunities
+              Explore High-Return Opportunities
               <br />
-              in prime locations
+              In Prime Locations
             </h2>
           </div>
 
@@ -144,7 +144,7 @@ export default async function InvestmentsPage() {
                 />
               </div>
               <h3 className="mt-[18px] text-[20px] font-normal leading-[1.3] tracking-[0] text-[#0f172a] lg:text-[20.5px] lg:leading-[42px]">
-                Opportunity snapshot
+                Opportunity Snapshot
               </h3>
               <p className="mt-2 max-w-[262px] text-[12px] font-normal leading-[19px] tracking-[0] text-[rgba(0,0,0,0.8)] lg:mt-[-1px] lg:text-[11.5px]">
                 Here&apos;s a quick look at how we&apos;re creating consistent growth and value in real estate investment.

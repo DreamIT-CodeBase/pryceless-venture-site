@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import logoHeader from "@/app/assets/headerlogo.svg";
+import footerLogo from "@/app/assets/pvwhite.png";
 import viewOpportunityHeaderIcon from "@/app/assets/viewoppertunitysvg.svg";
 import { SiteNav } from "@/components/public/site-nav";
 
@@ -36,7 +37,7 @@ export function SiteShell({
   ];
   const socialLinks = [
     {
-      href: "https://facebook.com",
+      href: "https://www.facebook.com/thepvnetwork/",
       label: "Facebook",
       icon: (
         <svg aria-hidden="true" className="h-[19px] w-[19px] fill-[#1f2430]" viewBox="0 0 24 24">
@@ -65,7 +66,7 @@ export function SiteShell({
       ),
     },
     {
-      href: "https://linkedin.com",
+      href: "https://www.linkedin.com/company/pryceless-ventures-llc/",
       label: "LinkedIn",
       icon: (
         <svg aria-hidden="true" className="h-[19px] w-[19px] fill-[#1f2430]" viewBox="0 0 24 24">
@@ -76,7 +77,7 @@ export function SiteShell({
   ];
   const contactItems = [
     {
-      label: "(566) 456-7890",
+      label: "(832) 981-3190",
       icon: (
         <svg aria-hidden="true" className="h-[12px] w-[12px] shrink-0 fill-white" viewBox="0 0 24 24">
           <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.11.37 2.3.56 3.58.56a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.3 21 3 13.7 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.28.19 2.47.56 3.58a1 1 0 0 1-.25 1.01l-2.19 2.2Z" />
@@ -85,6 +86,7 @@ export function SiteShell({
     },
     {
       label: "info@prycelessventures.com",
+      href: "https://outlook.office.com/mail/deeplink/compose?to=info%40prycelessventures.com",
       icon: (
         <svg aria-hidden="true" className="h-[12px] w-[12px] shrink-0 fill-white" viewBox="0 0 24 24">
           <path d="M20 5H4a2 2 0 0 0-2 2v.35l10 5.56 10-5.56V7a2 2 0 0 0-2-2Zm2 4.65-9.51 5.29a1 1 0 0 1-.98 0L2 9.65V17a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9.65Z" />
@@ -92,7 +94,8 @@ export function SiteShell({
       ),
     },
     {
-      label: "123 Homzon Avenue, New York City, USA",
+      label: "7306 Knox Street, Houston, TX 77088",
+      href: "https://www.google.com/maps/search/?api=1&query=7306+Knox+Street,+Houston,+TX+77088",
       icon: (
         <svg aria-hidden="true" className="h-[12px] w-[12px] shrink-0 fill-white" viewBox="0 0 24 24">
           <path d="M12 2a7 7 0 0 0-7 7c0 4.8 5.18 10.88 6.2 12.03a1 1 0 0 0 1.5 0C13.82 19.88 19 13.8 19 9a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
@@ -105,10 +108,20 @@ export function SiteShell({
   const footerRuleClassName = "mt-[15px] h-px w-full bg-[#19a7df]";
   const footerListLinkClassName =
     "block border-b border-white/18 text-[14px] leading-[30px] tracking-[0] !text-white transition hover:text-[var(--pv-sand)] sm:leading-[32px]";
+  const footerIntroTextClassName =
+    "text-[13px] font-normal leading-[22px] tracking-[0] !text-white";
   const footerSmallTextClassName =
     "text-[14px] font-normal leading-[24px] tracking-[0] !text-white";
+  const footerContactLinkClassName =
+    "text-[14px] font-normal leading-[24px] tracking-[0] !text-white transition hover:text-[var(--pv-sand)]";
   const footerBottomTextClassName =
     "text-[14px] leading-[24px] tracking-[0] !text-white";
+  const footerIntroLines = [
+    "Pryceless Ventures builds wealth",
+    "through curated real estate",
+    "opportunities backed by data,",
+    "technology, and execution.",
+  ];
 
   return (
     <div className="min-h-screen bg-white text-[var(--pv-ink)]">
@@ -164,9 +177,19 @@ export function SiteShell({
       >
         <div className="mx-auto w-full max-w-[1320px] px-4 pb-[24px] pt-[34px] sm:px-6 sm:pb-[28px] sm:pt-[38px] min-[1025px]:px-8 min-[1025px]:pb-[30px] min-[1025px]:pt-[44px]">
           <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[minmax(0,214px)_minmax(0,286px)_minmax(0,314px)_minmax(0,252px)] xl:items-start xl:justify-between">
-            <div className="max-w-[320px] xl:pt-[52px]">
-              <p className={footerSmallTextClassName}>
-                Lorem ipsum dolor sit amet conse ctetur adipem scing elit. Ut elit tellus luctus nec ullam corper mattis pulvinar dapibus leo
+            <div className="max-w-[320px] self-start">
+              <Image
+                alt="Pryceless Ventures"
+                className="-ml-[8px] -mt-[14px] mb-[14px] h-auto w-[228px] max-w-full object-contain"
+                sizes="228px"
+                src={footerLogo}
+              />
+              <p className={footerIntroTextClassName}>
+                {footerIntroLines.map((line) => (
+                  <span className="block" key={line}>
+                    {line}
+                  </span>
+                ))}
               </p>
               <div className="mt-[16px] flex items-center gap-[9px]">
                 {socialLinks.map((item) => (
@@ -227,7 +250,19 @@ export function SiteShell({
                 {contactItems.map((item) => (
                   <div className="flex items-start gap-[8px]" key={item.label}>
                     <span className="mt-[4px]">{item.icon}</span>
-                    <p className={footerSmallTextClassName}>{item.label}</p>
+                    {item.href ? (
+                      <a
+                        className={footerContactLinkClassName}
+                        href={item.href}
+                        rel="noreferrer"
+                        style={{ color: "#ffffff" }}
+                        target="_blank"
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      <p className={footerSmallTextClassName}>{item.label}</p>
+                    )}
                   </div>
                 ))}
               </div>
