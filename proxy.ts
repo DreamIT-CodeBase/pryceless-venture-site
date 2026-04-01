@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
 
-const adminProxy = auth((req) => {
+export default auth((req) => {
   if (req.nextUrl.pathname === "/admin/login") {
     return NextResponse.next();
   }
@@ -13,10 +13,6 @@ const adminProxy = auth((req) => {
 
   return NextResponse.next();
 });
-
-export default function proxy(...args: Parameters<typeof adminProxy>) {
-  return adminProxy(...args);
-}
 
 export const config = {
   matcher: ["/admin/:path*", "/api/admin/:path*"],
