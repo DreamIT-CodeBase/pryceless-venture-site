@@ -40,19 +40,24 @@ export function PageSectionHero({
     >
       <div
         className={joinClasses(
-          "mx-auto w-full max-w-[1360px] px-4 pb-[28px] pt-[24px] sm:px-6 sm:pb-[34px] sm:pt-[30px] min-[1025px]:min-h-[219px] min-[1025px]:pb-[36px] min-[1025px]:pl-[230px] min-[1025px]:pr-[125px] min-[1025px]:pt-[38px]",
+          "mx-auto w-full max-w-[1360px] px-4 pb-[28px] pt-[24px] sm:px-6 sm:pb-[34px] sm:pt-[30px] min-[1025px]:min-h-[219px] min-[1025px]:pb-[36px] min-[1025px]:pl-[320px] min-[1025px]:pr-[125px] min-[1025px]:pt-[38px]",
           innerClassName,
         )}
       >
         <div className="flex flex-col gap-[20px] min-[1025px]:grid min-[1025px]:grid-cols-[minmax(0,1fr)_340px] min-[1025px]:gap-x-[54px] min-[1025px]:gap-y-0">
-          <div className={joinClasses("max-w-[794px]", titleWrapClassName)}>
-            <div className="flex items-center gap-[8px] text-[12.5px] font-normal leading-[20px] tracking-[0] text-white min-[1025px]:text-[13.5px] min-[1025px]:leading-[21px]">
+          <div
+            className={joinClasses(
+              "flex max-w-[794px] flex-col gap-[24px] min-[1025px]:pl-[88px] sm:gap-[28px] min-[1025px]:gap-[42px]",
+              titleWrapClassName,
+            )}
+          >
+            <div className="flex items-center gap-[6px] text-[13.5px] font-normal leading-[21px] tracking-[0] text-white min-[1025px]:text-[14.5px] min-[1025px]:leading-[22px]">
               <Link className="text-white" href="/" style={{ color: "#ffffff" }}>
                 Home
               </Link>
               <svg
                 aria-hidden="true"
-                className="h-[10px] w-[10px] text-white"
+                className="h-[11px] w-[11px] text-white"
                 fill="none"
                 viewBox="0 0 10 10"
               >
@@ -74,7 +79,7 @@ export function PageSectionHero({
 
             <h1
               className={joinClasses(
-                "mt-[22px] text-[28px] font-bold leading-[1.08] tracking-[-0.04em] text-white sm:mt-[26px] sm:text-[38px] min-[1025px]:mt-[30px] min-[1025px]:max-w-[794px] min-[1025px]:text-[30.5px] min-[1025px]:leading-[42px] min-[1025px]:tracking-[0]",
+                "text-[28px] font-bold leading-[1.08] tracking-[-0.04em] text-white sm:text-[38px] min-[1025px]:max-w-[794px] min-[1025px]:text-[30.5px] min-[1025px]:leading-[42px] min-[1025px]:tracking-[0]",
                 titleClassName,
               )}
               style={{ color: "#ffffff" }}
@@ -85,7 +90,7 @@ export function PageSectionHero({
 
           <div
             className={joinClasses(
-              "max-w-[520px] min-[1025px]:w-[340px] min-[1025px]:justify-self-end min-[1025px]:pt-[38px]",
+              "max-w-[520px] min-[1025px]:w-[340px] min-[1025px]:justify-self-end min-[1025px]:pt-[46px]",
               introWrapClassName,
             )}
           >

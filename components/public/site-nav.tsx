@@ -130,7 +130,7 @@ export function SiteNav({
         </div>
       </div>
 
-      <nav aria-label="Primary" className="hidden min-[1025px]:flex min-[1025px]:items-center min-[1025px]:justify-center min-[1025px]:gap-6 xl:gap-8">
+      <nav aria-label="Primary" className="hidden min-[1025px]:flex min-[1025px]:w-full min-[1025px]:max-w-[860px] min-[1025px]:items-center min-[1025px]:justify-between min-[1025px]:gap-0">
         {navItems.map((item) => {
           const active = isItemActive(pathname, item.href);
           const isHovered = hoveredHref === item.href;

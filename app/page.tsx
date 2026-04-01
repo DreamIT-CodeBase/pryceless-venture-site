@@ -253,12 +253,7 @@ const investmentOpportunityShowcaseCards = [
     iconClassName: "h-[68px] w-[82px]",
     iconShellClassName: "bg-[linear-gradient(180deg,#17b1ed_0%,#278af6_100%)]",
     title: "Investments",
-    body: (
-      <>
-        <span className="block">Curated passive and active</span>
-        <span className="block">investment opportunities.</span>
-      </>
-    ),
+    body: "Curated investment opportunities.",
     ctaLabel: "More Details",
     ctaHref: "/investments",
   },
@@ -267,12 +262,7 @@ const investmentOpportunityShowcaseCards = [
     iconClassName: "h-[96px] w-[90px]",
     iconShellClassName: "bg-[linear-gradient(180deg,#df42cb_0%,#b445ee_100%)]",
     title: "Properties",
-    body: (
-      <>
-        <span className="block">Curated passive and active</span>
-        <span className="block">investment opportunities.</span>
-      </>
-    ),
+    body: "Curated investment opportunities.",
     ctaLabel: "More Details",
     ctaHref: "/properties",
   },
@@ -281,12 +271,7 @@ const investmentOpportunityShowcaseCards = [
     iconClassName: "h-[108px] w-[80px]",
     iconShellClassName: "bg-[linear-gradient(180deg,#13c6ad_0%,#11bb80_100%)]",
     title: "ROI Calculators",
-    body: (
-      <>
-        <span className="block">Curated passive and active</span>
-        <span className="block">investment opportunities.</span>
-      </>
-    ),
+    body: "Curated investment opportunities.",
     ctaLabel: "More Details",
     ctaHref: "/calculators",
   },
@@ -475,7 +460,7 @@ export default async function Home() {
     <SiteShell cta={primaryCta}>
       <section className="w-full">
         <div
-          className="relative isolate overflow-hidden bg-[#09152d] min-h-[560px] sm:min-h-[640px] lg:min-h-0 lg:aspect-[1492/684]"
+          className="relative isolate overflow-hidden bg-[#09152d] min-h-[560px] sm:min-h-[640px] lg:min-h-0 lg:aspect-[3327/1344]"
         >
           <Image
             src={heroSectionImage}
@@ -521,20 +506,24 @@ export default async function Home() {
                   )}
                 </p>
 
-                <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:w-auto lg:gap-[10px]">
+                <div className="flex w-full flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-4 lg:w-auto lg:gap-[18px]">
                   <Link
                     href={primaryCta.href}
-                    className="inline-flex min-h-[58px] w-full items-center justify-center rounded-[16px] bg-white px-6 py-3 text-[17px] font-semibold tracking-[-0.02em] text-[#111827] shadow-[0_14px_32px_rgba(0,0,0,0.16)] transition-colors hover:bg-white sm:h-[56px] sm:w-[214px] sm:text-[17px] lg:h-[38px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[14px] lg:tracking-[-0.02em] lg:shadow-[0_2px_5px_rgba(6,18,37,0.12)]"
+                    className="inline-flex min-h-[54px] w-full items-center justify-center rounded-[16px] bg-white px-6 py-3 text-[17px] font-semibold tracking-[-0.02em] text-[#111827] shadow-[0_14px_32px_rgba(0,0,0,0.16)] transition-colors hover:bg-white sm:h-[50px] sm:w-[214px] sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(6,18,37,0.12)]"
                   >
-                    {primaryCta.label}
+                    <span className="lg:inline-flex lg:h-[18px] lg:w-[126px] lg:items-center lg:justify-center lg:whitespace-nowrap lg:text-center">
+                      {primaryCta.label}
+                    </span>
                   </Link>
 
                   <Link
                     href={secondaryCta.href}
-                    className="inline-flex min-h-[58px] w-full items-center justify-center rounded-[16px] bg-[#c79872] px-6 py-3 text-[17px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_32px_rgba(35,18,10,0.18)] transition-colors hover:bg-[#c79872] hover:text-white sm:h-[56px] sm:w-[214px] sm:text-[17px] lg:h-[38px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[14px] lg:tracking-[-0.02em] lg:shadow-[0_2px_5px_rgba(35,18,10,0.1)]"
+                    className="inline-flex min-h-[54px] w-full items-center justify-center rounded-[16px] bg-[#c79872] px-6 py-3 text-[17px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_32px_rgba(35,18,10,0.18)] transition-colors hover:bg-[#c79872] hover:text-white sm:h-[50px] sm:w-[214px] sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(35,18,10,0.1)]"
                     style={{ color: "#ffffff" }}
                   >
-                    <span style={{ color: "#ffffff" }}>{secondaryCta.label}</span>
+                    <span className="lg:inline-flex lg:h-[18px] lg:w-[126px] lg:items-center lg:justify-center lg:whitespace-nowrap lg:text-center" style={{ color: "#ffffff" }}>
+                      {secondaryCta.label}
+                    </span>
                   </Link>
                 </div>
               </div>
@@ -576,20 +565,26 @@ export default async function Home() {
 
       <section className="bg-white py-[54px] sm:py-[72px] lg:py-[56px]">
         <div className="mx-auto w-full max-w-[1905px] px-4 sm:px-6 lg:px-[135px]">
-          <div className="grid gap-y-8 lg:grid-cols-[610px_minmax(0,1fr)_520px] lg:items-start lg:gap-y-12">
-            <div className="lg:col-start-1 lg:w-[610px] lg:pt-[2px]">
-            <h2 className="max-w-[10ch] text-[33px] font-bold leading-[1.02] tracking-[-0.05em] text-[#16203b] sm:max-w-none sm:text-[48px] lg:text-[42px] lg:leading-[54px] lg:tracking-[0] lg:text-[#0f172a]">
+          <div className="grid gap-y-8 lg:grid-cols-[720px_minmax(0,1fr)_520px] lg:items-start lg:gap-y-12">
+            <div className="lg:col-start-1 lg:w-[720px] lg:pt-[2px]">
+            <h2 className="max-w-[10ch] text-[33px] font-bold leading-[1.02] tracking-[-0.05em] text-[#16203b] sm:max-w-none sm:text-[48px] lg:max-w-none lg:text-[42px] lg:leading-[54px] lg:tracking-[-0.045em] lg:text-[#0f172a]">
               Why Pryceless Ventures, LLC
             </h2>
 
-            <div className="mt-[18px] lg:mt-[21px] lg:w-[610px]">
-              <p className="max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[610px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48]">
+            <div className="mt-[18px] lg:mt-[21px] lg:w-[720px]">
+              <p
+                className="max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[720px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48]"
+                style={{ wordSpacing: "0.03em" }}
+              >
                 Your leading real estate advocate, transforming houses into dreams. Trust us
                 to expertly guide you home. 45,000 apartments &amp; home for sell, rent &amp;
                 mortgage. Lorem ipsum dolor sit amet conse ctetur adip mscing.
               </p>
               <div aria-hidden="true" className="h-[18px] lg:h-[12px]" />
-              <p className="max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[610px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48]">
+              <p
+                className="max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[720px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48]"
+                style={{ wordSpacing: "0.03em" }}
+              >
                 At pryceless Ventures, LLC, we believe finding a home should feel effortless.
                 Our platform combines cutting-edge design, intelligent property listings,
                 and reliable agent connections to make your real estate journey smooth,
@@ -597,19 +592,19 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="mt-[30px] flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-[30px] sm:gap-y-5 lg:mt-[39px] lg:gap-x-[18px]">
+            <div className="mt-[30px] flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-[30px] sm:gap-y-5 lg:mt-[42px] lg:flex-nowrap lg:items-center lg:gap-x-[26px]">
               <Link
-                className="inline-flex min-h-[54px] w-full items-center justify-center rounded-full border border-[#95989f] bg-white px-[32px] py-3 text-[16px] font-semibold tracking-[-0.02em] text-[#131927] transition hover:bg-[#fafafa] sm:min-w-[238px] sm:w-auto lg:h-[35px] lg:w-[135px] lg:min-w-[135px] lg:rounded-[17.5px] lg:border lg:border-[#808080] lg:px-0 lg:py-0 lg:text-[14px] lg:tracking-[0]"
+                className="inline-flex min-h-[54px] w-full items-center justify-center rounded-full border border-[#95989f] bg-white px-[32px] py-3 text-[16px] font-semibold tracking-[-0.02em] text-[#131927] transition hover:bg-[#fafafa] sm:min-w-[238px] sm:w-auto lg:h-[54px] lg:w-[216px] lg:min-w-[216px] lg:rounded-[27px] lg:border-[1.5px] lg:border-[#8e949d] lg:px-0 lg:py-0 lg:text-[17px] lg:font-semibold lg:leading-none lg:tracking-[0]"
                 href="/properties"
               >
                 Explore Listing
               </Link>
               <Link
-                className="inline-flex w-full items-center justify-between gap-[16px] border-b-[1.5px] border-[#182138] pb-[10px] text-[16px] font-semibold tracking-[-0.02em] text-[#161d2e] sm:w-auto sm:justify-start lg:gap-[9px] lg:border-b lg:border-[#3c4250] lg:pb-[4px] lg:text-[14px] lg:tracking-[0] lg:text-[#131927]"
+                className="inline-flex w-full items-center justify-between gap-[16px] border-b-[1.5px] border-[#182138] pb-[10px] text-[16px] font-semibold tracking-[-0.02em] text-[#161d2e] sm:w-auto sm:justify-start lg:w-[226px] lg:translate-y-[6px] lg:justify-between lg:gap-[14px] lg:border-b-[1.5px] lg:border-[#2f3340] lg:pb-[7px] lg:text-[17px] lg:font-semibold lg:leading-none lg:tracking-[0] lg:text-[#131927]"
                 href="/cash-offer"
               >
                 <span>Request A Callback</span>
-                <span aria-hidden="true" className="text-[21px] leading-none lg:text-[14px]">{"\u2197"}</span>
+                <span aria-hidden="true" className="text-[21px] leading-none lg:text-[15px] lg:translate-y-[-1px]">{"\u2197"}</span>
                 <span aria-hidden="true" className="hidden text-[23px] leading-none">
                   ↗
                 </span>
@@ -662,7 +657,7 @@ export default async function Home() {
                   style={{
                     marginTop: "clamp(10px, 1.5vw, 16px)",
                   }}
-                  className="max-w-[150px] text-[14px] font-normal leading-[1.25] tracking-[-0.02em] text-[#2a2e35] sm:text-[16px] lg:max-w-[180px] lg:text-[17px] lg:leading-[20px] lg:tracking-[0]"
+                  className="max-w-[150px] text-[14px] font-normal leading-[1.25] tracking-[-0.02em] text-[#2a2e35] sm:text-[16px] lg:max-w-none lg:min-h-[20px] lg:whitespace-nowrap lg:text-[16px] lg:leading-[20px] lg:tracking-[0]"
                 >
                   {item.label}
                 </p>
@@ -767,7 +762,7 @@ export default async function Home() {
               <div className="flex w-full justify-center" key={`${card.title}-${index}`}>
                 <ShowcaseActionCard
                   body={card.body}
-                  bodyClassName="mt-[7px] max-w-[188px] whitespace-normal text-[13px] leading-[17px]"
+                  bodyClassName="mt-[8px] max-w-none whitespace-nowrap px-2 text-[12.5px] leading-[16px] sm:text-[13px]"
                   buttonWrapClassName="pt-[18px]"
                   cardClassName="bg-white shadow-[0_8px_18px_rgba(8,18,38,0.06)]"
                   ctaLabel={card.ctaLabel}
@@ -778,7 +773,7 @@ export default async function Home() {
                   imageSizes="120px"
                   panelClassName={`h-[106px] w-[120px] rounded-[13px] border-transparent ${card.iconShellClassName}`}
                   title={card.title}
-                  titleClassName="mt-[12px] text-[18px] font-semibold leading-[32px]"
+                  titleClassName="mt-[12px] whitespace-nowrap px-2 text-[18px] font-semibold leading-[1.2]"
                 />
               </div>
             ))}
@@ -876,7 +871,7 @@ export default async function Home() {
                   style={{
                     marginTop: "clamp(10px, 1.5vw, 16px)",
                   }}
-                  className="max-w-[150px] text-[14px] font-normal leading-[1.25] tracking-[-0.02em] text-[#2a2e35] sm:text-[16px] lg:max-w-[180px] lg:text-[17px] lg:leading-[20px] lg:tracking-[0]"
+                  className="max-w-[150px] text-[14px] font-normal leading-[1.25] tracking-[-0.02em] text-[#2a2e35] sm:text-[16px] lg:max-w-none lg:min-h-[20px] lg:whitespace-nowrap lg:text-[16px] lg:leading-[20px] lg:tracking-[0]"
                 >
                   {item.label}
                 </p>

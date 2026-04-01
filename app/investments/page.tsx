@@ -165,7 +165,7 @@ export default async function InvestmentsPage() {
         <section className="bg-white px-4 sm:px-6 lg:px-0">
           <div className="mx-auto w-full max-w-[1080px]">
             <div className="text-left">
-              <p className="text-[13px] font-normal uppercase leading-[20px] tracking-[0] text-[#bf9375]">
+              <p className="whitespace-nowrap text-[15px] font-medium uppercase leading-[20px] tracking-[0.03em] text-[#bf9375] lg:text-[15.5px] lg:leading-[22px]">
                 Investment Deals
               </p>
               <h2 className="mt-[8px] max-w-[489px] text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]">

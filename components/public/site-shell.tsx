@@ -113,24 +113,24 @@ export function SiteShell({
   return (
     <div className="min-h-screen bg-white text-[var(--pv-ink)]">
       <header className="relative z-50 bg-white">
-        <div className="mx-auto flex w-full max-w-[1478px] items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 sm:py-5 min-[1025px]:grid min-[1025px]:min-h-[92px] min-[1025px]:grid-cols-[160px_minmax(0,1fr)_196px] min-[1025px]:items-center min-[1025px]:gap-x-[34px] min-[1025px]:px-[72px] min-[1025px]:py-0 xl:px-[110px]">
-          <Link aria-label="Pryceless Ventures home" className="max-w-[calc(100%-72px)] shrink-0" href="/">
+        <div className="mx-auto flex w-full max-w-[1478px] items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 sm:py-5 min-[1025px]:grid min-[1025px]:min-h-[86px] min-[1025px]:grid-cols-[240px_minmax(0,1fr)_240px] min-[1025px]:items-center min-[1025px]:gap-x-[32px] min-[1025px]:px-[88px] min-[1025px]:py-0 xl:px-[124px]">
+          <Link aria-label="Pryceless Ventures home" className="ml-2 max-w-[calc(100%-72px)] shrink-0 sm:ml-3 min-[1025px]:ml-0" href="/">
             <Image
               alt="Pryceless Ventures"
-              className="h-auto w-[164px] sm:w-[184px] min-[1025px]:w-[160px]"
+              className="h-auto w-[192px] sm:w-[208px] min-[1025px]:w-[216px]"
               priority
-              sizes="(min-width: 1024px) 160px, (min-width: 640px) 200px, 200px"
+              sizes="(min-width: 1024px) 216px, (min-width: 640px) 208px, 192px"
               src={logoHeader}
             />
           </Link>
 
-          <div className="ml-auto min-w-0 min-[1025px]:ml-0 min-[1025px]:flex min-[1025px]:justify-center">
+          <div className="ml-auto min-w-0 min-[1025px]:ml-0 min-[1025px]:flex min-[1025px]:w-full min-[1025px]:justify-center">
             <SiteNav mobileCta={headerCta} />
           </div>
 
-          <div className="hidden shrink-0 min-[1025px]:flex min-[1025px]:w-[196px] min-[1025px]:justify-self-end">
+          <div className="hidden shrink-0 min-[1025px]:flex min-[1025px]:w-[240px] min-[1025px]:justify-self-end min-[1025px]:justify-end">
             <Link
-              className="inline-flex h-[53px] w-[196px] items-center justify-center gap-[9px] rounded-[6px] bg-[#18357a] px-[14px] text-[15px] leading-none font-medium text-white transition-none hover:bg-[#18357a] hover:text-white"
+              className="inline-flex h-[50px] w-[196px] items-center justify-center gap-[9px] rounded-[6px] bg-[#18357a] px-[14px] text-[15px] leading-none font-medium text-white transition-none hover:bg-[#18357a] hover:text-white"
               href={headerCta.href}
             >
               <span className="flex shrink-0 items-center gap-[7px]">
@@ -143,7 +143,7 @@ export function SiteShell({
                   }}
                   src={viewOpportunityHeaderIcon}
                 />
-                <span className="block h-[24px] w-px shrink-0 bg-white/40" />
+                <span className="block h-[22px] w-px shrink-0 bg-white/40" />
               </span>
               <span
                 className="whitespace-nowrap leading-none tracking-[-0.016em] text-white"

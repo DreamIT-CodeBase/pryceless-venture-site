@@ -89,10 +89,10 @@ export function ShowcaseActionCard({
         />
       </div>
 
-      <div className="flex w-full flex-1 flex-col items-center text-center">
+      <div className="mx-auto flex w-full max-w-[236px] flex-1 flex-col items-center pt-[22px] text-center sm:pt-[24px]">
         <h3
           className={joinClasses(
-            "mx-auto mt-4 w-full max-w-[220px] text-center text-[18px] font-semibold leading-[1.2] tracking-[0] text-[#182544] sm:mt-[16px] sm:max-w-[208px] sm:leading-[32px]",
+            "mx-auto mt-5 max-w-full px-2 text-center text-[18px] font-semibold leading-[1.18] tracking-[0] text-[#182544] whitespace-nowrap sm:mt-[20px] sm:text-[19px] sm:leading-[1.2]",
             titleClassName,
           )}
         >
@@ -101,23 +101,25 @@ export function ShowcaseActionCard({
 
         <p
           className={joinClasses(
-            "mx-auto mt-[7px] w-full max-w-[220px] text-center text-[13px] font-normal leading-[1.45] tracking-[0] text-[rgba(97,97,97,1)]",
+            "mx-auto mt-[10px] max-w-full px-2 text-center text-[12.5px] font-normal leading-[1.35] tracking-[0] text-[rgba(97,97,97,1)] whitespace-nowrap sm:text-[13px]",
             bodyClassName,
           )}
         >
           {body}
         </p>
 
-        <div className={joinClasses("mt-auto flex w-full justify-center pt-[18px]", buttonWrapClassName)}>
+        <div className={joinClasses("mx-auto mt-auto flex w-full max-w-[182px] justify-center pt-[18px]", buttonWrapClassName)}>
           <Link
             className={joinClasses(
-              "inline-flex min-h-[44px] w-full max-w-[182px] items-center justify-center rounded-[10px] border border-[#284868] bg-[linear-gradient(180deg,#1d3a59_0%,#11283e_100%)] px-5 py-3 text-center text-[13px] font-semibold leading-[16px] tracking-[-0.01em] text-white shadow-[0_10px_22px_rgba(17,40,62,0.18)] transition-all duration-200 hover:-translate-y-[1px] hover:border-[#33577d] hover:shadow-[0_14px_26px_rgba(17,40,62,0.22)]",
+              "inline-flex min-h-[44px] w-full max-w-none items-center justify-center rounded-[10px] border border-[#284868] bg-[linear-gradient(180deg,#1d3a59_0%,#11283e_100%)] px-5 py-3 text-center text-[13px] font-semibold leading-[16px] tracking-[-0.01em] text-white shadow-[0_10px_22px_rgba(17,40,62,0.18)] transition-all duration-200 hover:-translate-y-[1px] hover:border-[#33577d] hover:shadow-[0_14px_26px_rgba(17,40,62,0.22)]",
               buttonClassName,
             )}
             href={href}
             style={{ color: "#ffffff" }}
           >
-            <span style={{ color: "#ffffff" }}>{ctaLabel}</span>
+            <span className="inline-flex w-full items-center justify-center text-center leading-[1.2]" style={{ color: "#ffffff" }}>
+              {ctaLabel}
+            </span>
           </Link>
         </div>
       </div>
