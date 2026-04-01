@@ -31,8 +31,10 @@ const uploadFilesInBatches = async (files: File[], folder: string, batchSize = 3
   return uploadedFiles;
 };
 
-export const POST = auth(async (request) => {
-  if (!request.auth?.user?.isAdmin) {
+export async function POST(request: Request) {
+  const session = await auth();
+
+  if (!session?.user?.isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -47,4 +49,4 @@ export const POST = auth(async (request) => {
   const uploadedFiles = await uploadFilesInBatches(files, folder);
 
   return NextResponse.json({ files: uploadedFiles });
-});
+}
