@@ -18,7 +18,7 @@ if (fs.existsSync(dotPrisma)) {
   process.exit(1);
 }
 
-// Copy @prisma (Prisma 7.x puts generated client here)
+// Copy @prisma (Prisma 7.x generated client lives here)
 const atPrisma = path.join(nodeModules, "@prisma");
 if (fs.existsSync(atPrisma)) {
   const dest = path.join(buildNodeModules, "@prisma");
