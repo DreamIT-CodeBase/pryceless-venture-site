@@ -4,6 +4,7 @@ const azureBlobAccountName =
     ?.split("=")[1] || "prycelessventureblob";
 
 const nextConfig = {
+  distDir: "build",
   devIndicators: {
     buildActivity: false,
   },

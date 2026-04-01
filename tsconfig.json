@@ -34,10 +34,10 @@
     "**/*.mts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/routes.d.ts",
-    ".next/types/validator.ts",
-    ".next/dev/types/**/*.ts",
-    ".next/types/**/*.ts"
+    "build/types/routes.d.ts",
+    "build/types/validator.ts",
+    "build/dev/types/**/*.ts",
+    "build/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
