@@ -7,6 +7,35 @@ let cachedContainerClient:
   | ReturnType<BlobServiceClient["getContainerClient"]>
   | undefined;
 
+const getStorageAccountName = () =>
+  env.azureStorageConnectionString
+    .split(";")
+    .find((part) => part.startsWith("AccountName="))
+    ?.split("=")[1]
+    ?.trim() ?? "";
+
+export const getAzureBlobHost = () => `${getStorageAccountName()}.blob.core.windows.net`;
+
+export const getAzureBlobUrlPrefix = () =>
+  `https://${getAzureBlobHost()}/${env.azureContainerName}/`;
+
+export const isAzureBlobStorageUrl = (value: string | null | undefined) => {
+  if (!value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      url.host === getAzureBlobHost() &&
+      url.pathname.startsWith(`/${env.azureContainerName}/`)
+    );
+  } catch {
+    return false;
+  }
+};
+
 const getContainerClient = async () => {
   if (!cachedContainerClient) {
     const serviceClient = BlobServiceClient.fromConnectionString(

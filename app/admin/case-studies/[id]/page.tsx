@@ -19,7 +19,7 @@ export default async function EditCaseStudyPage({
   if (!caseStudy) notFound();
 
   return (
-    <AdminShell title={caseStudy.title} subtitle="Keep the qualitative narrative and structured case study sections aligned.">
+    <AdminShell title={caseStudy.title} subtitle="Keep the qualitative narrative aligned and manage the Azure Blob image gallery plus primary profile image.">
       <CaseStudyForm caseStudy={caseStudy} errorMessage={errorMessage} />
     </AdminShell>
   );

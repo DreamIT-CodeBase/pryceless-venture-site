@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PublicForm } from "@/components/forms/public-form";
@@ -7,7 +6,6 @@ import {
   type DetailMediaCarouselItem,
 } from "@/components/public/detail-media-carousel";
 import {
-  DetailBadgeRow,
   DetailBreadcrumbs,
   DetailBulletList,
   DetailGlassPanel,
@@ -16,8 +14,6 @@ import {
   DetailSection,
   DetailSectionHeading,
   DetailStatGrid,
-  detailPrimaryButtonClassName,
-  detailSecondaryButtonClassName,
 } from "@/components/public/slug-detail-ui";
 import { SiteShell } from "@/components/public/site-shell";
 import {
@@ -85,7 +81,7 @@ const createMediaItems = (investment: NonNullable<Awaited<ReturnType<typeof getP
   investment.images.forEach((image, index) => {
     pushItem({
       alt: image.altText || investment.title,
-      caption: image.caption || `${investment.title} image ${index + 1}`,
+      caption: image.caption || undefined,
       eyebrow: `Gallery ${String(index + 1).padStart(2, "0")}`,
       src: image.mediaFile.blobUrl,
       title: image.caption || investment.title,
@@ -116,11 +112,6 @@ export default async function InvestmentDetailPage({
   const highlightItems = investment.highlights.map((highlight) => highlight.highlight);
   const summaryParagraphs = splitParagraphs(investment.summary);
   const disclaimerParagraphs = splitParagraphs(investment.returnsDisclaimer || page?.disclaimer);
-  const badgeItems = [
-    investment.status ? formatDisplayValue(investment.status) : null,
-    investment.assetType ? formatDisplayValue(investment.assetType) : null,
-    investment.strategy ? formatDisplayValue(investment.strategy) : null,
-  ].filter(Boolean) as string[];
   const investmentStats = [
     investment.minimumInvestmentDisplay
       ? { label: "Minimum Investment", value: investment.minimumInvestmentDisplay }
@@ -138,41 +129,36 @@ export default async function InvestmentDetailPage({
           <DetailBreadcrumbs currentLabel={investment.title} href="/" />
 
           <div
-            className={`mt-7 grid gap-8 lg:items-start lg:gap-10 ${
-              mediaItems.length ? "lg:grid-cols-[minmax(0,1fr)_minmax(480px,540px)]" : ""
+            className={`mt-7 grid gap-8 lg:items-start lg:gap-12 ${
+              mediaItems.length ? "lg:grid-cols-[minmax(0,760px)_minmax(440px,520px)]" : ""
             }`}
           >
-            <div className="max-w-[700px]">
-              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-slate-500">
+            <div className="max-w-[760px]">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.34em] text-[#bf9375] sm:text-[13px]">
                 Investment Detail
               </p>
-              <h1 className="mt-4 text-[32px] font-semibold leading-[1.04] tracking-[-0.045em] text-[#111827] sm:text-[48px] lg:text-[62px]">
+              <h1 className="mt-3 max-w-[660px] text-balance text-[32px] font-medium leading-[1.02] tracking-[-0.05em] text-[#111827] sm:text-[42px] lg:text-[52px]">
                 {investment.title}
               </h1>
-              <p className="mt-5 max-w-[620px] text-[16px] leading-[1.85] text-slate-700 sm:text-[17px]">
+              <p className="mt-10 max-w-[760px] text-[16px] leading-[1.78] text-slate-700 sm:mt-12 sm:text-[17px]">
                 {page?.intro ?? investment.summary}
               </p>
 
-              <div className="mt-7">
-                <DetailBadgeRow items={badgeItems} />
-              </div>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                {ctaLabel && form ? (
-                  <Link className={detailPrimaryButtonClassName} href="#deal-packet-form">
-                    {ctaLabel}
-                  </Link>
-                ) : null}
-                <Link className={detailSecondaryButtonClassName} href="/investments">
-                  Browse More Opportunities
-                </Link>
-              </div>
-
               {investmentStats.length ? (
-                <div className="mt-8">
+                <div className="mt-14 max-w-[980px] sm:mt-16">
                   <DetailStatGrid columns={4} items={investmentStats} />
                 </div>
               ) : null}
+
+              <div className="mt-14 hidden lg:block">
+                <DetailNarrativeBlock
+                  body={summaryParagraphs.map((paragraph, index) => (
+                    <p key={`${paragraph}-${index}`}>{paragraph}</p>
+                  ))}
+                  eyebrow="Opportunity Thesis"
+                  title={page?.pageTitle || investment.title}
+                />
+              </div>
             </div>
 
             {mediaItems.length ? <DetailMediaCarousel items={mediaItems} priorityFirst /> : null}
@@ -182,13 +168,15 @@ export default async function InvestmentDetailPage({
         <DetailSection className="pb-14 lg:pb-18">
           <div className={`grid gap-6 ${form ? "lg:grid-cols-[minmax(0,1fr)_390px]" : ""}`}>
             <div className="grid gap-6">
-              <DetailNarrativeBlock
-                body={summaryParagraphs.map((paragraph, index) => (
-                  <p key={`${paragraph}-${index}`}>{paragraph}</p>
-                ))}
-                eyebrow="Opportunity Thesis"
-                title={page?.pageTitle || investment.title}
-              />
+              <div className="lg:hidden">
+                <DetailNarrativeBlock
+                  body={summaryParagraphs.map((paragraph, index) => (
+                    <p key={`${paragraph}-${index}`}>{paragraph}</p>
+                  ))}
+                  eyebrow="Opportunity Thesis"
+                  title={page?.pageTitle || investment.title}
+                />
+              </div>
 
               {highlightItems.length ? (
                 <DetailGlassPanel>

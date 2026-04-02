@@ -61,6 +61,9 @@ export const getInvestmentAdmin = async (id: string) =>
 export const getCaseStudiesAdmin = async () =>
   prisma.caseStudy.findMany({
     orderBy: { updatedAt: "desc" },
+    include: {
+      images: { select: { id: true }, take: 1 },
+    },
   });
 
 export const getCaseStudyAdmin = async (id: string) =>
@@ -68,6 +71,11 @@ export const getCaseStudyAdmin = async (id: string) =>
     where: { id },
     include: {
       assetProfile: { orderBy: { sortOrder: "asc" } },
+      primaryImage: { include: { mediaFile: true } },
+      images: {
+        orderBy: { sortOrder: "asc" },
+        include: { mediaFile: true },
+      },
       takeaways: { orderBy: { sortOrder: "asc" } },
     },
   });

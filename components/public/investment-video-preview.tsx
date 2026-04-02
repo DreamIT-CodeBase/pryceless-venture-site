@@ -34,7 +34,7 @@ export function InvestmentVideoPreview({
   };
 
   return (
-    <div className="relative min-h-[330px] overflow-hidden rounded-[15px] bg-[#18243f] lg:h-[330px]">
+    <div className="relative min-h-[330px] overflow-hidden rounded-[15px] bg-[#18243f] lg:h-[330px] 2xl:h-[360px]">
       <video
         className="h-full w-full object-cover"
         controls={hasStarted}

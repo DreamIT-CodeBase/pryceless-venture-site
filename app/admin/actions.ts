@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { requireAdminSession } from "@/lib/authz";
 import type { AdminFlash } from "@/lib/admin-flash";
+import { isAzureBlobStorageUrl } from "@/lib/blob";
 import { singletonPageGroups } from "@/lib/content-blueprint";
 import { prisma } from "@/lib/prisma";
 import { asOptionalString, parseJson, slugify } from "@/lib/utils";
@@ -17,6 +18,13 @@ type UploadedImagePayload = {
   blobUrl: string;
   fileName: string;
   altText?: string;
+};
+
+type HomeTestimonialInput = {
+  avatarUrl?: string;
+  city: string;
+  name: string;
+  quote: string;
 };
 
 const dedupeUploadedImages = (images: UploadedImagePayload[]) => {
@@ -94,8 +102,80 @@ const parseSimpleLines = (value: string | undefined) =>
 const parsePipeRows = (value: string | undefined) =>
   parseSimpleLines(value).map((line) => line.split("|").map((segment) => segment.trim()));
 
+const parseSingletonPageGroupRows = (
+  group: { supportsBody?: boolean },
+  value: string | undefined,
+) => {
+  if (!group.supportsBody) {
+    return parseSimpleLines(value).map((title) => ({ body: undefined, title }));
+  }
+
+  return parsePipeRows(value)
+    .map((row) => ({
+      body: row[1]?.trim() || undefined,
+      title: row[0]?.trim() ?? "",
+    }))
+    .filter((row) => row.title);
+};
+
 const parseImages = (formData: FormData) =>
   parseJson<UploadedImagePayload[]>(formData.get("imagesPayload"), []);
+
+const parseHomeTestimonials = (formData: FormData): HomeTestimonialInput[] => {
+  const testimonialsJson = asOptionalString(formData.get("testimonialsJson"));
+
+  if (testimonialsJson) {
+    return parseJson<Array<Partial<HomeTestimonialInput>>>(testimonialsJson, []).map(
+      (testimonial) => ({
+        avatarUrl: String(testimonial.avatarUrl ?? "").trim() || undefined,
+        city: String(testimonial.city ?? "").trim(),
+        name: String(testimonial.name ?? "").trim(),
+        quote: String(testimonial.quote ?? "").trim(),
+      }),
+    );
+  }
+
+  return parsePipeRows(asOptionalString(formData.get("testimonialsText"))).map((row) => ({
+    avatarUrl: row[3]?.trim() || undefined,
+    city: row[1]?.trim() ?? "",
+    name: row[0]?.trim() ?? "",
+    quote: row[2]?.trim() ?? "",
+  }));
+};
+
+const createHomeTestimonialRecords = (testimonials: HomeTestimonialInput[]) =>
+  testimonials
+    .filter((testimonial) => testimonial.name && testimonial.city && testimonial.quote)
+    .map((testimonial, index) => ({
+      homePageId: "home",
+      name: testimonial.name,
+      city: testimonial.city,
+      quote: testimonial.quote,
+      avatarUrl: testimonial.avatarUrl || undefined,
+      sortOrder: index,
+    }));
+
+const getHomePageManagedImageError = ({
+  aboutSectionImageUrl,
+  testimonials,
+}: {
+  aboutSectionImageUrl?: string;
+  testimonials: HomeTestimonialInput[];
+}) => {
+  if (aboutSectionImageUrl && !isAzureBlobStorageUrl(aboutSectionImageUrl)) {
+    return "Why section image must use Azure Blob Storage. Upload the image from the admin portal.";
+  }
+
+  const invalidTestimonialIndex = testimonials.findIndex(
+    (testimonial) => testimonial.avatarUrl && !isAzureBlobStorageUrl(testimonial.avatarUrl),
+  );
+
+  if (invalidTestimonialIndex >= 0) {
+    return `Testimonial ${invalidTestimonialIndex + 1} photo must use Azure Blob Storage. Upload the photo from the admin portal.`;
+  }
+
+  return null;
+};
 
 const parsePrimaryMediaFileId = (formData: FormData) =>
   asOptionalString(formData.get("primaryMediaFileId"));
@@ -252,6 +332,7 @@ const handleWriteError = async (
       if (
         metaText.includes("propertyimage") ||
         metaText.includes("investmentimage") ||
+        metaText.includes("casestudyimage") ||
         metaText.includes("mediafileid")
       ) {
         return redirectWithErrorMessage(
@@ -466,6 +547,56 @@ const upsertInvestmentImages = async (
 
   await prisma.investment.update({
     where: { id: investmentId },
+    data: {
+      primaryImageId: relation?.id ?? null,
+    },
+  });
+};
+
+const upsertCaseStudyImages = async (
+  caseStudyId: string,
+  images: UploadedImagePayload[],
+  primaryMediaFileId?: string,
+) => {
+  await prisma.caseStudy.update({
+    where: { id: caseStudyId },
+    data: { primaryImageId: null },
+  });
+
+  await prisma.caseStudyImage.deleteMany({ where: { caseStudyId } });
+
+  for (const [index, image] of images.entries()) {
+    await prisma.mediaFile.update({
+      where: { id: image.mediaFileId },
+      data: {
+        altText: image.altText,
+      },
+    });
+
+    await prisma.caseStudyImage.create({
+      data: {
+        caseStudyId,
+        mediaFileId: image.mediaFileId,
+        altText: image.altText,
+        sortOrder: index,
+      },
+    });
+  }
+
+  if (!images.length) {
+    return;
+  }
+
+  const chosenMediaFileId = primaryMediaFileId ?? images[0]?.mediaFileId;
+  const relation = await prisma.caseStudyImage.findFirst({
+    where: {
+      caseStudyId,
+      mediaFileId: chosenMediaFileId,
+    },
+  });
+
+  await prisma.caseStudy.update({
+    where: { id: caseStudyId },
     data: {
       primaryImageId: relation?.id ?? null,
     },
@@ -826,6 +957,8 @@ export const saveCaseStudy = async (formData: FormData) => {
 
   const assetProfileRows = parsePipeRows(asOptionalString(formData.get("assetProfileText")));
   const takeaways = parseSimpleLines(asOptionalString(formData.get("takeawaysText")));
+  const images = dedupeUploadedImages(parseImages(formData));
+  const primaryMediaFileId = parsePrimaryMediaFileId(formData);
 
   const caseStudyRecord = {
     title: caseStudyData.title,
@@ -875,8 +1008,14 @@ export const saveCaseStudy = async (formData: FormData) => {
         })),
       });
     }
+
+    await upsertCaseStudyImages(caseStudy.id, images, primaryMediaFileId);
   } catch (error) {
-    await handleWriteError(error, editPath, "Case study");
+    await handleWriteError(
+      error,
+      caseStudy?.id ? `/admin/case-studies/${caseStudy.id}` : editPath,
+      "Case study",
+    );
   }
 
   revalidatePath("/admin/case-studies");
@@ -962,6 +1101,12 @@ export const saveCalculator = async (formData: FormData) => {
     shortDescription: calculatorData.shortDescription,
     disclaimer: calculatorData.disclaimer,
   };
+  const existingCalculator = calculatorData.id
+    ? await prisma.calculator.findUnique({
+        where: { id: calculatorData.id },
+        select: { slug: true },
+      })
+    : null;
 
   let calculator;
 
@@ -981,8 +1126,14 @@ export const saveCalculator = async (formData: FormData) => {
   revalidatePath("/admin/calculators");
   revalidatePath(`/admin/calculators/${calculator.id}`);
   revalidatePath("/calculators");
+  revalidatePath(`/calculators/${calculator.slug}`);
+  if (existingCalculator?.slug && existingCalculator.slug !== calculator.slug) {
+    revalidatePath(`/calculators/${existingCalculator.slug}`);
+    revalidateTag(`calculator:${existingCalculator.slug}`, TAG_REVALIDATE_PROFILE);
+  }
   revalidatePath("/");
   revalidateTag("calculators", TAG_REVALIDATE_PROFILE);
+  revalidateTag(`calculator:${calculator.slug}`, TAG_REVALIDATE_PROFILE);
   const calculatorFlash = getLifecycleFlash({
     entityLabel: "Calculator",
     lifecycleStatus: calculatorData.lifecycleStatus,
@@ -1002,9 +1153,14 @@ export const deleteCalculator = async (formData: FormData) => {
     return;
   }
 
+  const existing = await prisma.calculator.findUnique({ where: { id } });
   await prisma.calculator.delete({ where: { id } });
   revalidatePath("/admin/calculators");
   revalidatePath("/calculators");
+  if (existing?.slug) {
+    revalidatePath(`/calculators/${existing.slug}`);
+    revalidateTag(`calculator:${existing.slug}`, TAG_REVALIDATE_PROFILE);
+  }
   revalidateTag("calculators", TAG_REVALIDATE_PROFILE);
   await redirectWithSuccessMessage("/admin/calculators", "Calculator deleted successfully.", {
     title: "Calculator deleted",
@@ -1013,6 +1169,16 @@ export const deleteCalculator = async (formData: FormData) => {
 
 export const saveHomePage = async (formData: FormData) => {
   await requireAdminSession();
+  const aboutSectionImageUrl = asOptionalString(formData.get("aboutSectionImageUrl"));
+  const testimonials = parseHomeTestimonials(formData);
+  const managedImageError = getHomePageManagedImageError({
+    aboutSectionImageUrl,
+    testimonials,
+  });
+
+  if (managedImageError) {
+    await redirectWithErrorMessage("/admin/pages/home", managedImageError, "Invalid image source");
+  }
 
   await prisma.homePage.upsert({
     where: { id: "home" },
@@ -1023,6 +1189,15 @@ export const saveHomePage = async (formData: FormData) => {
       heroPrimaryCtaHref: String(formData.get("heroPrimaryCtaHref") ?? "").trim(),
       heroSecondaryCtaLabel: asOptionalString(formData.get("heroSecondaryCtaLabel")),
       heroSecondaryCtaHref: asOptionalString(formData.get("heroSecondaryCtaHref")),
+      aboutSectionTitle: asOptionalString(formData.get("aboutSectionTitle")),
+      aboutSectionParagraphOne: asOptionalString(formData.get("aboutSectionParagraphOne")),
+      aboutSectionParagraphTwo: asOptionalString(formData.get("aboutSectionParagraphTwo")),
+      aboutSectionPrimaryCtaLabel: asOptionalString(formData.get("aboutSectionPrimaryCtaLabel")),
+      aboutSectionPrimaryCtaHref: asOptionalString(formData.get("aboutSectionPrimaryCtaHref")),
+      aboutSectionSecondaryCtaLabel: asOptionalString(formData.get("aboutSectionSecondaryCtaLabel")),
+      aboutSectionSecondaryCtaHref: asOptionalString(formData.get("aboutSectionSecondaryCtaHref")),
+      aboutSectionImageUrl,
+      aboutSectionImageAlt: asOptionalString(formData.get("aboutSectionImageAlt")),
       metricsDisclaimer: asOptionalString(formData.get("metricsDisclaimer")),
       portfolioValueDisplay: asOptionalString(formData.get("portfolioValueDisplay")),
       portfolioCaption: asOptionalString(formData.get("portfolioCaption")),
@@ -1035,6 +1210,15 @@ export const saveHomePage = async (formData: FormData) => {
       heroPrimaryCtaHref: String(formData.get("heroPrimaryCtaHref") ?? "").trim(),
       heroSecondaryCtaLabel: asOptionalString(formData.get("heroSecondaryCtaLabel")),
       heroSecondaryCtaHref: asOptionalString(formData.get("heroSecondaryCtaHref")),
+      aboutSectionTitle: asOptionalString(formData.get("aboutSectionTitle")),
+      aboutSectionParagraphOne: asOptionalString(formData.get("aboutSectionParagraphOne")),
+      aboutSectionParagraphTwo: asOptionalString(formData.get("aboutSectionParagraphTwo")),
+      aboutSectionPrimaryCtaLabel: asOptionalString(formData.get("aboutSectionPrimaryCtaLabel")),
+      aboutSectionPrimaryCtaHref: asOptionalString(formData.get("aboutSectionPrimaryCtaHref")),
+      aboutSectionSecondaryCtaLabel: asOptionalString(formData.get("aboutSectionSecondaryCtaLabel")),
+      aboutSectionSecondaryCtaHref: asOptionalString(formData.get("aboutSectionSecondaryCtaHref")),
+      aboutSectionImageUrl,
+      aboutSectionImageAlt: asOptionalString(formData.get("aboutSectionImageAlt")),
       metricsDisclaimer: asOptionalString(formData.get("metricsDisclaimer")),
       portfolioValueDisplay: asOptionalString(formData.get("portfolioValueDisplay")),
       portfolioCaption: asOptionalString(formData.get("portfolioCaption")),
@@ -1045,7 +1229,6 @@ export const saveHomePage = async (formData: FormData) => {
   const segments = parsePipeRows(asOptionalString(formData.get("segmentsText")));
   const platformCards = parsePipeRows(asOptionalString(formData.get("platformCardsText")));
   const caseHighlights = parsePipeRows(asOptionalString(formData.get("caseHighlightsText")));
-  const testimonials = parsePipeRows(asOptionalString(formData.get("testimonialsText")));
 
   await prisma.homeMetric.deleteMany({ where: { homePageId: "home" } });
   await prisma.homeSegment.deleteMany({ where: { homePageId: "home" } });
@@ -1113,16 +1296,7 @@ export const saveHomePage = async (formData: FormData) => {
 
   if (testimonials.length) {
     await prisma.homeTestimonial.createMany({
-      data: testimonials
-        .filter((row) => row[0] && row[1] && row[2])
-        .map((row, index) => ({
-          homePageId: "home",
-          name: row[0],
-          city: row[1],
-          quote: row[2],
-          avatarUrl: row[3] || undefined,
-          sortOrder: index,
-        })),
+      data: createHomeTestimonialRecords(testimonials),
     });
   }
 
@@ -1165,16 +1339,20 @@ export const saveSingletonPage = async (formData: FormData) => {
   });
 
   for (const group of groups) {
-    const lines = parseSimpleLines(asOptionalString(formData.get(`group_${group.key}`)));
-    if (!lines.length) {
+    const rows = parseSingletonPageGroupRows(
+      group,
+      asOptionalString(formData.get(`group_${group.key}`)),
+    );
+    if (!rows.length) {
       continue;
     }
 
     await prisma.singletonPageItem.createMany({
-      data: lines.map((title, index) => ({
+      data: rows.map((row, index) => ({
         pageId: currentPage.id,
         groupKey: group.key,
-        title,
+        title: row.title,
+        body: row.body,
         sortOrder: index,
       })),
     });
@@ -1535,6 +1713,8 @@ export const autosaveCaseStudyDraft = async (formData: FormData) => {
   const outcomeSummary = String(formData.get("outcomeSummary") ?? "").trim();
   const assetProfileRows = parsePipeRows(asOptionalString(formData.get("assetProfileText")));
   const takeaways = parseSimpleLines(asOptionalString(formData.get("takeawaysText")));
+  const images = dedupeUploadedImages(parseImages(formData));
+  const primaryMediaFileId = parsePrimaryMediaFileId(formData);
 
   if (
     !existing &&
@@ -1544,7 +1724,8 @@ export const autosaveCaseStudyDraft = async (formData: FormData) => {
     !execution &&
     !outcomeSummary &&
     !assetProfileRows.length &&
-    !takeaways.length
+    !takeaways.length &&
+    !images.length
   ) {
     return null;
   }
@@ -1619,6 +1800,8 @@ export const autosaveCaseStudyDraft = async (formData: FormData) => {
       })),
     });
   }
+
+  await upsertCaseStudyImages(caseStudy.id, images, primaryMediaFileId);
 
   return {
     path: getAutosavePath("/admin/case-studies", caseStudy.id),
@@ -1706,6 +1889,16 @@ export const autosaveCalculatorDraft = async (formData: FormData) => {
 
 export const autosaveHomePageDraft = async (formData: FormData) => {
   await requireAdminSession();
+  const aboutSectionImageUrl = asOptionalString(formData.get("aboutSectionImageUrl"));
+  const testimonials = parseHomeTestimonials(formData);
+  const managedImageError = getHomePageManagedImageError({
+    aboutSectionImageUrl,
+    testimonials,
+  });
+
+  if (managedImageError) {
+    throw new Error(managedImageError);
+  }
 
   const homePage = await prisma.homePage.upsert({
     where: { id: "home" },
@@ -1716,6 +1909,15 @@ export const autosaveHomePageDraft = async (formData: FormData) => {
       heroPrimaryCtaHref: String(formData.get("heroPrimaryCtaHref") ?? "").trim(),
       heroSecondaryCtaLabel: asOptionalString(formData.get("heroSecondaryCtaLabel")),
       heroSecondaryCtaHref: asOptionalString(formData.get("heroSecondaryCtaHref")),
+      aboutSectionTitle: asOptionalString(formData.get("aboutSectionTitle")),
+      aboutSectionParagraphOne: asOptionalString(formData.get("aboutSectionParagraphOne")),
+      aboutSectionParagraphTwo: asOptionalString(formData.get("aboutSectionParagraphTwo")),
+      aboutSectionPrimaryCtaLabel: asOptionalString(formData.get("aboutSectionPrimaryCtaLabel")),
+      aboutSectionPrimaryCtaHref: asOptionalString(formData.get("aboutSectionPrimaryCtaHref")),
+      aboutSectionSecondaryCtaLabel: asOptionalString(formData.get("aboutSectionSecondaryCtaLabel")),
+      aboutSectionSecondaryCtaHref: asOptionalString(formData.get("aboutSectionSecondaryCtaHref")),
+      aboutSectionImageUrl,
+      aboutSectionImageAlt: asOptionalString(formData.get("aboutSectionImageAlt")),
       metricsDisclaimer: asOptionalString(formData.get("metricsDisclaimer")),
       portfolioValueDisplay: asOptionalString(formData.get("portfolioValueDisplay")),
       portfolioCaption: asOptionalString(formData.get("portfolioCaption")),
@@ -1728,6 +1930,15 @@ export const autosaveHomePageDraft = async (formData: FormData) => {
       heroPrimaryCtaHref: String(formData.get("heroPrimaryCtaHref") ?? "").trim(),
       heroSecondaryCtaLabel: asOptionalString(formData.get("heroSecondaryCtaLabel")),
       heroSecondaryCtaHref: asOptionalString(formData.get("heroSecondaryCtaHref")),
+      aboutSectionTitle: asOptionalString(formData.get("aboutSectionTitle")),
+      aboutSectionParagraphOne: asOptionalString(formData.get("aboutSectionParagraphOne")),
+      aboutSectionParagraphTwo: asOptionalString(formData.get("aboutSectionParagraphTwo")),
+      aboutSectionPrimaryCtaLabel: asOptionalString(formData.get("aboutSectionPrimaryCtaLabel")),
+      aboutSectionPrimaryCtaHref: asOptionalString(formData.get("aboutSectionPrimaryCtaHref")),
+      aboutSectionSecondaryCtaLabel: asOptionalString(formData.get("aboutSectionSecondaryCtaLabel")),
+      aboutSectionSecondaryCtaHref: asOptionalString(formData.get("aboutSectionSecondaryCtaHref")),
+      aboutSectionImageUrl,
+      aboutSectionImageAlt: asOptionalString(formData.get("aboutSectionImageAlt")),
       metricsDisclaimer: asOptionalString(formData.get("metricsDisclaimer")),
       portfolioValueDisplay: asOptionalString(formData.get("portfolioValueDisplay")),
       portfolioCaption: asOptionalString(formData.get("portfolioCaption")),
@@ -1738,7 +1949,6 @@ export const autosaveHomePageDraft = async (formData: FormData) => {
   const segments = parsePipeRows(asOptionalString(formData.get("segmentsText")));
   const platformCards = parsePipeRows(asOptionalString(formData.get("platformCardsText")));
   const caseHighlights = parsePipeRows(asOptionalString(formData.get("caseHighlightsText")));
-  const testimonials = parsePipeRows(asOptionalString(formData.get("testimonialsText")));
 
   await prisma.homeMetric.deleteMany({ where: { homePageId: "home" } });
   await prisma.homeSegment.deleteMany({ where: { homePageId: "home" } });
@@ -1806,16 +2016,7 @@ export const autosaveHomePageDraft = async (formData: FormData) => {
 
   if (testimonials.length) {
     await prisma.homeTestimonial.createMany({
-      data: testimonials
-        .filter((row) => row[0] && row[1] && row[2])
-        .map((row, index) => ({
-          homePageId: "home",
-          name: row[0],
-          city: row[1],
-          quote: row[2],
-          avatarUrl: row[3] || undefined,
-          sortOrder: index,
-        })),
+      data: createHomeTestimonialRecords(testimonials),
     });
   }
 
@@ -1857,16 +2058,20 @@ export const autosaveSingletonPageDraft = async (formData: FormData) => {
   });
 
   for (const group of groups) {
-    const lines = parseSimpleLines(asOptionalString(formData.get(`group_${group.key}`)));
-    if (!lines.length) {
+    const rows = parseSingletonPageGroupRows(
+      group,
+      asOptionalString(formData.get(`group_${group.key}`)),
+    );
+    if (!rows.length) {
       continue;
     }
 
     await prisma.singletonPageItem.createMany({
-      data: lines.map((title, index) => ({
+      data: rows.map((row, index) => ({
         pageId: currentPage.id,
         groupKey: group.key,
-        title,
+        title: row.title,
+        body: row.body,
         sortOrder: index,
       })),
     });

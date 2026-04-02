@@ -1,10 +1,20 @@
 import { env } from "@/lib/env";
 
 type EmailPayload = {
+  attachments?: EmailAttachment[];
   subject: string;
   html: string;
   text: string;
+  replyTo?: string[];
   to?: string[];
+};
+
+export type EmailAttachment = {
+  contentBytes: string;
+  contentId?: string;
+  contentType: string;
+  isInline?: boolean;
+  name: string;
 };
 
 const getGraphToken = async () => {
@@ -38,6 +48,11 @@ export const sendGraphMail = async (payload: EmailPayload) => {
   const recipients = (payload.to?.length ? payload.to : [env.recipientMail]).map((address) => ({
     emailAddress: { address },
   }));
+  const replyToRecipients = payload.replyTo?.length
+    ? payload.replyTo.map((address) => ({
+        emailAddress: { address },
+      }))
+    : undefined;
 
   const response = await fetch(
     `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(env.senderMail)}/sendMail`,
@@ -49,11 +64,20 @@ export const sendGraphMail = async (payload: EmailPayload) => {
       },
       body: JSON.stringify({
         message: {
+          attachments: payload.attachments?.map((attachment) => ({
+            "@odata.type": "#microsoft.graph.fileAttachment",
+            contentBytes: attachment.contentBytes,
+            contentId: attachment.contentId,
+            contentType: attachment.contentType,
+            isInline: attachment.isInline ?? false,
+            name: attachment.name,
+          })),
           subject: payload.subject,
           body: {
             contentType: "HTML",
             content: payload.html,
           },
+          replyTo: replyToRecipients,
           toRecipients: recipients,
         },
         saveToSentItems: false,

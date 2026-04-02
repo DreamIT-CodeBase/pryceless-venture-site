@@ -56,6 +56,18 @@ const homePageSelect = {
   heroPrimaryCtaHref: true,
   heroSecondaryCtaLabel: true,
   heroSecondaryCtaHref: true,
+  aboutSectionTitle: true,
+  aboutSectionParagraphOne: true,
+  aboutSectionParagraphTwo: true,
+  aboutSectionPrimaryCtaLabel: true,
+  aboutSectionPrimaryCtaHref: true,
+  aboutSectionSecondaryCtaLabel: true,
+  aboutSectionSecondaryCtaHref: true,
+  aboutSectionImageUrl: true,
+  aboutSectionImageAlt: true,
+  metricsDisclaimer: true,
+  portfolioValueDisplay: true,
+  portfolioCaption: true,
   metrics: {
     orderBy: { sortOrder: "asc" as const },
     select: {
@@ -64,6 +76,15 @@ const homePageSelect = {
     },
   },
   segments: {
+    orderBy: { sortOrder: "asc" as const },
+    select: {
+      body: true,
+      ctaHref: true,
+      ctaLabel: true,
+      title: true,
+    },
+  },
+  platformCards: {
     orderBy: { sortOrder: "asc" as const },
     select: {
       body: true,
@@ -118,6 +139,7 @@ const singletonPageSelect = {
 const mediaFileBlobSelect = {
   select: {
     blobUrl: true,
+    altText: true,
   },
 } as const;
 
@@ -142,6 +164,8 @@ const propertyListSelect = {
   propertyType: true,
   slug: true,
   status: true,
+  strategy: true,
+  summary: true,
   title: true,
   primaryImage: primaryPropertyImageSelect,
   images: propertyListImageSelect,
@@ -207,9 +231,12 @@ const investmentListImageSelect = {
 } as const;
 
 const investmentListSelect = {
+  assetType: true,
   id: true,
   minimumInvestmentDisplay: true,
   slug: true,
+  status: true,
+  strategy: true,
   summary: true,
   title: true,
   primaryImage: primaryInvestmentImageSelect,
@@ -268,9 +295,24 @@ const investmentDetailSelect = {
 } as const;
 
 const caseStudyListSelect = {
+  category: true,
   overview: true,
   slug: true,
   title: true,
+  primaryImage: {
+    select: {
+      altText: true,
+      mediaFile: mediaFileBlobSelect,
+    },
+  },
+  images: {
+    orderBy: { sortOrder: "asc" as const },
+    take: 1,
+    select: {
+      altText: true,
+      mediaFile: mediaFileBlobSelect,
+    },
+  },
 } as const;
 
 const caseStudyDetailSelect = {
@@ -280,6 +322,20 @@ const caseStudyDetailSelect = {
   outcomeSummary: true,
   overview: true,
   title: true,
+  primaryImage: {
+    select: {
+      altText: true,
+      mediaFile: mediaFileBlobSelect,
+    },
+  },
+  images: {
+    orderBy: { sortOrder: "asc" as const },
+    select: {
+      altText: true,
+      caption: true,
+      mediaFile: mediaFileBlobSelect,
+    },
+  },
   assetProfile: {
     orderBy: { sortOrder: "asc" as const },
     select: {
@@ -481,6 +537,25 @@ export const getPublishedCaseStudy = async (slug: string) =>
   )();
 
 export const getPublishedCalculators = async () => getPublishedCalculatorsCached();
+
+export const getPublishedCalculator = async (slug: string) =>
+  unstable_cache(
+    () =>
+      withPublicFallback(`published-calculator:${slug}`, null, () =>
+        prisma.calculator.findFirst({
+          where: {
+            slug,
+            lifecycleStatus: "PUBLISHED",
+          },
+          select: calculatorListSelect,
+        }),
+      ),
+    ["public-published-calculator", slug],
+    {
+      revalidate: PUBLIC_REVALIDATE_SECONDS,
+      tags: ["calculators", `calculator:${slug}`],
+    },
+  )();
 
 export const getActiveFormBySlug = async (slug: string) =>
   unstable_cache(

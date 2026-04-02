@@ -8,7 +8,7 @@ export default async function HomeAdminPage() {
   const homePage = await getHomePageAdmin();
 
   return (
-    <AdminShell title="Home Page" subtitle="Edit the approved hero, metrics, segments, platform cards, portfolio, case highlights, and testimonials.">
+    <AdminShell title="Home Page" subtitle="Edit the hero, why section, metrics, segments, platform cards, portfolio, case highlights, and testimonials.">
       <HomePageForm homePage={homePage} />
     </AdminShell>
   );

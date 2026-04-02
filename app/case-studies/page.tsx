@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 
 import aboutSectionImage from "@/app/assets/aboutsectionimage.jpg";
 import featuredPropertiesLeftImage from "@/app/assets/featuredpropertieslegftboximage.png";
@@ -13,7 +13,7 @@ import {
 import { EmptyCollectionCard } from "@/components/public/marketing-ui";
 import { PageSectionHero } from "@/components/public/page-section-hero";
 import { SiteShell } from "@/components/public/site-shell";
-import { getPublishedCaseStudies } from "@/lib/data/public";
+import { getPublishedCaseStudies, getSingletonPage } from "@/lib/data/public";
 
 export const revalidate = 300;
 
@@ -26,82 +26,158 @@ const caseStudyImages = [
   featuredPropertiesLeftImage,
 ];
 
+type CaseStudyCardImage = StaticImageData | string;
+
+const categoryLabels: Record<string, string> = {
+  FIX_FLIP: "Fix & Flip",
+  OTHER: "Other",
+  TURNAROUND: "Turnaround Strategy",
+  VALUE_ADD_MULTIFAMILY: "Value-Add Multifamily",
+};
+
 const truncate = (value: string, limit: number) =>
   value.length > limit ? `${value.slice(0, limit).trim()}...` : value;
 
+const formatCategoryLabel = (value: string | null | undefined) =>
+  categoryLabels[String(value ?? "").trim().toUpperCase()] ??
+  String(value ?? "")
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+
 export default async function CaseStudiesPage() {
-  const caseStudies = await getPublishedCaseStudies();
-  const storyCards = caseStudies.slice(0, 9).map((caseStudy, index) => ({
-    title: caseStudy.title,
-    overview: truncate(caseStudy.overview, 230),
-    href: `/case-studies/${caseStudy.slug}`,
-    image: caseStudyImages[index % caseStudyImages.length],
-  }));
+  const [page, caseStudies] = await Promise.all([
+    getSingletonPage("CASE_STUDIES_INDEX"),
+    getPublishedCaseStudies(),
+  ]);
+
+  const configuredCategoryOrder =
+    page?.items.filter((item) => item.groupKey === "categories").map((item) => item.title) ?? [];
+  const storiesByCategory = new Map<
+    string,
+    Array<{
+      href: string;
+      image: CaseStudyCardImage;
+      imageAlt: string;
+      overview: string;
+      title: string;
+    }>
+  >();
+
+  caseStudies.forEach((caseStudy, index) => {
+    const categoryLabel = formatCategoryLabel(caseStudy.category);
+    const currentStories = storiesByCategory.get(categoryLabel) ?? [];
+
+    currentStories.push({
+      href: `/case-studies/${caseStudy.slug}`,
+      image:
+        caseStudy.primaryImage?.mediaFile.blobUrl ??
+        caseStudy.images?.[0]?.mediaFile.blobUrl ??
+        caseStudyImages[index % caseStudyImages.length],
+      imageAlt:
+        caseStudy.primaryImage?.altText ??
+        caseStudy.primaryImage?.mediaFile.altText ??
+        caseStudy.images?.[0]?.altText ??
+        caseStudy.images?.[0]?.mediaFile.altText ??
+        caseStudy.title,
+      overview: truncate(caseStudy.overview, 230),
+      title: caseStudy.title,
+    });
+
+    storiesByCategory.set(categoryLabel, currentStories);
+  });
+
+  const orderedCategories = [
+    ...configuredCategoryOrder.filter((label) => storiesByCategory.has(label)),
+    ...Array.from(storiesByCategory.keys()).filter((label) => !configuredCategoryOrder.includes(label)),
+  ];
 
   return (
     <SiteShell cta={{ href: "/investments", label: "View Opportunities" }}>
       <div className="pb-[92px]">
         <PageSectionHero
-          currentLabel="Case Studies"
-          intro="How strategic renovations and operational improvements transformed long-term returns"
-          title={
-            <>
-              <span className="block">Unlocking Value in</span>
-              <span className="block">Underperforming Assets</span>
-            </>
+          currentLabel={page?.pageTitle ?? "Case Studies"}
+          intro={
+            page?.intro ??
+            "Examples of investment strategies, execution frameworks, and lessons learned across real estate asset types."
           }
+          title={page?.pageTitle ?? "Case Studies"}
         />
 
-        <section className="bg-white px-4 pt-[56px] sm:px-6 lg:px-0 lg:pt-[76px]">
-          <div className="mx-auto flex max-w-[660px] flex-col items-center text-center">
-            <p className="text-[13px] font-normal leading-[21px] tracking-[0] text-[var(--pv-sand)] lg:text-[14px] lg:leading-[22px]">
-              Case Studies
-            </p>
-            <h2 className="mt-[8px] text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0]">
-              From Acquisition to Acceleration
-            </h2>
-          </div>
+        <section className="bg-white px-4 pt-[56px] sm:px-6 lg:px-0 lg:pt-[76px] 2xl:pt-[84px]">
+          <div className="mx-auto w-full 2xl:max-w-[1760px] 2xl:px-[164px]">
+            <div className="mx-auto flex max-w-[760px] flex-col items-center text-center 2xl:mx-0 2xl:max-w-[760px] 2xl:items-start 2xl:text-left">
+              <p className="text-[13px] font-normal leading-[21px] tracking-[0] text-[var(--pv-sand)] lg:text-[14px] lg:leading-[22px]">
+                Case Studies
+              </p>
+              <h2 className="mt-[8px] text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0] 2xl:max-w-[720px] 2xl:text-[42px] 2xl:leading-[1.08] 2xl:tracking-[-0.04em]">
+                {page?.pageTitle ?? "Case Studies"}
+              </h2>
+            </div>
 
-          <div className="mx-auto mt-[44px] w-full">
-            {storyCards.length ? (
-              <ThreeUpCollectionGrid desktopCardWidth={330} desktopGap={38}>
-                {storyCards.map((story, index) => (
-                  <StandardCollectionCardLink href={story.href} key={`${story.title}-${index}`}>
-                    <div className="px-[13px] pt-[13px]">
-                      <div className="relative h-[196px] overflow-hidden rounded-[14px]">
-                        <Image
-                          alt={story.title}
-                          className="object-cover"
-                          fill
-                          sizes="(max-width: 1023px) 100vw, 330px"
-                          src={story.image}
-                        />
+            <div className="mx-auto mt-[44px] w-full max-w-[1088px] space-y-[38px] 2xl:mt-[50px] 2xl:max-w-[1432px] 2xl:space-y-[44px]">
+              {orderedCategories.length ? (
+                orderedCategories.map((categoryLabel) => {
+                  const stories = storiesByCategory.get(categoryLabel) ?? [];
+
+                  return (
+                    <section key={categoryLabel}>
+                      <div className="mb-[18px] flex items-center gap-[12px] 2xl:justify-start">
+                        <span className="h-px flex-1 bg-[#d8d8d4] 2xl:max-w-[300px] 2xl:flex-none" />
+                        <h3 className="shrink-0 text-[18px] font-semibold leading-[1.2] tracking-[-0.02em] text-[#182544] sm:text-[21px] 2xl:text-[24px]">
+                          {categoryLabel}
+                        </h3>
+                        <span className="h-px flex-1 bg-[#d8d8d4]" />
                       </div>
-                    </div>
 
-                    <div className="flex flex-1 flex-col px-[13px] pb-[16px] pt-[14px]">
-                      <h3 className="min-h-[93px] text-left text-[19px] font-bold leading-[1.12] tracking-[-0.03em] text-[#131d36]">
-                        {story.title}
-                      </h3>
-                      <p
-                        className="mt-[9px] text-left text-[13px] font-normal leading-[1.36] tracking-[0] text-[rgba(97,97,97,1)]"
-                        style={{
-                          WebkitBoxOrient: "vertical",
-                          WebkitLineClamp: 5,
-                          display: "-webkit-box",
-                          overflow: "hidden",
-                        }}
+                      <ThreeUpCollectionGrid
+                        desktopCardWidth={330}
+                        desktopGap={38}
+                        wideDesktopCardWidth={456}
+                        wideDesktopGap={32}
                       >
-                        {story.overview}
-                      </p>
-                      <span className={standardCollectionButtonClassName}>Explore more</span>
-                    </div>
-                  </StandardCollectionCardLink>
-                ))}
-              </ThreeUpCollectionGrid>
-            ) : (
-              <EmptyCollectionCard message="Published case studies will appear here after the admin team publishes them." />
-            )}
+                        {stories.map((story, index) => (
+                          <StandardCollectionCardLink href={story.href} key={`${categoryLabel}-${story.title}-${index}`}>
+                            <div className="px-[13px] pt-[13px]">
+                              <div className="relative h-[196px] overflow-hidden rounded-[14px] 2xl:h-[248px]">
+                                <Image
+                                  alt={story.imageAlt}
+                                  className="object-cover"
+                                  fill
+                                  sizes="(max-width: 1023px) 100vw, (max-width: 1535px) 330px, 456px"
+                                  src={story.image}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex flex-1 flex-col px-[13px] pb-[16px] pt-[14px]">
+                              <h3 className="min-h-[93px] text-left text-[19px] font-bold leading-[1.12] tracking-[-0.03em] text-[#131d36] 2xl:min-h-[104px] 2xl:text-[22px]">
+                                {story.title}
+                              </h3>
+                              <p
+                                className="mt-[9px] text-left text-[13px] font-normal leading-[1.36] tracking-[0] text-[rgba(97,97,97,1)] 2xl:text-[13.5px] 2xl:leading-[1.5]"
+                                style={{
+                                  WebkitBoxOrient: "vertical",
+                                  WebkitLineClamp: 5,
+                                  display: "-webkit-box",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                {story.overview}
+                              </p>
+                              <span className={`${standardCollectionButtonClassName} 2xl:max-w-[182px] 2xl:text-[13px]`}>Explore more</span>
+                            </div>
+                          </StandardCollectionCardLink>
+                        ))}
+                      </ThreeUpCollectionGrid>
+                    </section>
+                  );
+                })
+              ) : (
+                <EmptyCollectionCard message="Published case studies will appear here after the admin team publishes them." />
+              )}
+            </div>
           </div>
         </section>
       </div>

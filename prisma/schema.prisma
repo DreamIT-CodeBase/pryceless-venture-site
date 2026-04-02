@@ -27,6 +27,15 @@ model HomePage {
   heroPrimaryCtaHref    String
   heroSecondaryCtaLabel String?
   heroSecondaryCtaHref  String?
+  aboutSectionTitle     String?
+  aboutSectionParagraphOne String?          @db.NVarChar(Max)
+  aboutSectionParagraphTwo String?          @db.NVarChar(Max)
+  aboutSectionPrimaryCtaLabel String?
+  aboutSectionPrimaryCtaHref  String?
+  aboutSectionSecondaryCtaLabel String?
+  aboutSectionSecondaryCtaHref  String?
+  aboutSectionImageUrl  String?             @db.NVarChar(2000)
+  aboutSectionImageAlt  String?             @db.NVarChar(1000)
   metricsDisclaimer     String?             @db.NVarChar(Max)
   portfolioValueDisplay String?
   portfolioCaption      String?             @db.NVarChar(Max)
@@ -150,6 +159,7 @@ model MediaFile {
   updatedAt       DateTime           @updatedAt
   propertyImages  PropertyImage[]
   investmentImages InvestmentImage[]
+  caseStudyImages CaseStudyImage[]
 }
 
 model Property {
@@ -263,12 +273,31 @@ model CaseStudy {
   businessPlan    String                  @db.NVarChar(Max)
   execution       String                  @db.NVarChar(Max)
   outcomeSummary  String                  @db.NVarChar(Max)
+  primaryImageId  String?
   createdAt       DateTime                @default(now())
   updatedAt       DateTime                @updatedAt
+  primaryImage    CaseStudyImage?         @relation("CaseStudyPrimaryImage", fields: [primaryImageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   assetProfile    CaseStudyAssetProfile[]
+  images          CaseStudyImage[]        @relation("CaseStudyImages")
   takeaways       CaseStudyTakeaway[]
 
   @@index([lifecycleStatus, createdAt])
+}
+
+model CaseStudyImage {
+  id                   String      @id @default(cuid())
+  caseStudyId          String
+  mediaFileId          String
+  caption              String?     @db.NVarChar(Max)
+  altText              String?     @db.NVarChar(1000)
+  sortOrder            Int         @default(0)
+  createdAt            DateTime    @default(now())
+  mediaFile            MediaFile   @relation(fields: [mediaFileId], references: [id], onDelete: Cascade)
+  caseStudy            CaseStudy   @relation("CaseStudyImages", fields: [caseStudyId], references: [id], onDelete: Cascade)
+  primaryForCaseStudy  CaseStudy[] @relation("CaseStudyPrimaryImage")
+
+  @@unique([caseStudyId, mediaFileId])
+  @@index([caseStudyId, sortOrder])
 }
 
 model CaseStudyAssetProfile {

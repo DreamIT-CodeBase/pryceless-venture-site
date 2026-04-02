@@ -102,7 +102,7 @@ export function DetailMediaCarousel({
     >
       <div
         className={joinClasses(
-          "relative overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_16px_48px_rgba(15,23,42,0.08)]",
+          "relative overflow-hidden rounded-[32px] border border-[rgba(191,147,117,0.22)] bg-white shadow-[0_16px_48px_rgba(15,23,42,0.08)]",
           compact
             ? "min-h-[320px] sm:min-h-[360px] lg:min-h-[400px]"
             : "min-h-[400px] sm:min-h-[460px] lg:min-h-[560px]",
@@ -130,9 +130,9 @@ export function DetailMediaCarousel({
         </div>
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5 sm:p-6 lg:p-7">
-          <div className="max-w-[420px] rounded-[24px] border border-slate-200 bg-white/92 px-4 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:px-5">
+          <div className="max-w-[420px] rounded-[24px] border border-[rgba(191,147,117,0.22)] bg-white/92 px-4 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:px-5">
             {activeItem.eyebrow ? (
-              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-slate-500">
+              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[var(--pv-sand)]">
                 {activeItem.eyebrow}
               </p>
             ) : null}
@@ -151,7 +151,7 @@ export function DetailMediaCarousel({
 
         {safeItems.length > 1 ? (
           <>
-            <div className="absolute left-4 top-4 z-10 rounded-full border border-slate-200 bg-white/92 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-[#111827] shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+            <div className="absolute left-4 top-4 z-10 rounded-full border border-[rgba(191,147,117,0.22)] bg-white/92 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-[#18314b] shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm">
               {String(activeIndex + 1).padStart(2, "0")} / {String(safeItems.length).padStart(2, "0")}
             </div>
 
@@ -183,7 +183,7 @@ export function DetailMediaCarousel({
                   aria-label={`Show image ${index + 1}`}
                   className={joinClasses(
                     "h-2.5 rounded-full transition-all",
-                    index === activeIndex ? "w-8 bg-[#111827]" : "w-2.5 bg-slate-300 hover:bg-slate-400",
+                    index === activeIndex ? "w-8 bg-[var(--pv-sand)]" : "w-2.5 bg-slate-300 hover:bg-slate-400",
                   )}
                   key={item.id}
                   onClick={() => {

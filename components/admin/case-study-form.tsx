@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { autosaveCaseStudyDraft, deleteCaseStudy, saveCaseStudy } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
+import { ImageManager } from "@/components/admin/image-manager";
 import { caseStudyCategoryOptions } from "@/lib/content-blueprint";
 
 export function CaseStudyForm({
@@ -11,6 +12,14 @@ export function CaseStudyForm({
   caseStudy?: any;
   errorMessage?: string;
 }) {
+  const images =
+    caseStudy?.images?.map((image: any) => ({
+      mediaFileId: image.mediaFileId,
+      blobUrl: image.mediaFile.blobUrl,
+      fileName: image.mediaFile.fileName,
+      altText: image.altText ?? image.mediaFile.altText ?? "",
+    })) ?? [];
+
   return (
     <div className="space-y-6">
       <AdminAutosaveForm
@@ -58,6 +67,14 @@ export function CaseStudyForm({
             </label>
           </div>
         </div>
+
+        <ImageManager
+          folder="case-studies"
+          initialImages={images}
+          initialPrimaryMediaFileId={caseStudy?.primaryImage?.mediaFileId}
+          name="imagesPayload"
+        />
+
         <div className="flex flex-wrap items-center gap-3">
           <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="draft">Save Draft</button>
           <button className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="publish">Publish</button>

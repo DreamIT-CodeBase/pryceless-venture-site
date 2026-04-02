@@ -126,11 +126,11 @@ export function SiteShell({
   return (
     <div className="min-h-screen bg-white text-[var(--pv-ink)]">
       <header className="relative z-50 bg-white">
-        <div className="mx-auto flex w-full max-w-[1478px] items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 sm:py-5 min-[1025px]:grid min-[1025px]:min-h-[86px] min-[1025px]:grid-cols-[240px_minmax(0,1fr)_240px] min-[1025px]:items-center min-[1025px]:gap-x-[32px] min-[1025px]:px-[88px] min-[1025px]:py-0 xl:px-[124px]">
-          <Link aria-label="Pryceless Ventures home" className="ml-2 max-w-[calc(100%-72px)] shrink-0 sm:ml-3 min-[1025px]:ml-0" href="/">
+        <div className="mx-auto flex w-full max-w-[1478px] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-5 min-[1025px]:grid min-[1025px]:min-h-[86px] min-[1025px]:grid-cols-[240px_minmax(0,1fr)_240px] min-[1025px]:items-center min-[1025px]:gap-x-[32px] min-[1025px]:px-[88px] min-[1025px]:py-0 xl:px-[124px] 2xl:max-w-[1760px] 2xl:px-[164px]">
+          <Link aria-label="Pryceless Ventures home" className="ml-1 max-w-[calc(100%-64px)] shrink-0 sm:ml-3 min-[1025px]:ml-0" href="/">
             <Image
               alt="Pryceless Ventures"
-              className="h-auto w-[192px] sm:w-[208px] min-[1025px]:w-[216px]"
+              className="h-auto w-[170px] sm:w-[208px] min-[1025px]:w-[216px]"
               priority
               sizes="(min-width: 1024px) 216px, (min-width: 640px) 208px, 192px"
               src={logoHeader}
@@ -175,8 +175,8 @@ export function SiteShell({
         className="mt-0 text-white"
         style={{ background: "rgba(0, 27, 40, 1)", color: "#ffffff" }}
       >
-        <div className="mx-auto w-full max-w-[1320px] px-4 pb-[24px] pt-[34px] sm:px-6 sm:pb-[28px] sm:pt-[38px] min-[1025px]:px-8 min-[1025px]:pb-[30px] min-[1025px]:pt-[44px]">
-          <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[minmax(0,214px)_minmax(0,286px)_minmax(0,314px)_minmax(0,252px)] xl:items-start xl:justify-between">
+        <div className="mx-auto w-full max-w-[1320px] px-4 pb-[24px] pt-[34px] sm:px-6 sm:pb-[28px] sm:pt-[38px] min-[1025px]:px-8 min-[1025px]:pb-[30px] min-[1025px]:pt-[44px] 2xl:max-w-[1560px] 2xl:px-[42px]">
+          <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[minmax(0,214px)_minmax(0,286px)_minmax(0,314px)_minmax(0,252px)] xl:items-start xl:justify-between 2xl:grid-cols-[minmax(0,244px)_minmax(0,330px)_minmax(0,372px)_minmax(0,292px)] 2xl:gap-x-[52px]">
             <div className="max-w-[320px] self-start">
               <Image
                 alt="Pryceless Ventures"

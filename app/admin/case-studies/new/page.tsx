@@ -11,7 +11,7 @@ export default async function NewCaseStudyPage({
   const errorMessage = (await searchParams)?.error;
 
   return (
-    <AdminShell title="New Case Study" subtitle="Create a case study draft with asset profile and key takeaways.">
+    <AdminShell title="New Case Study" subtitle="Create a case study draft, upload Azure Blob images, and choose the primary profile image.">
       <CaseStudyForm errorMessage={errorMessage} />
     </AdminShell>
   );

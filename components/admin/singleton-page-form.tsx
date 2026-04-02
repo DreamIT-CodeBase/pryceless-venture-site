@@ -2,10 +2,34 @@ import Link from "next/link";
 
 import { autosaveSingletonPageDraft, saveSingletonPage } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
-import { singletonPageGroups, singletonPageLabels } from "@/lib/content-blueprint";
+import {
+  getCalculatorCardFallbackDescription,
+  getCapitalUseFallbackDescription,
+  singletonPageGroups,
+  singletonPageLabels,
+} from "@/lib/content-blueprint";
 
 export function SingletonPageForm({ page }: { page: any }) {
   const groups = singletonPageGroups[page.key] ?? [];
+  const getGroupDefaultValue = (group: (typeof groups)[number]) =>
+    page.items
+      .filter((item: any) => item.groupKey === group.key)
+      .map((item: any) => {
+        if (!group.supportsBody) {
+          return item.title;
+        }
+
+        const body =
+          item.body?.trim() ||
+          (page.key === "CAPITAL_RATES"
+            ? getCapitalUseFallbackDescription(item.title)
+            : page.key === "CALCULATORS_INDEX"
+              ? getCalculatorCardFallbackDescription(item.title)
+              : "");
+
+        return body ? `${item.title} | ${body}` : item.title;
+      })
+      .join("\n");
 
   return (
     <AdminAutosaveForm
@@ -26,9 +50,14 @@ export function SingletonPageForm({ page }: { page: any }) {
           {groups.map((group) => (
             <label className="block md:col-span-2" key={group.key}>
               <span className="mb-2 block text-sm font-medium text-slate-700">{group.label}</span>
+              {group.supportsBody ? (
+                <span className="mb-2 block text-xs leading-5 text-slate-500">
+                  Use one line per item in this format: <code>Title | Subtitle</code>
+                </span>
+              ) : null}
               <textarea
                 className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={page.items.filter((item: any) => item.groupKey === group.key).map((item: any) => item.title).join("\n")}
+                defaultValue={getGroupDefaultValue(group)}
                 name={`group_${group.key}`}
                 placeholder={group.placeholder}
               />

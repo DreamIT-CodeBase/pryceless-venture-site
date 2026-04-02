@@ -88,9 +88,54 @@ export const singletonPageLabels: Record<string, string> = {
   CASE_STUDY_DETAIL: "Case Study Detail Template",
 };
 
+export const getCapitalUseFallbackDescription = (title: string) => {
+  const normalized = title.trim().toLowerCase();
+
+  if (normalized.includes("acquisition")) {
+    return "Capital aligned with purchase timing, underwriting discipline, and the operating plan behind the deal.";
+  }
+
+  if (normalized.includes("renovation")) {
+    return "Funding structured around scope, timeline, and the value-creation path identified for the asset.";
+  }
+
+  if (normalized.includes("bridge")) {
+    return "Short-duration capital support designed for transition periods, refinances, and close-sensitive opportunities.";
+  }
+
+  if (normalized.includes("portfolio")) {
+    return "Flexible capital solutions for investors expanding across multiple assets, markets, or execution stages.";
+  }
+
+  return "Capital solutions are evaluated based on risk, duration, and the execution strategy behind the opportunity.";
+};
+
+export const getCalculatorCardFallbackDescription = (title: string) => {
+  const normalized = title.trim().toLowerCase();
+
+  if (normalized.includes("brrrr")) {
+    return "Model the buy, rehab, rent, refinance, and repeat strategy with live acquisition, refinance, and cash-flow outputs.";
+  }
+
+  if (normalized.includes("mortgage")) {
+    return "Estimate monthly financing impact, principal and interest structure, and debt service assumptions for a deal.";
+  }
+
+  if (normalized.includes("value-add") || normalized.includes("value add")) {
+    return "Assess renovation scenarios, operational upside, and the path to improved asset performance in a value-add plan.";
+  }
+
+  return "Evaluate projected cash flow, return potential, and overall investment performance for a real estate opportunity.";
+};
+
 export const singletonPageGroups: Record<
   string,
-  { key: string; label: string; placeholder: string }[]
+  {
+    key: string;
+    label: string;
+    placeholder: string;
+    supportsBody?: boolean;
+  }[]
 > = {
   CASH_OFFER: [
     {
@@ -115,14 +160,16 @@ export const singletonPageGroups: Record<
     {
       key: "calculator_list",
       label: "Calculator List",
-      placeholder: "ROI Calculator",
+      placeholder: "ROI Calculator | Evaluate projected cash flow...",
+      supportsBody: true,
     },
   ],
   CAPITAL_RATES: [
     {
       key: "supported_uses",
       label: "Supported Uses",
-      placeholder: "Acquisitions",
+      placeholder: "Acquisitions | Capital aligned with purchase timing...",
+      supportsBody: true,
     },
   ],
 };
@@ -136,15 +183,25 @@ export const homePageSeed = {
   heroPrimaryCtaHref: "/investments",
   heroSecondaryCtaLabel: "Get a Cash Offer",
   heroSecondaryCtaHref: "/cash-offer",
-  metricsDisclaimer:
-    "Logos shown for illustrative purposes. Metrics and historical references are presented for informational use only.",
+  aboutSectionTitle: "Why Pryceless Ventures, LLC",
+  aboutSectionParagraphOne:
+    "Build wealth through institutional-grade real estate opportunities guided by data, technology, and disciplined execution.",
+  aboutSectionParagraphTwo:
+    "Earn passive income through structured real estate investments backed by data and operational discipline. Scale your portfolio with access to capital, analytics, and execution support.",
+  aboutSectionPrimaryCtaLabel: "View Opportunities",
+  aboutSectionPrimaryCtaHref: "/investments",
+  aboutSectionSecondaryCtaLabel: "Get a Cash Offer",
+  aboutSectionSecondaryCtaHref: "/cash-offer",
+  aboutSectionImageUrl: null,
+  aboutSectionImageAlt: "Interior bedroom",
+  metricsDisclaimer: "Logos shown for illustrative purposes. Links can be activated once confirmed.",
   portfolioValueDisplay: "$920,000 (Illustrative)",
   portfolioCaption: "Historical Performance Overview",
   metrics: [
-    { metricValue: "$250M+", metricLabel: "Total Transaction Volume" },
-    { metricValue: "75+", metricLabel: "Properties Acquired" },
-    { metricValue: "$1.6M", metricLabel: "Avg Annualized Return" },
-    { metricValue: "15+", metricLabel: "Years of Experience" },
+    { metricValue: "$250M+", metricLabel: "Transaction Volume Influenced" },
+    { metricValue: "75+", metricLabel: "Properties Across Transactions" },
+    { metricValue: "15+ Years", metricLabel: "Combined Team Experience" },
+    { metricValue: "Data-Driven", metricLabel: "Investment & Deal Analysis" },
   ],
   segments: [
     {
@@ -156,7 +213,7 @@ export const homePageSeed = {
     {
       title: "Active Investors",
       body: "Scale your portfolio with access to capital, analytics, and execution support.",
-      ctaLabel: "Capital & Rates",
+      ctaLabel: "Request Funding Information",
       ctaHref: "/capital-rates",
     },
     {
@@ -168,7 +225,7 @@ export const homePageSeed = {
     {
       title: "Buyers",
       body: "Access off-market opportunities and value-add properties sourced through our network.",
-      ctaLabel: "Browse Properties",
+      ctaLabel: "Request Details",
       ctaHref: "/properties",
     },
   ],
@@ -176,13 +233,13 @@ export const homePageSeed = {
     {
       title: "Investments",
       body: "Curated passive and active investment opportunities.",
-      ctaLabel: "Explore Investments",
+      ctaLabel: "View Opportunities",
       ctaHref: "/investments",
     },
     {
       title: "Properties",
       body: "Turnkey and value-add properties across select markets.",
-      ctaLabel: "Browse Properties",
+      ctaLabel: "Request Details",
       ctaHref: "/properties",
     },
     {
@@ -218,49 +275,49 @@ export const homePageSeed = {
       city: "Chicago",
       quote:
         "Pryceless Ventures, LLC made my first home purchase seamless. Their team guided me at every step and made the process stress-free from the first conversation through closing.",
-      avatarUrl: "https://randomuser.me/api/portraits/men/12.jpg",
+      avatarUrl: null,
     },
     {
       name: "Danielle R",
       city: "Austin",
       quote:
         "The team helped us evaluate options clearly and move fast with confidence. We always knew what came next, and that made a huge difference during the process.",
-      avatarUrl: "https://randomuser.me/api/portraits/women/28.jpg",
+      avatarUrl: null,
     },
     {
       name: "Marcus T",
       city: "Miami",
       quote:
         "What stood out most was the communication. Every update was clear, practical, and timely, and the experience felt much more disciplined than a typical transaction.",
-      avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+      avatarUrl: null,
     },
     {
       name: "Sophia L",
       city: "Denver",
       quote:
         "Pryceless Ventures made the experience feel organized from day one. Their insight helped us make a better decision without feeling rushed or overwhelmed.",
-      avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg",
+      avatarUrl: null,
     },
     {
       name: "Anthony P",
       city: "Phoenix",
       quote:
         "We appreciated how transparent the team was throughout the deal. The process was efficient, thoughtful, and much easier to navigate than we expected.",
-      avatarUrl: "https://randomuser.me/api/portraits/men/55.jpg",
+      avatarUrl: null,
     },
     {
       name: "Jasmine K",
       city: "Seattle",
       quote:
         "From property review to final execution, everything was handled with professionalism. It felt like working with a team that truly understands both service and strategy.",
-      avatarUrl: "https://randomuser.me/api/portraits/women/22.jpg",
+      avatarUrl: null,
     },
     {
       name: "Michael B",
       city: "Atlanta",
       quote:
         "Their guidance gave us clarity at every step. We felt supported, informed, and confident throughout the entire process, which is exactly what we needed.",
-      avatarUrl: "https://randomuser.me/api/portraits/men/71.jpg",
+      avatarUrl: null,
     },
   ],
 };
@@ -364,10 +421,26 @@ export const singletonPageSeed = [
     ctaLabel: null,
     ctaHref: null,
     items: [
-      { groupKey: "calculator_list", title: "ROI Calculator" },
-      { groupKey: "calculator_list", title: "BRRRR Calculator" },
-      { groupKey: "calculator_list", title: "Mortgage Calculator" },
-      { groupKey: "calculator_list", title: "Value-Add Analysis" },
+      {
+        groupKey: "calculator_list",
+        title: "ROI Calculator",
+        body: "Evaluate projected cash flow, return potential, and overall investment performance for a real estate opportunity.",
+      },
+      {
+        groupKey: "calculator_list",
+        title: "BRRRR Calculator",
+        body: "Model the buy, rehab, rent, refinance, and repeat strategy with live acquisition, refinance, and cash-flow outputs.",
+      },
+      {
+        groupKey: "calculator_list",
+        title: "Mortgage Calculator",
+        body: "Estimate monthly financing impact, principal and interest structure, and debt service assumptions for a deal.",
+      },
+      {
+        groupKey: "calculator_list",
+        title: "Value-Add Analysis",
+        body: "Assess renovation scenarios, operational upside, and the path to improved asset performance in a value-add plan.",
+      },
     ],
   },
   {
@@ -381,10 +454,26 @@ export const singletonPageSeed = [
     ctaLabel: "Request Funding Information",
     ctaHref: "#funding-info",
     items: [
-      { groupKey: "supported_uses", title: "Acquisitions" },
-      { groupKey: "supported_uses", title: "Renovations" },
-      { groupKey: "supported_uses", title: "Bridge capital" },
-      { groupKey: "supported_uses", title: "Portfolio scaling" },
+      {
+        groupKey: "supported_uses",
+        title: "Acquisitions",
+        body: "Capital aligned with purchase timing, underwriting discipline, and the operating plan behind the deal.",
+      },
+      {
+        groupKey: "supported_uses",
+        title: "Renovations",
+        body: "Funding structured around scope, timeline, and the value-creation path identified for the asset.",
+      },
+      {
+        groupKey: "supported_uses",
+        title: "Bridge capital",
+        body: "Short-duration capital support designed for transition periods, refinances, and close-sensitive opportunities.",
+      },
+      {
+        groupKey: "supported_uses",
+        title: "Portfolio scaling",
+        body: "Flexible capital solutions for investors expanding across multiple assets, markets, or execution stages.",
+      },
     ],
   },
 ] as const;

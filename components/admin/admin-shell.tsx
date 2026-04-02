@@ -146,7 +146,7 @@ export async function AdminShell({
                   aria-hidden="true"
                   className="absolute inset-0 bg-[linear-gradient(rgba(123,97,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(123,97,255,0.06)_1px,transparent_1px)] [background-size:34px_34px]"
                 />
-                <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="relative">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#6d36ff]">
                       Workspace
@@ -157,9 +157,6 @@ export async function AdminShell({
                     {subtitle ? (
                       <p className="mt-3 max-w-4xl text-[17px] leading-8 text-slate-600">{subtitle}</p>
                     ) : null}
-                  </div>
-                  <div className="inline-flex items-center self-start rounded-full border border-violet-200 bg-white/86 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-700 shadow-sm shadow-violet-100/70">
-                    Microsoft Entra secured
                   </div>
                 </div>
               </header>

@@ -40,14 +40,14 @@ export function PageSectionHero({
     >
       <div
         className={joinClasses(
-          "mx-auto w-full max-w-[1360px] px-4 pb-[28px] pt-[24px] sm:px-6 sm:pb-[34px] sm:pt-[30px] min-[1025px]:min-h-[252px] min-[1025px]:pb-[42px] min-[1025px]:pl-[320px] min-[1025px]:pr-[125px] min-[1025px]:pt-[42px]",
+          "mx-auto w-full max-w-[1360px] px-4 pb-[28px] pt-[24px] sm:px-6 sm:pb-[34px] sm:pt-[30px] min-[1025px]:min-h-[252px] min-[1025px]:pb-[42px] min-[1025px]:pl-[320px] min-[1025px]:pr-[125px] min-[1025px]:pt-[42px] 2xl:max-w-[1760px] 2xl:min-h-[280px] 2xl:pb-[52px] 2xl:pl-[164px] 2xl:pr-[164px] 2xl:pt-[48px]",
           innerClassName,
         )}
       >
         <div className="flex flex-col gap-[18px]">
           <div
             className={joinClasses(
-              "flex max-w-[794px] flex-col gap-[24px] min-[1025px]:pl-[88px] sm:gap-[28px] min-[1025px]:gap-[34px]",
+              "flex max-w-[794px] flex-col gap-[24px] min-[1025px]:pl-[88px] sm:gap-[28px] min-[1025px]:gap-[34px] 2xl:max-w-[940px] 2xl:gap-[30px] 2xl:pl-0",
               titleWrapClassName,
             )}
           >
@@ -79,7 +79,7 @@ export function PageSectionHero({
 
             <h1
               className={joinClasses(
-                "text-[28px] font-bold leading-[1.08] tracking-[-0.04em] text-white sm:text-[38px] min-[1025px]:max-w-[794px] min-[1025px]:text-[30.5px] min-[1025px]:leading-[42px] min-[1025px]:tracking-[0]",
+                "text-[28px] font-bold leading-[1.08] tracking-[-0.04em] text-white sm:text-[38px] min-[1025px]:max-w-[794px] min-[1025px]:text-[30.5px] min-[1025px]:leading-[42px] min-[1025px]:tracking-[0] 2xl:max-w-[900px] 2xl:text-[50px] 2xl:leading-[1.04] 2xl:tracking-[-0.04em]",
                 titleClassName,
               )}
               style={{ color: "#ffffff" }}
@@ -89,13 +89,13 @@ export function PageSectionHero({
 
             <div
               className={joinClasses(
-                "max-w-[794px]",
+                "max-w-[794px] 2xl:max-w-[760px]",
                 introWrapClassName,
               )}
             >
               <p
                 className={joinClasses(
-                  "text-[14px] font-normal leading-[1.65] tracking-[0] text-white/80 sm:text-[15px] min-[1025px]:text-[11.5px] min-[1025px]:leading-[19px]",
+                  "text-[14px] font-normal leading-[1.65] tracking-[0] text-white/80 sm:text-[15px] min-[1025px]:text-[11.5px] min-[1025px]:leading-[19px] 2xl:text-[17px] 2xl:leading-[1.65]",
                   introClassName,
                 )}
                 style={{ color: introColor }}

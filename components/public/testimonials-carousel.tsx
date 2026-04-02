@@ -27,6 +27,10 @@ const getVisibleCount = (width: number) => {
 };
 
 const getGap = (width: number) => {
+  if (width >= 1536) {
+    return 44;
+  }
+
   if (width >= 1024) {
     return 34;
   }
@@ -98,19 +102,19 @@ export function TestimonialsCarousel({
 
   return (
     <div
-      className="mx-auto w-full max-w-[380px] overflow-hidden sm:max-w-[610px] lg:max-w-[944px]"
+      className="mx-auto w-full max-w-[380px] overflow-hidden sm:max-w-[610px] lg:max-w-[944px] 2xl:max-w-[1168px]"
       onBlurCapture={() => setIsPaused(false)}
       onFocusCapture={() => setIsPaused(true)}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div
-        className="pv-hide-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-[6px] sm:gap-[26px] lg:gap-[34px]"
+        className="pv-hide-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-[6px] sm:gap-[26px] lg:gap-[34px] 2xl:gap-[44px]"
         ref={viewportRef}
       >
         {safeItems.map((item, index) => (
           <div
-            className="flex min-w-full snap-start justify-center sm:min-w-[292px]"
+            className="flex min-w-full snap-start justify-center sm:min-w-[292px] 2xl:min-w-[360px]"
             data-testimonial-card="true"
             key={`${item.name}-${index}`}
           >

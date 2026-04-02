@@ -19,7 +19,6 @@ const nextConfig = {
     minimumCacheTTL: 604800,
     remotePatterns: [
       new URL(`https://${azureBlobAccountName}.blob.core.windows.net/**`),
-      new URL("https://randomuser.me/api/portraits/**"),
     ],
   },
 };

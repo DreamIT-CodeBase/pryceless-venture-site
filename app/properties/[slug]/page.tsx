@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PublicForm } from "@/components/forms/public-form";
@@ -7,7 +6,6 @@ import {
   type DetailMediaCarouselItem,
 } from "@/components/public/detail-media-carousel";
 import {
-  DetailBadgeRow,
   DetailBreadcrumbs,
   DetailBulletList,
   DetailGlassPanel,
@@ -16,8 +14,6 @@ import {
   DetailSection,
   DetailSectionHeading,
   DetailStatGrid,
-  detailPrimaryButtonClassName,
-  detailSecondaryButtonClassName,
 } from "@/components/public/slug-detail-ui";
 import { SiteShell } from "@/components/public/site-shell";
 import { getPublishedProperty, getSingletonPage } from "@/lib/data/public";
@@ -81,7 +77,7 @@ const createMediaItems = (property: NonNullable<Awaited<ReturnType<typeof getPub
   property.images.forEach((image, index) => {
     pushItem({
       alt: image.altText || property.title,
-      caption: image.caption || `${property.title} image ${index + 1}`,
+      caption: image.caption || undefined,
       eyebrow: `Gallery ${String(index + 1).padStart(2, "0")}`,
       src: image.mediaFile.blobUrl,
       title: image.caption || property.title,
@@ -117,11 +113,6 @@ export default async function PropertyDetailPage({
     property.strategy ? { label: "Strategy", value: formatDisplayValue(property.strategy) } : null,
     property.status ? { label: "Status", value: formatDisplayValue(property.status) } : null,
   ].filter(Boolean) as Array<{ label: string; value: string }>;
-  const badgeItems = [
-    property.propertyType ? formatDisplayValue(property.propertyType) : null,
-    property.strategy ? formatDisplayValue(property.strategy) : null,
-    property.status ? formatDisplayValue(property.status) : null,
-  ].filter(Boolean) as string[];
   const ctaLabel = page?.ctaLabel || property.inquiryForm?.formName;
 
   return (
@@ -131,41 +122,36 @@ export default async function PropertyDetailPage({
           <DetailBreadcrumbs currentLabel={property.title} href="/" />
 
           <div
-            className={`mt-7 grid gap-8 lg:items-start lg:gap-10 ${
-              mediaItems.length ? "lg:grid-cols-[minmax(0,1fr)_minmax(480px,540px)]" : ""
+            className={`mt-7 grid gap-8 lg:items-start lg:gap-12 ${
+              mediaItems.length ? "lg:grid-cols-[minmax(0,760px)_minmax(440px,520px)]" : ""
             }`}
           >
-            <div className="max-w-[690px]">
-              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-slate-500">
+            <div className="max-w-[760px]">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.34em] text-[#bf9375] sm:text-[13px]">
                 Property Detail
               </p>
-              <h1 className="mt-4 text-[32px] font-semibold leading-[1.04] tracking-[-0.045em] text-[#111827] sm:text-[48px] lg:text-[62px]">
+              <h1 className="mt-3 max-w-[660px] text-balance text-[32px] font-medium leading-[1.02] tracking-[-0.05em] text-[#111827] sm:text-[42px] lg:text-[52px]">
                 {property.title}
               </h1>
-              <p className="mt-5 max-w-[620px] text-[16px] leading-[1.85] text-slate-700 sm:text-[17px]">
-                {property.summary}
+              <p className="mt-10 max-w-[760px] text-[16px] leading-[1.78] text-slate-700 sm:mt-12 sm:text-[17px]">
+                {page?.intro ?? property.summary}
               </p>
 
-              <div className="mt-7">
-                <DetailBadgeRow items={badgeItems} />
-              </div>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                {ctaLabel && property.inquiryForm ? (
-                  <Link className={detailPrimaryButtonClassName} href="#property-inquiry">
-                    {ctaLabel}
-                  </Link>
-                ) : null}
-                <Link className={detailSecondaryButtonClassName} href="/properties">
-                  Explore More Properties
-                </Link>
-              </div>
-
               {propertyStats.length ? (
-                <div className="mt-8">
+                <div className="mt-14 max-w-[980px] sm:mt-16">
                   <DetailStatGrid columns={4} items={propertyStats} />
                 </div>
               ) : null}
+
+              <div className="mt-14 hidden lg:block">
+                <DetailNarrativeBlock
+                  body={narrativeParagraphs.map((paragraph, index) => (
+                    <p key={`${paragraph}-${index}`}>{paragraph}</p>
+                  ))}
+                  eyebrow="Property Story"
+                  title={page?.pageTitle || property.title}
+                />
+              </div>
             </div>
 
             {mediaItems.length ? <DetailMediaCarousel items={mediaItems} priorityFirst /> : null}
@@ -175,13 +161,15 @@ export default async function PropertyDetailPage({
         <DetailSection className="pb-14 lg:pb-18">
           <div className={`grid gap-6 ${property.inquiryForm ? "lg:grid-cols-[minmax(0,1fr)_390px]" : ""}`}>
             <div className="grid gap-6">
-              <DetailNarrativeBlock
-                body={narrativeParagraphs.map((paragraph, index) => (
-                  <p key={`${paragraph}-${index}`}>{paragraph}</p>
-                ))}
-                eyebrow="Property Story"
-                title={page?.pageTitle || property.title}
-              />
+              <div className="lg:hidden">
+                <DetailNarrativeBlock
+                  body={narrativeParagraphs.map((paragraph, index) => (
+                    <p key={`${paragraph}-${index}`}>{paragraph}</p>
+                  ))}
+                  eyebrow="Property Story"
+                  title={page?.pageTitle || property.title}
+                />
+              </div>
 
               {highlights.length ? (
                 <DetailGlassPanel>

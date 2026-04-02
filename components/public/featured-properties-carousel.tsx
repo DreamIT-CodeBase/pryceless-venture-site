@@ -21,16 +21,19 @@ type FeaturedPropertyCarouselItem = {
   propertyType: string;
   timeLabel: string;
   timeLeft: string;
+  ctaLabel?: string;
 };
 
 const AUTO_PLAY_MS = 3800;
 const FEATURED_PROPERTY_DESKTOP_WIDTH = 310;
+const FEATURED_PROPERTY_2XL_WIDTH = 364;
 const FEATURED_PROPERTY_TABLET_WIDTH = 278;
 const FEATURED_PROPERTY_DESKTOP_GAP = 38;
+const FEATURED_PROPERTY_2XL_GAP = 44;
 const FEATURED_PROPERTY_TABLET_GAP = 26;
 const FEATURED_PROPERTY_MOBILE_GAP = 16;
 const featuredPropertyButtonClassName =
-  "inline-flex min-h-[40px] w-full max-w-[124px] items-center justify-center rounded-[8px] bg-[#18314b] px-[18px] py-2 text-center text-[12px] font-semibold leading-none text-white transition-all duration-300 group-hover:bg-[#234766] hover:bg-[#234766]";
+  "inline-flex min-h-[40px] w-full max-w-[156px] items-center justify-center rounded-[8px] bg-[#18314b] px-[20px] py-2 text-center text-[12px] font-semibold leading-none whitespace-nowrap text-white transition-all duration-300 group-hover:bg-[#234766] hover:bg-[#234766]";
 
 function LocationPinIcon({ className = "" }: { className?: string }) {
   return (
@@ -84,6 +87,10 @@ const getVisibleCount = (width: number) => {
 };
 
 const getGap = (width: number) => {
+  if (width >= 1536) {
+    return FEATURED_PROPERTY_2XL_GAP;
+  }
+
   if (width >= 1024) {
     return FEATURED_PROPERTY_DESKTOP_GAP;
   }
@@ -97,8 +104,10 @@ const getGap = (width: number) => {
 
 export function FeaturedPropertiesCarousel({
   items,
+  ctaLabel = "Request Details",
 }: {
   items: FeaturedPropertyCarouselItem[];
+  ctaLabel?: string;
 }) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -157,7 +166,7 @@ export function FeaturedPropertiesCarousel({
 
   return (
     <div
-      className="mx-auto w-full max-w-full sm:max-w-[582px] lg:max-w-[1006px]"
+      className="mx-auto w-full max-w-full sm:max-w-[582px] lg:max-w-[1006px] 2xl:max-w-[1180px]"
       onFocusCapture={() => setIsPaused(true)}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -165,12 +174,12 @@ export function FeaturedPropertiesCarousel({
       style={{ fontFamily: "var(--font-poppins), sans-serif" }}
     >
       <div
-        className="pv-hide-scrollbar flex snap-x snap-mandatory gap-[18px] overflow-x-auto pb-[6px] sm:gap-[26px] lg:gap-[38px]"
+        className="pv-hide-scrollbar flex snap-x snap-mandatory gap-[18px] overflow-x-auto pb-[6px] sm:gap-[26px] lg:gap-[38px] 2xl:gap-[44px]"
         ref={viewportRef}
       >
         {safeItems.map((item) => (
           <StandardCollectionCardLink
-            className="!min-h-[430px] h-auto min-w-full snap-start rounded-[18px] sm:!min-h-[454px] sm:h-[454px] sm:min-w-[278px] lg:!min-h-[454px] lg:h-[454px] lg:min-w-[310px]"
+            className="!min-h-[430px] h-auto min-w-full snap-start rounded-[18px] sm:!min-h-[454px] sm:h-[454px] sm:min-w-[278px] lg:!min-h-[454px] lg:h-[454px] lg:min-w-[310px] 2xl:!min-h-[484px] 2xl:h-[484px] 2xl:min-w-[364px]"
             href={item.href}
             key={item.id}
           >
@@ -180,7 +189,7 @@ export function FeaturedPropertiesCarousel({
                   alt={`${item.title} featured property`}
                   className="object-cover"
                   fill
-                  sizes={`(max-width: 639px) 100vw, (max-width: 1023px) ${FEATURED_PROPERTY_TABLET_WIDTH}px, ${FEATURED_PROPERTY_DESKTOP_WIDTH}px`}
+                  sizes={`(max-width: 639px) 100vw, (max-width: 1023px) ${FEATURED_PROPERTY_TABLET_WIDTH}px, (max-width: 1535px) ${FEATURED_PROPERTY_DESKTOP_WIDTH}px, ${FEATURED_PROPERTY_2XL_WIDTH}px`}
                   src={item.image}
                 />
               </div>
@@ -203,7 +212,7 @@ export function FeaturedPropertiesCarousel({
                 />
               </div>
 
-              <p className="mt-[8px] text-left text-[11px] font-normal leading-[15px] tracking-[0] text-[rgba(97,97,97,1)]">
+              <p className="mt-[8px] min-h-[30px] overflow-hidden text-left text-[11px] font-normal leading-[15px] tracking-[0] text-[rgba(97,97,97,1)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
                 {item.raisedSummary}
               </p>
 
@@ -226,7 +235,7 @@ export function FeaturedPropertiesCarousel({
                 </div>
               </div>
 
-              <div className="mt-auto flex flex-col gap-3 pt-[20px] sm:flex-row sm:items-end sm:justify-between sm:gap-[14px]">
+              <div className="mt-auto flex flex-col gap-3 pt-[20px] sm:flex-row sm:items-center sm:justify-between sm:gap-[14px]">
                 <div className="min-w-0">
                   <p className="text-left text-[10px] font-normal leading-[14px] tracking-[0] text-[rgba(97,97,97,1)]">
                     {item.timeLabel}
@@ -239,7 +248,7 @@ export function FeaturedPropertiesCarousel({
                   </div>
                 </div>
 
-                <span className={featuredPropertyButtonClassName}>Invest Now</span>
+                <span className={`shrink-0 ${featuredPropertyButtonClassName}`}>{item.ctaLabel ?? ctaLabel}</span>
               </div>
             </div>
           </StandardCollectionCardLink>

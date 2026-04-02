@@ -394,7 +394,7 @@ export function TestimonialCard({
     .join("");
 
   return (
-    <article className="relative flex min-h-[264px] w-full max-w-[380px] flex-col rounded-[22px] border border-[#d9e5f0] bg-white/92 px-[20px] pb-[20px] pt-[18px] shadow-[0_18px_38px_rgba(15,23,42,0.08)] backdrop-blur lg:h-[236px] lg:w-[292px] lg:max-w-none lg:rounded-[15px] lg:border-[#cfcfcf] lg:bg-white lg:px-[18px] lg:pb-[17px] lg:pt-[14px] lg:shadow-none">
+    <article className="relative flex min-h-[264px] w-full max-w-[380px] flex-col rounded-[22px] border border-[#d9e5f0] bg-white/92 px-[20px] pb-[20px] pt-[18px] shadow-[0_18px_38px_rgba(15,23,42,0.08)] backdrop-blur lg:h-[236px] lg:w-[292px] lg:max-w-none lg:rounded-[15px] lg:border-[#cfcfcf] lg:bg-white lg:px-[18px] lg:pb-[17px] lg:pt-[14px] lg:shadow-none 2xl:h-[258px] 2xl:w-[360px] 2xl:px-[24px] 2xl:pb-[20px] 2xl:pt-[18px]">
       <span
         aria-hidden="true"
         className="absolute right-[18px] top-[14px] text-[42px] font-bold leading-none tracking-[-0.16em] text-[#2496f0] lg:right-[17px] lg:top-[11px] lg:text-[36px]"
@@ -431,7 +431,7 @@ export function TestimonialCard({
         </div>
       </div>
 
-      <p className="mt-[22px] max-w-none text-[14px] font-normal leading-[1.7] tracking-[0] text-[#5b6472] lg:mt-[23px] lg:max-w-[246px] lg:text-[12px] lg:leading-[1.58] lg:text-[#676767]">
+      <p className="mt-[30px] max-w-none text-[14px] font-normal leading-[1.7] tracking-[0] text-[#5b6472] lg:mt-[30px] lg:max-w-[246px] lg:text-[12px] lg:leading-[1.58] lg:text-[#676767]">
         &ldquo;{normalizedQuote}&rdquo;
       </p>
     </article>
