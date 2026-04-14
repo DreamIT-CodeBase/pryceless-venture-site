@@ -12,6 +12,8 @@ import { mergeSingletonPageWithSeed } from "@/lib/singleton-page-utils";
 const PUBLIC_REVALIDATE_SECONDS = 300;
 const warnedFallbackLabels = new Set<string>();
 
+const hasDatabaseUrl = () => Boolean(process.env.DATABASE_URL?.trim());
+
 const isConnectionFailure = (error: unknown) => {
   if (!error || typeof error !== "object") {
     return false;
@@ -115,6 +117,14 @@ const withPublicFallback = async <T>(
   fallback: T,
   query: () => Promise<T>,
 ) => {
+  if (!hasDatabaseUrl()) {
+    if (!warnedFallbackLabels.has(label)) {
+      warnedFallbackLabels.add(label);
+      console.warn(`[public-data] ${label} fallback enabled: database unavailable.`);
+    }
+    return fallback;
+  }
+
   try {
     return await query();
   } catch (error) {
@@ -135,6 +145,11 @@ const withLoanProgramFallback = async <T>(
   fallback: T,
   query: () => Promise<T>,
 ) => {
+  if (!hasDatabaseUrl()) {
+    warnFallbackOnce(label, "database unavailable, using seed data instead.");
+    return fallback;
+  }
+
   try {
     return await query();
   } catch (error) {
@@ -155,6 +170,11 @@ const withBlogFallback = async <T>(
   fallback: T,
   query: () => Promise<T>,
 ) => {
+  if (!hasDatabaseUrl()) {
+    warnFallbackOnce(label, "database unavailable, using seed data instead.");
+    return fallback;
+  }
+
   try {
     return await query();
   } catch (error) {
@@ -815,21 +835,31 @@ const getSeedLoanProgramDetail = async (
   };
 };
 
-const getLoanProgramDelegate = () =>
-  (prisma as unknown as {
+const getLoanProgramDelegate = () => {
+  if (!hasDatabaseUrl()) {
+    return undefined;
+  }
+
+  return (prisma as unknown as {
     loanProgram?: {
       findFirst: (args: unknown) => Promise<unknown>;
       findMany: (args: unknown) => Promise<unknown>;
     };
   }).loanProgram;
+};
 
-const getBlogPostDelegate = () =>
-  (prisma as unknown as {
+const getBlogPostDelegate = () => {
+  if (!hasDatabaseUrl()) {
+    return undefined;
+  }
+
+  return (prisma as unknown as {
     blogPost?: {
       findFirst: (args: unknown) => Promise<unknown>;
       findMany: (args: unknown) => Promise<unknown>;
     };
   }).blogPost;
+};
 
 const getHomePageCached = unstable_cache(
   () =>
