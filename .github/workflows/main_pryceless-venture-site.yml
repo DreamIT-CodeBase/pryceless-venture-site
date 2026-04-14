@@ -23,14 +23,19 @@ jobs:
         with:
           node-version: '24.x'
 
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run db:deploy
-          npm run build --if-present
-          npm run test --if-present
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy Prisma migrations
+        run: npm run db:deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Build application
+        run: npm run build --if-present
+
+      - name: Run tests
+        run: npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4

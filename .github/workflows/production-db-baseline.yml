@@ -1,0 +1,60 @@
+name: Baseline existing production database
+
+on:
+  workflow_dispatch:
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: "24.x"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Verify production schema matches current Prisma schema
+        shell: bash
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set +e
+          npx prisma migrate diff \
+            --exit-code \
+            --from-config-datasource \
+            --to-schema=prisma/schema.prisma
+          status=$?
+          set -e
+
+          if [ "$status" -eq 2 ]; then
+            echo "::error::Production database schema does not match prisma/schema.prisma. Do not baseline all current migrations yet."
+            echo "::error::Inspect the live database first, then baseline only the migrations that are already represented there."
+            exit 2
+          fi
+
+          exit "$status"
+
+      - name: Mark current migrations as already applied
+        shell: bash
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -euo pipefail
+
+          for dir in $(find prisma/migrations -mindepth 1 -maxdepth 1 -type d | sort); do
+            migration="$(basename "$dir")"
+            echo "Marking ${migration} as applied..."
+            npx prisma migrate resolve --applied "$migration"
+          done
+
+      - name: Show migration status
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma migrate status
