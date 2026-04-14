@@ -28,7 +28,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Migration mode
+        run: |
+          if [ "${{ vars.ENABLE_PRODUCTION_DB_DEPLOY }}" = "true" ]; then
+            echo "Prisma migration deploy is enabled for this workflow run."
+          else
+            echo "Prisma migration deploy is skipped. Set repository variable ENABLE_PRODUCTION_DB_DEPLOY=true after production database alignment is complete."
+          fi
+
       - name: Deploy Prisma migrations
+        if: ${{ vars.ENABLE_PRODUCTION_DB_DEPLOY == 'true' }}
         run: npm run db:deploy
 
       - name: Build application
