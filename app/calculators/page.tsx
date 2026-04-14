@@ -3,6 +3,7 @@ import { PageSectionHero } from "@/components/public/page-section-hero";
 import { SiteShell } from "@/components/public/site-shell";
 import {
   buildPhaseOneCalculatorCollection,
+  getCanonicalCalculatorPath,
   getPhaseOneCalculators,
 } from "@/lib/calculator-content";
 import { getPublishedCalculators, getSingletonPage } from "@/lib/data/public";
@@ -40,7 +41,10 @@ export default async function CalculatorsPage() {
       ctaLabel: calculator.ctaLabel,
       description: pageItem?.body?.trim() || calculator.shortDescription,
       descriptionClassName: `${calculatorDescriptionClassName} ${calculatorDescriptionOffsetClassName}`,
-      href: `/calculators/${calculator.slug}`,
+      href: getCanonicalCalculatorPath({
+        calculatorType: calculator.calculatorType,
+        slug: calculator.slug,
+      }),
       icon: calculator.icon,
       iconClassName: calculator.iconClassName ?? fallbackCalculator.iconClassName,
       title: pageItem?.title?.trim() || calculator.title,
@@ -52,7 +56,7 @@ export default async function CalculatorsPage() {
   });
 
   return (
-    <SiteShell cta={{ href: "/capital-rates", label: "Request Funding Info" }}>
+    <SiteShell>
       <PageSectionHero
         currentLabel={page?.pageTitle ?? "Real Estate ROI Calculators"}
         intro={page?.intro ?? fallbackPageIntro}

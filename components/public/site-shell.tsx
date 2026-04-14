@@ -4,33 +4,44 @@ import type { ReactNode } from "react";
 
 import logoHeader from "@/app/assets/headerlogo.svg";
 import footerLogo from "@/app/assets/pvwhite.png";
-import viewOpportunityHeaderIcon from "@/app/assets/viewoppertunitysvg.svg";
+import { GetStartedModalTrigger } from "@/components/public/get-started-modal-trigger";
+import { getActiveFormBySlug } from "@/lib/data/public";
+import { truncateBlogText } from "@/lib/blog-content";
 import { SiteNav } from "@/components/public/site-nav";
+import { getPublishedBlogPosts } from "@/lib/data/public";
 
-export function SiteShell({
+export async function SiteShell({
   children,
   cta,
 }: {
   children: ReactNode;
   cta?: { href: string; label: string };
 }) {
-  const headerCta = cta ?? { href: "/investments", label: "View Opportunities" };
+  const [latestBlogs, getStartedForm] = await Promise.all([
+    getPublishedBlogPosts(4),
+    getActiveFormBySlug("get-started"),
+  ]);
+  const contextualHeaderCta =
+    cta?.href === "/capital-rates" || cta?.href === "/investments"
+      ? { href: "/get-financing", label: "Apply Now" }
+      : cta;
+  const showGetStartedCta = !contextualHeaderCta;
   const footerLinks = [
     { href: "/", label: "Home" },
-    { href: "/investments", label: "Investments" },
+    { href: "/get-financing", label: "Loan Offers" },
     { href: "/properties", label: "Properties" },
     { href: "/case-studies", label: "Case Studies" },
+    { href: "/blogs", label: "Insights" },
     { href: "/calculators", label: "ROI Calculators" },
-    { href: "/capital-rates", label: "Capital Rates" },
     { href: "/cash-offer", label: "Enquiry" },
     { href: "/cash-offer", label: "Contact" },
   ];
-  const blogLinks = [
-    { href: "/case-studies", label: "The Future of Luxury Living -" },
-    { href: "/case-studies", label: "Top 5 Emerging Real Estate -" },
-    { href: "/case-studies", label: "Why Forest & Nature Inspire -" },
-    { href: "/case-studies", label: "How to Choose the Perfect -" },
-  ];
+  const blogLinks = latestBlogs.length
+    ? latestBlogs.map((blogPost) => ({
+        href: `/blogs/${blogPost.slug}`,
+        label: truncateBlogText(blogPost.title, 40),
+      }))
+    : [{ href: "/blogs", label: "Read our latest real estate insights" }];
   const usefulLinkColumns = [
     footerLinks.slice(0, 4),
     footerLinks.slice(4, 8),
@@ -126,7 +137,7 @@ export function SiteShell({
   return (
     <div className="min-h-screen bg-white text-[var(--pv-ink)]">
       <header className="relative z-50 bg-white">
-        <div className="mx-auto flex w-full max-w-[1478px] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-5 min-[1025px]:grid min-[1025px]:min-h-[86px] min-[1025px]:grid-cols-[240px_minmax(0,1fr)_240px] min-[1025px]:items-center min-[1025px]:gap-x-[32px] min-[1025px]:px-[88px] min-[1025px]:py-0 xl:px-[124px] 2xl:max-w-[1760px] 2xl:px-[164px]">
+        <div className="mx-auto flex w-full max-w-[1478px] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-5 min-[1025px]:grid min-[1025px]:min-h-[86px] min-[1025px]:grid-cols-[216px_minmax(0,1fr)_220px] min-[1025px]:items-center min-[1025px]:gap-x-[28px] min-[1025px]:px-[52px] min-[1025px]:py-0 xl:px-[104px] 2xl:max-w-[1760px] 2xl:px-[164px]">
           <Link aria-label="Pryceless Ventures home" className="ml-1 max-w-[calc(100%-64px)] shrink-0 sm:ml-3 min-[1025px]:ml-0" href="/">
             <Image
               alt="Pryceless Ventures"
@@ -137,34 +148,29 @@ export function SiteShell({
             />
           </Link>
 
-          <div className="ml-auto min-w-0 min-[1025px]:ml-0 min-[1025px]:flex min-[1025px]:w-full min-[1025px]:justify-center">
-            <SiteNav mobileCta={headerCta} />
+          <div className="ml-auto min-w-0 min-[1025px]:-mr-8 min-[1025px]:ml-0 min-[1025px]:flex min-[1025px]:w-full min-[1025px]:justify-end">
+            <SiteNav
+              getStartedForm={showGetStartedCta ? getStartedForm : null}
+              mobileCta={contextualHeaderCta}
+            />
           </div>
 
-          <div className="hidden shrink-0 min-[1025px]:flex min-[1025px]:w-[240px] min-[1025px]:justify-self-end min-[1025px]:justify-end">
-            <Link
-              className="inline-flex h-[50px] w-[196px] items-center justify-center gap-[9px] rounded-[6px] bg-[#18357a] px-[14px] text-[15px] leading-none font-medium text-white transition-none hover:bg-[#18357a] hover:text-white"
-              href={headerCta.href}
-            >
-              <span className="flex shrink-0 items-center gap-[7px]">
-                <Image
-                  alt=""
-                  className="h-[19px] w-[16px] object-contain"
-                  style={{
-                    filter:
-                      "brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(181deg) brightness(115%) contrast(108%)",
-                  }}
-                  src={viewOpportunityHeaderIcon}
-                />
-                <span className="block h-[22px] w-px shrink-0 bg-white/40" />
-              </span>
-              <span
-                className="whitespace-nowrap leading-none tracking-[-0.016em] text-white"
-                style={{ color: "#ffffff" }}
+          <div className="hidden shrink-0 min-[1025px]:flex min-[1025px]:w-[220px] min-[1025px]:justify-self-end min-[1025px]:justify-end">
+            {showGetStartedCta ? (
+              <GetStartedModalTrigger form={getStartedForm} variant="desktop" />
+            ) : contextualHeaderCta ? (
+              <Link
+                className="inline-flex h-[50px] w-[196px] items-center justify-center gap-[9px] rounded-[6px] bg-[#18357a] px-[14px] text-[15px] leading-none font-medium text-white transition-none hover:bg-[#18357a] hover:text-white"
+                href={contextualHeaderCta.href}
               >
-                {headerCta.label}
-              </span>
-            </Link>
+                <span
+                  className="whitespace-nowrap leading-none tracking-[-0.016em] text-white"
+                  style={{ color: "#ffffff" }}
+                >
+                  {contextualHeaderCta.label}
+                </span>
+              </Link>
+            ) : null}
           </div>
         </div>
       </header>
@@ -227,7 +233,7 @@ export function SiteShell({
             </div>
 
             <div className="min-w-0 xl:max-w-[314px]">
-              <h3 className={footerHeadingClassName}>Latest Blog</h3>
+              <h3 className={footerHeadingClassName}>Latest Insights</h3>
               <div className={footerRuleClassName} />
               <div className="mt-[14px]">
                 {blogLinks.map((item) => (
@@ -272,9 +278,6 @@ export function SiteShell({
           <div className="mt-[38px] flex flex-col gap-3 border-t border-white/60 pt-[16px] text-center sm:text-left md:flex-row md:items-center md:justify-between min-[1025px]:mt-[46px]">
             <p className={footerBottomTextClassName}>&copy; Pryceless Ventures, LLC</p>
             <div className="flex flex-wrap items-center justify-center gap-x-[24px] gap-y-[8px] md:justify-end min-[1025px]:gap-x-[36px]">
-              <Link className={footerBottomTextClassName} href="/capital-rates" style={{ color: "#ffffff" }}>
-                Privacy Policy
-              </Link>
               <Link className={footerBottomTextClassName} href="/cash-offer" style={{ color: "#ffffff" }}>
                 Terms of Service
               </Link>

@@ -3,8 +3,8 @@ import Link from "next/link";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
   AdminArrowRightIcon,
+  AdminBlogIcon,
   AdminBuildingIcon,
-  AdminCalculatorIcon,
   AdminCaseStudyIcon,
   AdminFormsIcon,
   AdminInvestmentIcon,
@@ -26,16 +26,16 @@ const guides = [
     icon: AdminInvestmentIcon,
   },
   {
+    title: "Create a blog post",
+    body: "Open Blogs, add the article title, excerpt, full content, publishing date, featured image, and publish the slug-based article page.",
+    href: "/admin/blogs/new",
+    icon: AdminBlogIcon,
+  },
+  {
     title: "Create a case study",
     body: "Open Case Studies, write the overview, business plan, execution, outcome summary, and add asset profile plus takeaway rows.",
     href: "/admin/case-studies/new",
     icon: AdminCaseStudyIcon,
-  },
-  {
-    title: "Create a calculator",
-    body: "Open Calculators, add the title, calculator type, short description, and disclaimer, then save and verify the route.",
-    href: "/admin/calculators/new",
-    icon: AdminCalculatorIcon,
   },
   {
     title: "Create or update a page",

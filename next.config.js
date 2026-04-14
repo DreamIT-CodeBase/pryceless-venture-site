@@ -18,7 +18,16 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 604800,
     remotePatterns: [
-      new URL(`https://${azureBlobAccountName}.blob.core.windows.net/**`),
+      {
+        protocol: "https",
+        hostname: `${azureBlobAccountName}.blob.core.windows.net`,
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.pexels.com",
+        pathname: "/**",
+      },
     ],
   },
 };

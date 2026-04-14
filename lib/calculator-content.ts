@@ -95,6 +95,20 @@ const calculatorTypeAliases: Record<string, string> = {
   VALUE_ADD: "VALUE_ADD",
 };
 
+const canonicalCalculatorPathByType: Record<string, string> = {
+  BRRRR: "/calculators/brrrr",
+  MORTGAGE: "/calculators/mortgage",
+  ROI: "/calculators/roi",
+  VALUE_ADD: "/calculators/value-add",
+};
+
+const legacyCalculatorPathBySlug: Record<string, string> = {
+  "brrrr-calculator": canonicalCalculatorPathByType.BRRRR,
+  "mortgage-calculator": canonicalCalculatorPathByType.MORTGAGE,
+  "roi-calculator": canonicalCalculatorPathByType.ROI,
+  "value-add-analysis": canonicalCalculatorPathByType.VALUE_ADD,
+};
+
 export const normalizeCalculatorType = (value: string | null | undefined) => {
   const normalized = String(value ?? "")
     .trim()
@@ -102,6 +116,25 @@ export const normalizeCalculatorType = (value: string | null | undefined) => {
     .toUpperCase();
 
   return calculatorTypeAliases[normalized] ?? normalized;
+};
+
+export const getCanonicalCalculatorPath = ({
+  calculatorType,
+  slug,
+}: {
+  calculatorType?: string | null;
+  slug?: string | null;
+}) => {
+  if (slug && legacyCalculatorPathBySlug[slug]) {
+    return legacyCalculatorPathBySlug[slug];
+  }
+
+  const normalizedType = normalizeCalculatorType(calculatorType);
+  if (canonicalCalculatorPathByType[normalizedType]) {
+    return canonicalCalculatorPathByType[normalizedType];
+  }
+
+  return slug ? `/calculators/${slug}` : "/calculators";
 };
 
 const getPhaseOneCalculatorBySlug = (slug: string) =>

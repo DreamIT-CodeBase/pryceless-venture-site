@@ -14,10 +14,10 @@ export default async function EditSingletonPage({
   await requireAdminSession();
   const { key } = await params;
   const page = await getSingletonPageAdmin(key);
-  if (!page) notFound();
+  if (!page || !Object.prototype.hasOwnProperty.call(singletonPageLabels, key)) notFound();
 
   return (
-    <AdminShell title={singletonPageLabels[key] ?? page.pageTitle} subtitle={`Edit the seeded content for ${page.routePath}.`}>
+    <AdminShell title={singletonPageLabels[key]} subtitle={`Edit the seeded content for ${page.routePath}.`}>
       <SingletonPageForm page={page} />
     </AdminShell>
   );

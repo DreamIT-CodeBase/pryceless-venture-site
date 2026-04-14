@@ -54,6 +54,16 @@ export type ValueAddInputs = {
   unitCount: number;
 };
 
+export type MortgageAmortizationRow = {
+  cumulativeInterest: number;
+  cumulativePrincipal: number;
+  endingBalance: number;
+  interestPaid: number;
+  payment: number;
+  principalPaid: number;
+  year: number;
+};
+
 export const defaultRoiInputs: RoiInputs = {
   annualAppreciationRate: 3,
   closingCosts: 6000,
@@ -134,6 +144,24 @@ export const calculateMonthlyMortgagePayment = (
   return sanitizedPrincipal * ((monthlyRate * growth) / (growth - 1));
 };
 
+export const calculateEMI = (
+  principal: number,
+  annualRate: number,
+  years: number,
+) => {
+  const sanitizedPrincipal = toPositive(principal);
+  const months = Math.max(Math.round(toPositive(years) * 12), 1);
+  const emi = calculateMonthlyMortgagePayment(sanitizedPrincipal, annualRate, years);
+  const totalAmount = emi * months;
+  const totalInterest = totalAmount - sanitizedPrincipal;
+
+  return {
+    emi: Math.round(emi),
+    totalAmount: Math.round(totalAmount),
+    totalInterest: Math.round(totalInterest),
+  };
+};
+
 const calculateRemainingBalance = (
   principal: number,
   annualInterestRate: number,
@@ -156,6 +184,59 @@ const calculateRemainingBalance = (
   const growth = (1 + monthlyRate) ** months;
   const paidGrowth = (1 + monthlyRate) ** completedPayments;
   return sanitizedPrincipal * ((growth - paidGrowth) / (growth - 1));
+};
+
+export const buildYearlyAmortizationSchedule = (
+  principal: number,
+  annualInterestRate: number,
+  loanTermYears: number,
+) => {
+  const sanitizedPrincipal = toPositive(principal);
+  const months = Math.max(Math.round(toPositive(loanTermYears) * 12), 1);
+  const monthlyRate = toPositive(annualInterestRate) / 100 / 12;
+  const payment = calculateMonthlyMortgagePayment(
+    sanitizedPrincipal,
+    annualInterestRate,
+    loanTermYears,
+  );
+
+  if (!sanitizedPrincipal) {
+    return [] as MortgageAmortizationRow[];
+  }
+
+  let balance = sanitizedPrincipal;
+  let cumulativeInterest = 0;
+  let cumulativePrincipal = 0;
+  const schedule: MortgageAmortizationRow[] = [];
+
+  for (let month = 1; month <= months; month += 1) {
+    const monthlyInterest = monthlyRate > 0 ? balance * monthlyRate : 0;
+    const monthlyPrincipal = monthlyRate > 0 ? payment - monthlyInterest : sanitizedPrincipal / months;
+    const appliedPrincipal = Math.min(monthlyPrincipal, balance);
+
+    balance = Math.max(balance - appliedPrincipal, 0);
+    cumulativeInterest += monthlyInterest;
+    cumulativePrincipal += appliedPrincipal;
+
+    if (month % 12 === 0 || month === months) {
+      const yearStartMonth = month - ((month - 1) % 12);
+      const yearPaymentCount = month - yearStartMonth + 1;
+      const yearInterest = cumulativeInterest - (schedule.at(-1)?.cumulativeInterest ?? 0);
+      const yearPrincipal = cumulativePrincipal - (schedule.at(-1)?.cumulativePrincipal ?? 0);
+
+      schedule.push({
+        cumulativeInterest,
+        cumulativePrincipal,
+        endingBalance: balance,
+        interestPaid: yearInterest,
+        payment: payment * yearPaymentCount,
+        principalPaid: yearPrincipal,
+        year: Math.ceil(month / 12),
+      });
+    }
+  }
+
+  return schedule;
 };
 
 export const calculateRoi = (inputs: RoiInputs) => {

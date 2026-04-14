@@ -77,8 +77,9 @@ export function PastelActionCardGrid({
     <section className={joinClasses(styles.sectionClassName, sectionClassName)}>
       <div className={joinClasses(styles.gridClassName, gridClassName)}>
         {items.map((item, index) => (
-          <article
+          <Link
             className={styles.cardClassName}
+            href={item.href}
             key={`pastel-card-${index}`}
             style={{
               backgroundColor: item.backgroundColor,
@@ -112,16 +113,12 @@ export function PastelActionCardGrid({
               {item.description}
             </p>
 
-            <Link
-              className={styles.buttonClassName}
-              href={item.href}
-              style={{ color: "#ffffff" }}
-            >
+            <span className={styles.buttonClassName} style={{ color: "#ffffff" }}>
               <span className={joinClasses(styles.buttonTextClassName, item.buttonTextClassName)}>
                 {item.ctaLabel}
               </span>
-            </Link>
-          </article>
+            </span>
+          </Link>
         ))}
       </div>
 

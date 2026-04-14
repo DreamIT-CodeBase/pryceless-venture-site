@@ -4,13 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 
+import {
+  GetStartedModalTrigger,
+  type GetStartedFormDefinition,
+} from "@/components/public/get-started-modal-trigger";
+
 const navItems = [
   { href: "/", label: "Home" },
-  { href: "/investments", label: "Investments" },
+  { href: "/get-financing", label: "Loan Offers" },
   { href: "/properties", label: "Properties" },
   { href: "/case-studies", label: "Case Studies" },
+  { href: "/blogs", label: "Insights" },
   { href: "/calculators", label: "ROI Calculators" },
-  { href: "/capital-rates", label: "Capital Rates" },
 ];
 
 const isItemActive = (pathname: string, href: string) =>
@@ -18,8 +23,10 @@ const isItemActive = (pathname: string, href: string) =>
 
 export function SiteNav({
   mobileCta,
+  getStartedForm,
 }: {
   mobileCta?: { href: string; label: string };
+  getStartedForm?: GetStartedFormDefinition | null;
 }) {
   const pathname = usePathname();
   const menuId = useId();
@@ -118,7 +125,13 @@ export function SiteNav({
             })}
           </nav>
 
-          {mobileCta ? (
+          {getStartedForm ? (
+            <GetStartedModalTrigger
+              form={getStartedForm}
+              onTriggerClick={() => setMobileOpen(false)}
+              variant="mobile"
+            />
+          ) : mobileCta ? (
             <Link
               className="mt-4 inline-flex h-[50px] w-full items-center justify-center rounded-[10px] bg-[#18357a] px-5 text-[15px] font-medium leading-none !text-white transition hover:bg-[#18357a] hover:!text-white visited:!text-white"
               href={mobileCta.href}
@@ -133,7 +146,10 @@ export function SiteNav({
         </div>
       </div>
 
-      <nav aria-label="Primary" className="hidden min-[1025px]:flex min-[1025px]:w-full min-[1025px]:max-w-[860px] min-[1025px]:items-center min-[1025px]:justify-between min-[1025px]:gap-0 2xl:min-[1025px]:max-w-[980px]">
+      <nav
+        aria-label="Primary"
+        className="hidden min-[1025px]:flex min-[1025px]:w-full min-[1025px]:max-w-[780px] min-[1025px]:items-center min-[1025px]:justify-center min-[1025px]:gap-x-8 xl:min-[1025px]:max-w-[820px] xl:min-[1025px]:gap-x-10 2xl:min-[1025px]:max-w-[860px] 2xl:min-[1025px]:gap-x-12"
+      >
         {navItems.map((item) => {
           const active = isItemActive(pathname, item.href);
           const isHovered = hoveredHref === item.href;

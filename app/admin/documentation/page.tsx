@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
   AdminArrowRightIcon,
+  AdminBlogIcon,
   AdminBookIcon,
   AdminBuildingIcon,
   AdminInvestmentIcon,
@@ -24,6 +25,12 @@ const overviewCards = [
     body: "Manage opportunities, returns copy, deal packet forms, galleries, and lifecycle visibility.",
     href: "/admin/investments",
     icon: AdminInvestmentIcon,
+  },
+  {
+    title: "Blogs",
+    body: "Publish articles with featured images, dates, excerpts, and slug-based detail pages that feed the footer automatically.",
+    href: "/admin/blogs",
+    icon: AdminBlogIcon,
   },
   {
     title: "Pages & Forms",
@@ -84,7 +91,7 @@ export default async function AdminDocumentationPage() {
 
       <SectionCard title="How the admin portal is organized">
         <p>The sidebar is split into General, Modules, and Resources so editors can move quickly between dashboard work, content management, and documentation.</p>
-        <p>The header keeps documentation one click away, and every main content section opens in its own CRUD area: Properties, Investments, Case Studies, Calculators, Pages, Forms, and Submissions.</p>
+        <p>The header keeps documentation one click away, and every main content section opens in its own CRUD area: Properties, Investments, Loan Programs, Blogs, Case Studies, Pages, Forms, and Submissions.</p>
         <p>Authentication is handled with Microsoft Entra ID. Only approved admin email addresses can enter the portal.</p>
       </SectionCard>
 
@@ -114,7 +121,7 @@ export default async function AdminDocumentationPage() {
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
             { href: "/admin/properties", label: "Open Properties" },
-            { href: "/admin/investments", label: "Open Investments" },
+            { href: "/admin/blogs", label: "Open Blogs" },
             { href: "/admin/forms", label: "Open Forms" },
             { href: "/admin/submissions", label: "Open Submissions" },
           ].map((item) => (

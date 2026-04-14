@@ -323,6 +323,25 @@ model CaseStudyTakeaway {
   @@index([caseStudyId, sortOrder])
 }
 
+model BlogPost {
+  id               String   @id @default(cuid())
+  title            String
+  slug             String   @unique
+  lifecycleStatus  String   @default("DRAFT")
+  category         String
+  excerpt          String   @db.NVarChar(Max)
+  content          String   @db.NVarChar(Max)
+  authorName       String?
+  readTime         String?
+  featuredImageUrl String?  @db.NVarChar(2000)
+  featuredImageAlt String?  @db.NVarChar(1000)
+  publishedAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([lifecycleStatus, publishedAt, updatedAt])
+}
+
 model Calculator {
   id              String                  @id @default(cuid())
   title           String
@@ -337,19 +356,48 @@ model Calculator {
   @@index([lifecycleStatus, createdAt])
 }
 
+model LoanProgram {
+  id               String           @id @default(cuid())
+  title            String
+  slug             String           @unique
+  lifecycleStatus  String           @default("DRAFT")
+  shortDescription String           @db.NVarChar(Max)
+  fullDescription  String           @db.NVarChar(Max)
+  interestRate     String?
+  ltv              String?
+  loanTerm         String?
+  fees             String?          @db.NVarChar(Max)
+  minAmount        String?
+  maxAmount        String?
+  keyHighlights    String?          @db.NVarChar(Max)
+  crmTag           String?
+  imageUrl         String?          @db.NVarChar(2000)
+  imageAlt         String?          @db.NVarChar(1000)
+  isActive         Boolean          @default(true)
+  sortOrder        Int              @default(0)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  forms            FormDefinition[] @relation("LoanProgramFormLink")
+
+  @@index([lifecycleStatus, isActive, sortOrder, updatedAt])
+}
+
 model FormDefinition {
-  id               String              @id @default(cuid())
-  slug             String              @unique
-  formName         String
-  destination      String
-  successMessage   String              @db.NVarChar(Max)
-  isActive         Boolean             @default(true)
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-  fields           FormField[]
-  submissions      FormSubmission[]
-  investmentLinks  Investment[]        @relation("InvestmentDealPacketForm")
-  propertyLinks    Property[]          @relation("PropertyInquiryForm")
+  id                 String              @id @default(cuid())
+  slug               String              @unique
+  formName           String
+  destination        String
+  successMessage     String              @db.NVarChar(Max)
+  webhookUrl         String?             @db.NVarChar(2000)
+  linkedLoanProgramId String?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  linkedLoanProgram  LoanProgram?        @relation("LoanProgramFormLink", fields: [linkedLoanProgramId], references: [id], onDelete: SetNull)
+  fields             FormField[]
+  submissions        FormSubmission[]
+  investmentLinks    Investment[]        @relation("InvestmentDealPacketForm")
+  propertyLinks      Property[]          @relation("PropertyInquiryForm")
 }
 
 model FormField {
@@ -360,6 +408,7 @@ model FormField {
   type             String
   required         Boolean        @default(false)
   placeholder      String?
+  options          String?        @db.NVarChar(Max)
   sortOrder        Int            @default(0)
   createdAt        DateTime       @default(now())
   formDefinition   FormDefinition @relation(fields: [formDefinitionId], references: [id], onDelete: Cascade)
@@ -377,6 +426,8 @@ model FormSubmission {
   sourcePath          String?
   submissionEmailStatus String               @default("PENDING")
   emailError          String?               @db.NVarChar(Max)
+  submissionWebhookStatus String             @default("SKIPPED")
+  webhookError        String?               @db.NVarChar(Max)
   submittedAt         DateTime              @default(now())
   formDefinition      FormDefinition        @relation(fields: [formDefinitionId], references: [id], onDelete: NoAction)
   values              FormSubmissionValue[]

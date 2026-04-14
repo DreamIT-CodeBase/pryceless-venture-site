@@ -1,10 +1,21 @@
 import "dotenv/config";
 
 import { env } from "../lib/env";
-import { formDefinitionsSeed, homePageSeed, singletonPageSeed } from "../lib/content-blueprint";
+import {
+  blogPostSeed,
+  formDefinitionsSeed,
+  homePageSeed,
+  loanProgramSeed,
+  singletonPageSeed,
+} from "../lib/content-blueprint";
 import { createPrismaClient } from "../lib/prisma-factory";
 
 const prisma = createPrismaClient();
+const blogPostDelegate = (prisma as unknown as {
+  blogPost?: {
+    upsert: (args: unknown) => Promise<unknown>;
+  };
+}).blogPost;
 
 const caseStudySeed = [
   {
@@ -375,12 +386,24 @@ async function seedSingletonPages() {
 
 async function seedForms() {
   for (const form of formDefinitionsSeed) {
+    const webhookUrl =
+      "webhookUrl" in form ? String(form.webhookUrl ?? "").trim() || undefined : undefined;
+    const linkedLoanProgram =
+      "linkedLoanProgramSlug" in form && form.linkedLoanProgramSlug
+        ? await prisma.loanProgram.findUnique({
+            where: { slug: form.linkedLoanProgramSlug },
+            select: { id: true },
+          })
+        : null;
+
     const current = await prisma.formDefinition.upsert({
       where: { slug: form.slug },
       update: {
         formName: form.formName,
         destination: form.destination as never,
         successMessage: form.successMessage,
+        webhookUrl,
+        linkedLoanProgramId: linkedLoanProgram?.id,
         isActive: true,
       },
       create: {
@@ -388,6 +411,8 @@ async function seedForms() {
         formName: form.formName,
         destination: form.destination as never,
         successMessage: form.successMessage,
+        webhookUrl,
+        linkedLoanProgramId: linkedLoanProgram?.id,
         isActive: true,
       },
     });
@@ -399,11 +424,162 @@ async function seedForms() {
         fieldKey: field.fieldKey,
         label: field.label,
         type: field.type as never,
+        options: "options" in field && field.options ? JSON.stringify(field.options) : undefined,
+        placeholder: "placeholder" in field ? field.placeholder ?? undefined : undefined,
         required: field.required,
         sortOrder: index,
       })),
     });
   }
+}
+
+async function seedLoanPrograms() {
+  for (const program of loanProgramSeed) {
+    await prisma.loanProgram.upsert({
+      where: { slug: program.slug },
+      update: {
+        title: program.title,
+        lifecycleStatus: program.lifecycleStatus,
+        shortDescription: program.shortDescription,
+        fullDescription: program.fullDescription,
+        interestRate: program.interestRate,
+        ltv: program.ltv,
+        loanTerm: program.loanTerm,
+        fees: program.fees,
+        minAmount: program.minAmount,
+        maxAmount: program.maxAmount,
+        keyHighlights: program.keyHighlights,
+        crmTag: program.crmTag,
+        imageUrl: program.imageUrl ?? undefined,
+        imageAlt: program.imageAlt ?? undefined,
+        isActive: program.isActive,
+        sortOrder: program.sortOrder,
+      },
+      create: {
+        title: program.title,
+        slug: program.slug,
+        lifecycleStatus: program.lifecycleStatus,
+        shortDescription: program.shortDescription,
+        fullDescription: program.fullDescription,
+        interestRate: program.interestRate,
+        ltv: program.ltv,
+        loanTerm: program.loanTerm,
+        fees: program.fees,
+        minAmount: program.minAmount,
+        maxAmount: program.maxAmount,
+        keyHighlights: program.keyHighlights,
+        crmTag: program.crmTag,
+        imageUrl: program.imageUrl ?? undefined,
+        imageAlt: program.imageAlt ?? undefined,
+        isActive: program.isActive,
+        sortOrder: program.sortOrder,
+      },
+    });
+  }
+}
+
+async function cleanupRemovedCapitalRates() {
+  await prisma.homeSegment.updateMany({
+    where: { ctaHref: "/capital-rates" },
+    data: {
+      ctaHref: "/get-financing",
+      ctaLabel: "Get Financing",
+    },
+  });
+
+  await prisma.homePlatformCard.updateMany({
+    where: { ctaHref: "/capital-rates" },
+    data: {
+      ctaHref: "/get-financing",
+      ctaLabel: "Apply Now",
+    },
+  });
+
+  await prisma.homeCaseHighlight.updateMany({
+    where: { ctaHref: "/capital-rates" },
+    data: {
+      ctaHref: "/case-studies",
+      ctaLabel: "See Case Studies",
+    },
+  });
+
+  await prisma.homePage.updateMany({
+    where: { heroPrimaryCtaHref: "/capital-rates" },
+    data: {
+      heroPrimaryCtaHref: "/get-financing",
+      heroPrimaryCtaLabel: "Get Financing",
+    },
+  });
+
+  await prisma.homePage.updateMany({
+    where: { heroSecondaryCtaHref: "/capital-rates" },
+    data: {
+      heroSecondaryCtaHref: "/cash-offer",
+      heroSecondaryCtaLabel: "Get a Cash Offer",
+    },
+  });
+
+  await prisma.homePage.updateMany({
+    where: { aboutSectionPrimaryCtaHref: "/capital-rates" },
+    data: {
+      aboutSectionPrimaryCtaHref: "/get-financing",
+      aboutSectionPrimaryCtaLabel: "Get Financing",
+    },
+  });
+
+  await prisma.homePage.updateMany({
+    where: { aboutSectionSecondaryCtaHref: "/capital-rates" },
+    data: {
+      aboutSectionSecondaryCtaHref: "/cash-offer",
+      aboutSectionSecondaryCtaLabel: "Get a Cash Offer",
+    },
+  });
+
+  await prisma.singletonPage.deleteMany({
+    where: { key: "CAPITAL_RATES" },
+  });
+
+  const legacyFundingForm = await prisma.formDefinition.findUnique({
+    where: { slug: "funding-info-request" },
+    select: { id: true },
+  });
+
+  if (!legacyFundingForm) {
+    return;
+  }
+
+  const legacySubmissionIds = (
+    await prisma.formSubmission.findMany({
+      where: { formDefinitionId: legacyFundingForm.id },
+      select: { id: true },
+    })
+  ).map((submission) => submission.id);
+
+  if (legacySubmissionIds.length) {
+    await prisma.formSubmissionValue.deleteMany({
+      where: {
+        submissionId: {
+          in: legacySubmissionIds,
+        },
+      },
+    });
+
+    await prisma.formSubmission.deleteMany({
+      where: {
+        id: {
+          in: legacySubmissionIds,
+        },
+      },
+    });
+  }
+
+  await prisma.formField.deleteMany({
+    where: { formDefinitionId: legacyFundingForm.id },
+  });
+
+  await prisma.formDefinition.delete({
+    where: { id: legacyFundingForm.id },
+  });
 }
 
 async function seedAdminProfiles() {
@@ -466,12 +642,56 @@ async function seedCaseStudies() {
   }
 }
 
+async function seedBlogPosts() {
+  if (!blogPostDelegate) {
+    throw new Error(
+      "Prisma blogPost delegate is unavailable. Run prisma generate after adding the BlogPost model.",
+    );
+  }
+
+  for (const blogPost of blogPostSeed) {
+    const publishedAt = blogPost.publishedAt ? new Date(blogPost.publishedAt) : null;
+
+    await blogPostDelegate.upsert({
+      where: { slug: blogPost.slug },
+      update: {
+        title: blogPost.title,
+        lifecycleStatus: blogPost.lifecycleStatus,
+        category: blogPost.category,
+        excerpt: blogPost.excerpt,
+        content: blogPost.content,
+        authorName: blogPost.authorName ?? undefined,
+        readTime: blogPost.readTime ?? undefined,
+        featuredImageUrl: blogPost.featuredImageUrl ?? undefined,
+        featuredImageAlt: blogPost.featuredImageAlt ?? undefined,
+        publishedAt: publishedAt ?? undefined,
+      },
+      create: {
+        title: blogPost.title,
+        slug: blogPost.slug,
+        lifecycleStatus: blogPost.lifecycleStatus,
+        category: blogPost.category,
+        excerpt: blogPost.excerpt,
+        content: blogPost.content,
+        authorName: blogPost.authorName ?? undefined,
+        readTime: blogPost.readTime ?? undefined,
+        featuredImageUrl: blogPost.featuredImageUrl ?? undefined,
+        featuredImageAlt: blogPost.featuredImageAlt ?? undefined,
+        publishedAt: publishedAt ?? undefined,
+      },
+    });
+  }
+}
+
 async function main() {
   await seedHomePage();
   await seedSingletonPages();
+  await seedLoanPrograms();
   await seedForms();
+  await cleanupRemovedCapitalRates();
   await seedAdminProfiles();
   await seedCaseStudies();
+  await seedBlogPosts();
 }
 
 main()

@@ -2,13 +2,24 @@ import Link from "next/link";
 
 import { autosaveFormDefinitionDraft, saveFormDefinition } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
+import { formatFormFieldsEditorValue } from "@/lib/form-fields";
 
-export function FormDefinitionForm({ form, errorMessage }: { form: any; errorMessage?: string }) {
+export function FormDefinitionForm({
+  form,
+  errorMessage,
+  loanPrograms,
+}: {
+  form: any;
+  errorMessage?: string;
+  loanPrograms: Array<{ id: string; slug: string; title: string }>;
+}) {
+  const usingSeedLoanPrograms = loanPrograms.some((program) => program.id.startsWith("seed-"));
+
   return (
     <AdminAutosaveForm
       autosaveAction={autosaveFormDefinitionDraft}
       className="space-y-6"
-      initialRecordId={form.id}
+      initialRecordId={form.id ?? ""}
       submitAction={saveFormDefinition}
     >
       {errorMessage ? (
@@ -28,19 +39,51 @@ export function FormDefinitionForm({ form, errorMessage }: { form: any; errorMes
               <option value="BOTH">Both</option>
             </select>
           </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-700">Linked Loan Program</span>
+            <select className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3" defaultValue={form.linkedLoanProgramId ?? ""} name="linkedLoanProgramId">
+              <option value="">No linked loan program</option>
+              {loanPrograms.map((program) => (
+                <option key={program.id} value={program.id}>
+                  {program.title}
+                </option>
+              ))}
+            </select>
+            {usingSeedLoanPrograms ? (
+              <p className="mt-2 text-sm text-amber-700">
+                Loan programs are being shown from local fallback data because the financing schema
+                is not active in the current database yet.
+              </p>
+            ) : null}
+          </label>
           <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700">
             <input defaultChecked={form.isActive} name="isActive" type="checkbox" />
             Form is active
           </label>
+          <label className="block md:col-span-2">
+            <span className="mb-2 block text-sm font-medium text-slate-700">Webhook URL</span>
+            <input
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+              defaultValue={form.webhookUrl ?? ""}
+              name="webhookUrl"
+              placeholder="https://hooks.example.com/incoming-leads"
+            />
+            <p className="mt-2 text-sm text-slate-500">
+              Used for CRM or API-based delivery when destination is set to `CRM` or `Both`.
+            </p>
+          </label>
           <label className="block md:col-span-2"><span className="mb-2 block text-sm font-medium text-slate-700">Success Message</span><textarea className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3" defaultValue={form.successMessage ?? ""} minLength={5} name="successMessage" required /></label>
           <label className="block md:col-span-2">
-            <span className="mb-2 block text-sm font-medium text-slate-700">Fields</span>
+            <span className="mb-2 block text-sm font-medium text-slate-700">Fields JSON</span>
             <textarea
-              className="min-h-40 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
-              defaultValue={form.fields?.map((field: any) => `${field.fieldKey} | ${field.label} | ${field.type} | ${field.required}`).join("\n") ?? ""}
+              className="min-h-[280px] w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm"
+              defaultValue={formatFormFieldsEditorValue(form.fields ?? [])}
               name="fieldsText"
-              placeholder="field_key | Label | TYPE | true"
+              placeholder='[{"label":"Deal Type","type":"radio","name":"deal_type","options":["Fix & Flip","Refinance"],"required":true}]'
             />
+            <p className="mt-2 text-sm text-slate-500">
+              Each field supports `label`, `name`, `type`, `required`, `placeholder`, and `options`.
+            </p>
           </label>
         </div>
       </div>

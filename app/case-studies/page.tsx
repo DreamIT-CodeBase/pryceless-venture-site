@@ -1,4 +1,4 @@
-import Image, { type StaticImageData } from "next/image";
+import type { StaticImageData } from "next/image";
 
 import aboutSectionImage from "@/app/assets/aboutsectionimage.jpg";
 import featuredPropertiesLeftImage from "@/app/assets/featuredpropertieslegftboximage.png";
@@ -6,11 +6,10 @@ import featuredPropertiesRightLowerImage from "@/app/assets/featuredpropoertiesr
 import featuredPropertiesRightUpperImage from "@/app/assets/featuredpropertiesstaicrightupperboximages.jpg";
 import heroSectionImage from "@/app/assets/herosectionimage.jpg";
 import {
-  StandardCollectionCardLink,
   ThreeUpCollectionGrid,
-  standardCollectionButtonClassName,
 } from "@/components/public/collection-card-layout";
 import { EmptyCollectionCard } from "@/components/public/marketing-ui";
+import { OpportunityCard } from "@/components/public/opportunity-card";
 import { PageSectionHero } from "@/components/public/page-section-hero";
 import { SiteShell } from "@/components/public/site-shell";
 import { getPublishedCaseStudies, getSingletonPage } from "@/lib/data/public";
@@ -57,10 +56,13 @@ export default async function CaseStudiesPage() {
   const storiesByCategory = new Map<
     string,
     Array<{
+      assetProfile: Array<{ label: string; value: string }>;
+      category: string;
       href: string;
       image: CaseStudyCardImage;
       imageAlt: string;
       overview: string;
+      takeaways: string[];
       title: string;
     }>
   >();
@@ -68,8 +70,12 @@ export default async function CaseStudiesPage() {
   caseStudies.forEach((caseStudy, index) => {
     const categoryLabel = formatCategoryLabel(caseStudy.category);
     const currentStories = storiesByCategory.get(categoryLabel) ?? [];
+    const assetProfile = Array.isArray(caseStudy.assetProfile) ? caseStudy.assetProfile : [];
+    const takeaways = Array.isArray(caseStudy.takeaways) ? caseStudy.takeaways : [];
 
     currentStories.push({
+      assetProfile,
+      category: categoryLabel,
       href: `/case-studies/${caseStudy.slug}`,
       image:
         caseStudy.primaryImage?.mediaFile.blobUrl ??
@@ -82,6 +88,7 @@ export default async function CaseStudiesPage() {
         caseStudy.images?.[0]?.mediaFile.altText ??
         caseStudy.title,
       overview: truncate(caseStudy.overview, 230),
+      takeaways: takeaways.map((item) => truncate(item.takeaway, 48)),
       title: caseStudy.title,
     });
 
@@ -94,7 +101,7 @@ export default async function CaseStudiesPage() {
   ];
 
   return (
-    <SiteShell cta={{ href: "/investments", label: "View Opportunities" }}>
+    <SiteShell cta={{ href: "/get-financing", label: "Apply Now" }}>
       <div className="pb-[92px]">
         <PageSectionHero
           currentLabel={page?.pageTitle ?? "Case Studies"}
@@ -138,37 +145,20 @@ export default async function CaseStudiesPage() {
                         wideDesktopGap={32}
                       >
                         {stories.map((story, index) => (
-                          <StandardCollectionCardLink href={story.href} key={`${categoryLabel}-${story.title}-${index}`}>
-                            <div className="px-[13px] pt-[13px]">
-                              <div className="relative h-[196px] overflow-hidden rounded-[14px] 2xl:h-[248px]">
-                                <Image
-                                  alt={story.imageAlt}
-                                  className="object-cover"
-                                  fill
-                                  sizes="(max-width: 1023px) 100vw, (max-width: 1535px) 330px, 456px"
-                                  src={story.image}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="flex flex-1 flex-col px-[13px] pb-[16px] pt-[14px]">
-                              <h3 className="min-h-[93px] text-left text-[19px] font-bold leading-[1.12] tracking-[-0.03em] text-[#131d36] 2xl:min-h-[104px] 2xl:text-[22px]">
-                                {story.title}
-                              </h3>
-                              <p
-                                className="mt-[9px] text-left text-[13px] font-normal leading-[1.36] tracking-[0] text-[rgba(97,97,97,1)] 2xl:text-[13.5px] 2xl:leading-[1.5]"
-                                style={{
-                                  WebkitBoxOrient: "vertical",
-                                  WebkitLineClamp: 5,
-                                  display: "-webkit-box",
-                                  overflow: "hidden",
-                                }}
-                              >
-                                {story.overview}
-                              </p>
-                              <span className={`${standardCollectionButtonClassName} 2xl:max-w-[182px] 2xl:text-[13px]`}>Explore more</span>
-                            </div>
-                          </StandardCollectionCardLink>
+                          <OpportunityCard
+                            bulletItems={story.takeaways}
+                            ctaLabel={page?.ctaLabel ?? "Explore More"}
+                            footer={{ label: "Category", value: story.category }}
+                            href={story.href}
+                            image={story.image}
+                            imageAlt={story.imageAlt}
+                            key={`${categoryLabel}-${story.title}-${index}`}
+                            metaIcon="briefcase"
+                            metaText="Case Study"
+                            statItems={story.assetProfile.slice(0, 2)}
+                            summary={story.overview}
+                            title={story.title}
+                          />
                         ))}
                       </ThreeUpCollectionGrid>
                     </section>

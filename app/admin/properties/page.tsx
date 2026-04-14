@@ -12,7 +12,7 @@ export default async function AdminPropertiesPage() {
   const properties = await getPropertiesAdmin();
 
   return (
-    <AdminShell title="Properties" subtitle="Create, edit, publish, archive, and manage property media from one place.">
+    <AdminShell title="Properties" subtitle="Create, edit, publish, archive, and manage portfolio listings, sold deals, and rehab projects from one place.">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="inline-flex items-center self-start rounded-full border border-violet-200 bg-white/80 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-700 shadow-sm shadow-violet-100/70">
           {properties.length} records
@@ -25,7 +25,7 @@ export default async function AdminPropertiesPage() {
             <tr>
               <th className="px-6 py-4 font-medium">Title</th>
               <th className="px-6 py-4 font-medium">Lifecycle</th>
-              <th className="px-6 py-4 font-medium">Market Status</th>
+              <th className="px-6 py-4 font-medium">Portfolio Stage</th>
               <th className="px-6 py-4 font-medium">Updated</th>
               <th className="px-6 py-4 text-right font-medium">Actions</th>
             </tr>

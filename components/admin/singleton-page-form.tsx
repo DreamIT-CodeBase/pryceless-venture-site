@@ -4,7 +4,6 @@ import { autosaveSingletonPageDraft, saveSingletonPage } from "@/app/admin/actio
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import {
   getCalculatorCardFallbackDescription,
-  getCapitalUseFallbackDescription,
   singletonPageGroups,
   singletonPageLabels,
 } from "@/lib/content-blueprint";
@@ -21,11 +20,9 @@ export function SingletonPageForm({ page }: { page: any }) {
 
         const body =
           item.body?.trim() ||
-          (page.key === "CAPITAL_RATES"
-            ? getCapitalUseFallbackDescription(item.title)
-            : page.key === "CALCULATORS_INDEX"
-              ? getCalculatorCardFallbackDescription(item.title)
-              : "");
+          (page.key === "CALCULATORS_INDEX"
+            ? getCalculatorCardFallbackDescription(item.title)
+            : "");
 
         return body ? `${item.title} | ${body}` : item.title;
       })

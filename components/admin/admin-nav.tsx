@@ -7,9 +7,9 @@ import { ComponentType } from "react";
 
 import logoHeader from "@/app/assets/headerlogo.svg";
 import {
+  AdminBlogIcon,
   AdminBookIcon,
   AdminBuildingIcon,
-  AdminCalculatorIcon,
   AdminCaseStudyIcon,
   AdminChevronDownIcon,
   AdminCreateIcon,
@@ -44,8 +44,9 @@ const sections: NavSection[] = [
     items: [
       { href: "/admin/properties", label: "Properties", icon: AdminBuildingIcon },
       { href: "/admin/investments", label: "Investments", icon: AdminInvestmentIcon },
+      { href: "/admin/loan-programs", label: "Loan Programs", icon: AdminInvestmentIcon },
+      { href: "/admin/blogs", label: "Blogs", icon: AdminBlogIcon },
       { href: "/admin/case-studies", label: "Case Studies", icon: AdminCaseStudyIcon },
-      { href: "/admin/calculators", label: "Calculators", icon: AdminCalculatorIcon },
       { href: "/admin/pages", label: "Pages", icon: AdminPagesIcon },
       { href: "/admin/forms", label: "Forms", icon: AdminFormsIcon },
       { href: "/admin/submissions", label: "Submissions", icon: AdminSubmissionsIcon },

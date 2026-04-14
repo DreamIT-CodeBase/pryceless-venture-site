@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { deleteCaseStudy } from "@/app/admin/actions";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminStatusPill } from "@/components/admin/status-pill";
 import { requireAdminSession } from "@/lib/authz";
@@ -26,6 +27,7 @@ export default async function AdminCaseStudiesPage() {
               <th className="px-6 py-4 font-medium">Lifecycle</th>
               <th className="px-6 py-4 font-medium">Category</th>
               <th className="px-6 py-4 font-medium">Updated</th>
+              <th className="px-6 py-4 text-right font-medium">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100/80">
@@ -35,6 +37,25 @@ export default async function AdminCaseStudiesPage() {
                 <td className="px-6 py-4"><AdminStatusPill value={caseStudy.lifecycleStatus} /></td>
                 <td className="px-6 py-4 text-slate-600">{titleCase(caseStudy.category)}</td>
                 <td className="px-6 py-4 text-slate-600">{formatDateTime(caseStudy.updatedAt)}</td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-end gap-2">
+                    <Link
+                      className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
+                      href={`/admin/case-studies/${caseStudy.id}`}
+                    >
+                      Edit
+                    </Link>
+                    <form action={deleteCaseStudy}>
+                      <input name="recordId" type="hidden" value={caseStudy.id} />
+                      <button
+                        className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-100"
+                        type="submit"
+                      >
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

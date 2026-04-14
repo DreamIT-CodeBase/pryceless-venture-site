@@ -3,7 +3,8 @@ import Link from "next/link";
 import { autosavePropertyDraft, deleteProperty, saveProperty } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import { ImageManager } from "@/components/admin/image-manager";
-import { propertyStatusOptions, propertyStrategyOptions, propertyTypeOptions } from "@/lib/content-blueprint";
+import { propertyStrategyOptions, propertyTypeOptions } from "@/lib/content-blueprint";
+import { getPropertyEditorStatus, propertyStatusOptions } from "@/lib/property-portfolio";
 
 type PropertyFormProps = {
   property?: any;
@@ -48,10 +49,10 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Property Status</span>
+              <span className="mb-2 block text-sm font-medium text-slate-700">Portfolio Stage</span>
               <select
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={property?.status ?? "AVAILABLE"}
+                defaultValue={getPropertyEditorStatus(property?.status)}
                 name="status"
               >
                 {propertyStatusOptions.map((option) => (
@@ -60,6 +61,12 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
                   </option>
                 ))}
               </select>
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                Use <span className="font-semibold text-slate-700">For Sale</span> for active inventory,
+                <span className="font-semibold text-slate-700"> Sold</span> for completed deals that show
+                execution results, and <span className="font-semibold text-slate-700">In Progress</span> for
+                rehab projects receiving ongoing updates.
+              </span>
             </label>
 
             <label className="block">
@@ -122,22 +129,29 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
             </label>
 
             <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Buyer Fit</span>
+              <span className="mb-2 block text-sm font-medium text-slate-700">Buyer Fit / Notes</span>
               <textarea
                 className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
                 defaultValue={property?.buyerFit ?? ""}
                 name="buyerFit"
               />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                Use this field for buyer fit on listings, execution commentary on sold deals, or renovation notes
+                on in-progress properties.
+              </span>
             </label>
 
             <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Highlights</span>
+              <span className="mb-2 block text-sm font-medium text-slate-700">Highlights / Metrics</span>
               <textarea
                 className="min-h-32 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
                 defaultValue={property?.highlights?.map((item: any) => item.highlight).join("\n") ?? ""}
                 name="highlightsText"
-                placeholder="One highlight per line"
+                placeholder={"One item per line. Use Label | Value for snapshot rows.\nPurchase Price | $245,000"}
               />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                Plain lines become bullets on the public page. Lines written as <span className="font-semibold text-slate-700">Label | Value</span> render as sold underwriting stats or rehab progress snapshot rows.
+              </span>
             </label>
 
             <label className="block md:col-span-2">

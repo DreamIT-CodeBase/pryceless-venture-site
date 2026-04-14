@@ -3,9 +3,9 @@ import Link from "next/link";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
   AdminArrowRightIcon,
+  AdminBlogIcon,
   AdminBookIcon,
   AdminBuildingIcon,
-  AdminCalculatorIcon,
   AdminCaseStudyIcon,
   AdminFormsIcon,
   AdminInvestmentIcon,
@@ -31,11 +31,11 @@ export default async function AdminDashboardPage() {
       accent: "from-[#7c3aed] to-[#5b4af4]",
     },
     {
-      label: "Add Investment",
-      description: "Create a new opportunity with lifecycle, returns, and assets.",
-      href: "/admin/investments/new",
+      label: "Add Loan Program",
+      description: "Publish a financing program with terms, visibility, and linked application flow.",
+      href: "/admin/loan-programs/new",
       icon: AdminInvestmentIcon,
-      accent: "from-[#f97316] to-[#ef4444]",
+      accent: "from-[#0ea5e9] to-[#2563eb]",
     },
     {
       label: "Manage Pages",
@@ -56,8 +56,9 @@ export default async function AdminDashboardPage() {
   const overviewCards = [
     { label: "Properties", value: counts.properties, href: "/admin/properties", icon: AdminBuildingIcon },
     { label: "Investments", value: counts.investments, href: "/admin/investments", icon: AdminInvestmentIcon },
+    { label: "Loan Programs", value: counts.loanPrograms, href: "/admin/loan-programs", icon: AdminInvestmentIcon },
+    { label: "Blogs", value: counts.blogs, href: "/admin/blogs", icon: AdminBlogIcon },
     { label: "Case Studies", value: counts.caseStudies, href: "/admin/case-studies", icon: AdminCaseStudyIcon },
-    { label: "Calculators", value: counts.calculators, href: "/admin/calculators", icon: AdminCalculatorIcon },
     { label: "Forms", value: counts.forms, href: "/admin/forms", icon: AdminFormsIcon },
     { label: "Submissions", value: counts.submissions, href: "/admin/submissions", icon: AdminSubmissionsIcon },
   ] as const;

@@ -59,6 +59,17 @@ export function AdminCaseStudyIcon({ className }: IconProps) {
   );
 }
 
+export function AdminBlogIcon({ className }: IconProps) {
+  return (
+    <svg aria-hidden="true" className={className} {...sharedProps}>
+      <rect height="14" rx="2.5" width="14" x="5" y="5" />
+      <path d="M8.5 9h7" />
+      <path d="M8.5 12h7" />
+      <path d="M8.5 15h4.5" />
+    </svg>
+  );
+}
+
 export function AdminCalculatorIcon({ className }: IconProps) {
   return (
     <svg aria-hidden="true" className={className} {...sharedProps}>

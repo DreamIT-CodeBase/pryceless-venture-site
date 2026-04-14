@@ -7,6 +7,13 @@ let cachedContainerClient:
   | ReturnType<BlobServiceClient["getContainerClient"]>
   | undefined;
 
+type UploadBufferToBlobInput = {
+  buffer: Buffer;
+  fileName: string;
+  folder: string;
+  mimeType?: string;
+};
+
 const getStorageAccountName = () =>
   env.azureStorageConnectionString
     .split(";")
@@ -51,14 +58,28 @@ const getContainerClient = async () => {
 export const uploadFileToBlob = async (file: File, folder: string) => {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
+  return uploadBufferToBlob({
+    buffer,
+    fileName: file.name,
+    folder,
+    mimeType: file.type || "application/octet-stream",
+  });
+};
+
+export const uploadBufferToBlob = async ({
+  buffer,
+  fileName,
+  folder,
+  mimeType = "application/octet-stream",
+}: UploadBufferToBlobInput) => {
   const containerClient = await getContainerClient();
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
+  const safeName = fileName.replace(/[^a-zA-Z0-9._-]+/g, "-");
   const blobPath = `${folder}/${Date.now()}-${crypto.randomUUID()}-${safeName}`;
   const blockBlobClient = containerClient.getBlockBlobClient(blobPath);
 
   await blockBlobClient.uploadData(buffer, {
     blobHTTPHeaders: {
-      blobContentType: file.type || "application/octet-stream",
+      blobContentType: mimeType,
     },
   });
 
@@ -66,8 +87,8 @@ export const uploadFileToBlob = async (file: File, folder: string) => {
     data: {
       blobUrl: blockBlobClient.url,
       blobPath,
-      fileName: file.name,
-      mimeType: file.type || "application/octet-stream",
+      fileName,
+      mimeType,
       fileSize: buffer.byteLength,
     },
   });

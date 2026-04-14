@@ -9,6 +9,7 @@ import {
   DetailBreadcrumbs,
   DetailBulletList,
   DetailGlassPanel,
+  DetailKeyValueList,
   DetailNarrativeBlock,
   DetailPageCanvas,
   DetailSection,
@@ -18,6 +19,12 @@ import {
 import { SiteShell } from "@/components/public/site-shell";
 import { getPublishedProperty, getSingletonPage } from "@/lib/data/public";
 import { resolvePrimaryImage } from "@/lib/media";
+import {
+  formatPropertyStatusLabel,
+  getPropertyPortfolioStage,
+  getPropertyStageContent,
+  parsePropertyHighlights,
+} from "@/lib/property-portfolio";
 
 export const revalidate = 300;
 export const dynamic = "force-dynamic";
@@ -35,7 +42,9 @@ const splitParagraphs = (value: string | null | undefined) =>
     .map((part) => part.trim())
     .filter(Boolean);
 
-const createMediaItems = (property: NonNullable<Awaited<ReturnType<typeof getPublishedProperty>>>) => {
+const createMediaItems = (
+  property: NonNullable<Awaited<ReturnType<typeof getPublishedProperty>>>,
+) => {
   const items: DetailMediaCarouselItem[] = [];
   const seen = new Set<string>();
 
@@ -102,18 +111,34 @@ export default async function PropertyDetailPage({
     notFound();
   }
 
+  const stage = getPropertyPortfolioStage(property.status);
+  const stageContent = getPropertyStageContent(stage);
   const location = [property.locationCity, property.locationState].filter(Boolean).join(", ");
-  const narrativeParagraphs = splitParagraphs(page?.intro || property.summary);
-  const buyerFitParagraphs = splitParagraphs(property.buyerFit);
-  const highlights = property.highlights.map((highlight) => highlight.highlight);
+  const overviewParagraphs = splitParagraphs(property.summary || page?.intro);
+  const noteParagraphs = splitParagraphs(property.buyerFit);
+  const parsedHighlights = parsePropertyHighlights(
+    property.highlights.map((highlight) => highlight.highlight),
+  );
+  const galleryCaptions = property.images
+    .map((image) => image.caption?.trim())
+    .filter((caption): caption is string => Boolean(caption));
   const mediaItems = createMediaItems(property);
   const propertyStats = [
     location ? { label: "Location", value: location } : null,
-    property.propertyType ? { label: "Property Type", value: formatDisplayValue(property.propertyType) } : null,
-    property.strategy ? { label: "Strategy", value: formatDisplayValue(property.strategy) } : null,
-    property.status ? { label: "Status", value: formatDisplayValue(property.status) } : null,
+    property.propertyType
+      ? { label: "Property Type", value: formatDisplayValue(property.propertyType) }
+      : null,
+    property.strategy
+      ? { label: "Strategy", value: formatDisplayValue(property.strategy) }
+      : null,
+    {
+      label: "Status",
+      value: formatPropertyStatusLabel(property.status || stage),
+    },
   ].filter(Boolean) as Array<{ label: string; value: string }>;
-  const ctaLabel = page?.ctaLabel || property.inquiryForm?.formName;
+  const showInquiryForm = stageContent.supportForm && Boolean(property.inquiryForm);
+  const ctaLabel =
+    page?.ctaLabel || property.inquiryForm?.formName || stageContent.cardCtaLabel;
 
   return (
     <SiteShell cta={{ href: "/properties", label: "Back to Properties" }}>
@@ -128,13 +153,13 @@ export default async function PropertyDetailPage({
           >
             <div className="max-w-[760px]">
               <p className="text-[12px] font-semibold uppercase tracking-[0.34em] text-[#bf9375] sm:text-[13px]">
-                Property Detail
+                {stageContent.detailHeroEyebrow}
               </p>
               <h1 className="mt-3 max-w-[660px] text-balance text-[32px] font-medium leading-[1.02] tracking-[-0.05em] text-[#111827] sm:text-[42px] lg:text-[52px]">
                 {property.title}
               </h1>
               <p className="mt-10 max-w-[760px] text-[16px] leading-[1.78] text-slate-700 sm:mt-12 sm:text-[17px]">
-                {page?.intro ?? property.summary}
+                {property.summary}
               </p>
 
               {propertyStats.length ? (
@@ -145,11 +170,11 @@ export default async function PropertyDetailPage({
 
               <div className="mt-14 hidden lg:block">
                 <DetailNarrativeBlock
-                  body={narrativeParagraphs.map((paragraph, index) => (
+                  body={overviewParagraphs.map((paragraph, index) => (
                     <p key={`${paragraph}-${index}`}>{paragraph}</p>
                   ))}
-                  eyebrow="Property Story"
-                  title={page?.pageTitle || property.title}
+                  eyebrow={stageContent.detailNarrativeEyebrow}
+                  title={stageContent.detailNarrativeTitle}
                 />
               </div>
             </div>
@@ -159,39 +184,66 @@ export default async function PropertyDetailPage({
         </DetailSection>
 
         <DetailSection className="pb-14 lg:pb-18">
-          <div className={`grid gap-6 ${property.inquiryForm ? "lg:grid-cols-[minmax(0,1fr)_390px]" : ""}`}>
+          <div className={`grid gap-6 ${showInquiryForm ? "lg:grid-cols-[minmax(0,1fr)_390px]" : ""}`}>
             <div className="grid gap-6">
               <div className="lg:hidden">
                 <DetailNarrativeBlock
-                  body={narrativeParagraphs.map((paragraph, index) => (
+                  body={overviewParagraphs.map((paragraph, index) => (
                     <p key={`${paragraph}-${index}`}>{paragraph}</p>
                   ))}
-                  eyebrow="Property Story"
-                  title={page?.pageTitle || property.title}
+                  eyebrow={stageContent.detailNarrativeEyebrow}
+                  title={stageContent.detailNarrativeTitle}
                 />
               </div>
 
-              {highlights.length ? (
+              {parsedHighlights.metrics.length ? (
                 <DetailGlassPanel>
-                  <DetailSectionHeading eyebrow="Highlights" title="Highlights" />
+                  <DetailSectionHeading
+                    eyebrow={stageContent.detailSnapshotEyebrow}
+                    title={stageContent.detailSnapshotTitle}
+                  />
                   <div className="mt-5">
-                    <DetailBulletList items={highlights} />
+                    <DetailKeyValueList items={parsedHighlights.metrics} />
                   </div>
                 </DetailGlassPanel>
               ) : null}
 
-              {buyerFitParagraphs.length ? (
+              {parsedHighlights.bullets.length ? (
+                <DetailGlassPanel>
+                  <DetailSectionHeading
+                    eyebrow={stageContent.detailUpdateEyebrow}
+                    title={stageContent.detailUpdateTitle}
+                  />
+                  <div className="mt-5">
+                    <DetailBulletList items={parsedHighlights.bullets} />
+                  </div>
+                </DetailGlassPanel>
+              ) : null}
+
+              {stage === "IN_PROGRESS" && galleryCaptions.length ? (
+                <DetailGlassPanel>
+                  <DetailSectionHeading
+                    eyebrow="Photo Updates"
+                    title="Latest Rehab Notes"
+                  />
+                  <div className="mt-5">
+                    <DetailBulletList items={galleryCaptions} />
+                  </div>
+                </DetailGlassPanel>
+              ) : null}
+
+              {noteParagraphs.length ? (
                 <DetailNarrativeBlock
-                  body={buyerFitParagraphs.map((paragraph, index) => (
+                  body={noteParagraphs.map((paragraph, index) => (
                     <p key={`${paragraph}-${index}`}>{paragraph}</p>
                   ))}
-                  eyebrow="Buyer Alignment"
-                  title="Buyer Fit"
+                  eyebrow={stageContent.detailNotesEyebrow}
+                  title={stageContent.detailNotesTitle}
                 />
               ) : null}
             </div>
 
-            {property.inquiryForm ? (
+            {showInquiryForm && property.inquiryForm ? (
               <div className="grid gap-6 lg:sticky lg:top-[96px] lg:self-start">
                 <div id="property-inquiry">
                   <PublicForm

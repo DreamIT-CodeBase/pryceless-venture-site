@@ -5,11 +5,10 @@ import featuredPropertiesLeftImage from "@/app/assets/featuredpropertieslegftbox
 import heroSectionImage from "@/app/assets/herosectionimage.jpg";
 import viewOpportunityHeaderIcon from "@/app/assets/viewoppertunitysvg.svg";
 import {
-  StandardCollectionCardLink,
   ThreeUpCollectionGrid,
-  standardCollectionButtonClassName,
 } from "@/components/public/collection-card-layout";
 import { EmptyCollectionCard } from "@/components/public/marketing-ui";
+import { OpportunityCard } from "@/components/public/opportunity-card";
 import { InvestmentVideoPreview } from "@/components/public/investment-video-preview";
 import { PageSectionHero } from "@/components/public/page-section-hero";
 import { SiteShell } from "@/components/public/site-shell";
@@ -201,94 +200,23 @@ export default async function InvestmentsPage() {
                   wideDesktopGap={32}
                 >
                   {investmentCards.map((investment, index) => (
-                    <StandardCollectionCardLink href={investment.href} key={`${investment.title}-${index}`}>
-                      <div className="px-[13px] pt-[13px]">
-                        <div className="relative h-[196px] overflow-hidden rounded-[14px] 2xl:h-[248px]">
-                          <Image
-                            alt={investment.title}
-                            className="object-cover"
-                            fill
-                            sizes="(max-width: 1023px) 100vw, (max-width: 1535px) 330px, 456px"
-                            src={investment.imageUrl}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-1 flex-col px-[13px] pb-[16px] pt-[14px]">
-                        <h3
-                          className="min-h-[42px] text-[19px] font-bold leading-[1.12] tracking-[-0.02em] text-[#131d36] 2xl:min-h-[52px] 2xl:text-[22px]"
-                          style={{
-                            WebkitBoxOrient: "vertical",
-                            WebkitLineClamp: 2,
-                            display: "-webkit-box",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {investment.title}
-                        </h3>
-                        <div className="mt-[7px] flex items-start gap-[6px] text-[12px] leading-[16px] text-[#6b7280] 2xl:text-[13px]">
-                          <svg aria-hidden="true" className="mt-[1px] h-[12px] w-[12px] shrink-0 fill-[#30343b]" viewBox="0 0 24 24">
-                            <path d="M12 2a7 7 0 0 0-7 7c0 4.8 5.18 10.88 6.2 12.03a1 1 0 0 0 1.5 0C13.82 19.88 19 13.8 19 9a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
-                          </svg>
-                          <p className="truncate">{investment.location}</p>
-                        </div>
-
-                        <p
-                          className="mt-[9px] text-[12px] leading-[1.45] tracking-[0] text-[#6b7280] 2xl:text-[13px] 2xl:leading-[1.5]"
-                          style={{
-                            WebkitBoxOrient: "vertical",
-                            WebkitLineClamp: 2,
-                            display: "-webkit-box",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {investment.summary}
-                        </p>
-
-                        <div className="mt-[10px] space-y-[8px] text-[11.5px] leading-[1.4] text-[#646b75] 2xl:text-[12px]">
-                          {investment.highlights.slice(0, 2).map((item, highlightIndex) => (
-                            <div className="flex items-start gap-[6px]" key={`${investment.title}-highlight-${highlightIndex}`}>
-                              <span className="mt-[2px] text-[12px] font-semibold leading-none text-[#16213e]">
-                                &#10003;
-                              </span>
-                              <p
-                                style={{
-                                  WebkitBoxOrient: "vertical",
-                                  WebkitLineClamp: 1,
-                                  display: "-webkit-box",
-                                  overflow: "hidden",
-                                }}
-                              >
-                                {item}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="mt-[12px] grid border-y border-[#d7d7d7] text-left sm:grid-cols-2">
-                          <div className="border-b border-[#d7d7d7] px-[13px] py-[9px] sm:border-b-0 sm:border-r">
-                            <p className="text-[11px] leading-[16px] text-[#6b7280] 2xl:text-[11.5px]">Status</p>
-                            <p className="mt-[2px] text-[13px] font-semibold leading-[18px] text-[#30343b] 2xl:text-[14px]">
-                              {investment.status}
-                            </p>
-                          </div>
-                          <div className="px-[13px] py-[9px]">
-                            <p className="text-[11px] leading-[16px] text-[#6b7280] 2xl:text-[11.5px]">Min Investment</p>
-                            <p className="mt-[2px] text-[13px] font-semibold leading-[18px] text-[#30343b] 2xl:text-[14px]">
-                              {investment.minimum}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="mt-[10px] text-left text-[11px] leading-[16px] text-[#6b7280] 2xl:text-[11.5px]">
-                          <span className="font-medium text-[#30343b]">Strategy:</span> {investment.strategy}
-                        </div>
-
-                        <div className="pt-[16px]">
-                          <span className={`${standardCollectionButtonClassName} max-w-[188px] whitespace-nowrap px-[20px] 2xl:max-w-[210px] 2xl:text-[13px]`}>{cardCtaLabel}</span>
-                        </div>
-                      </div>
-                    </StandardCollectionCardLink>
+                    <OpportunityCard
+                      bulletItems={investment.highlights}
+                      ctaLabel={cardCtaLabel}
+                      footer={{ label: "Strategy", value: investment.strategy }}
+                      href={investment.href}
+                      image={investment.imageUrl}
+                      imageAlt={investment.title}
+                      key={`${investment.title}-${index}`}
+                      metaIcon="location"
+                      metaText={investment.location}
+                      statItems={[
+                        { label: "Status", value: investment.status },
+                        { label: "Min Investment", value: investment.minimum },
+                      ]}
+                      summary={investment.summary}
+                      title={investment.title}
+                    />
                   ))}
                 </ThreeUpCollectionGrid>
               ) : (

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 
 type ImageUrlFieldProps = {
+  allowManualUrl?: boolean;
   description?: string;
   folder: string;
   initialValue?: string | null;
@@ -12,6 +13,7 @@ type ImageUrlFieldProps = {
 };
 
 export function ImageUrlField({
+  allowManualUrl = false,
   description,
   folder,
   initialValue,
@@ -88,7 +90,9 @@ export function ImageUrlField({
             <p className="max-w-[680px] text-sm text-slate-500">{description}</p>
           ) : null}
           <p className="mt-2 text-sm text-slate-500">
-            Production images are stored in Azure Blob Storage.
+            {allowManualUrl
+              ? "Upload an image to Azure Blob Storage or paste a direct image URL."
+              : "Production images are stored in Azure Blob Storage."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -124,12 +128,23 @@ export function ImageUrlField({
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
         <label className="block">
           <span className="mb-2 block text-sm font-medium text-slate-700">
-            Stored Azure Blob URL
+            {allowManualUrl ? "Image URL" : "Stored Azure Blob URL"}
           </span>
           <input
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-600"
-            placeholder="Upload an image to store it in Azure Blob Storage"
-            readOnly
+            className={`w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-600 ${
+              allowManualUrl ? "bg-white" : "bg-slate-50"
+            }`}
+            onChange={
+              allowManualUrl
+                ? (event) => setValue(event.target.value)
+                : undefined
+            }
+            placeholder={
+              allowManualUrl
+                ? "Paste a direct image URL or upload an image"
+                : "Upload an image to store it in Azure Blob Storage"
+            }
+            readOnly={!allowManualUrl}
             value={value}
           />
         </label>

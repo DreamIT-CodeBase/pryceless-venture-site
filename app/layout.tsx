@@ -14,7 +14,7 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Pryceless Venture",
   description:
-    "Vertically integrated real estate and PropTech investments, acquisitions, and analytics.",
+    "Real estate financing, acquisitions, and analytics for operators, borrowers, and deal-focused teams.",
 };
 
 export default function RootLayout({

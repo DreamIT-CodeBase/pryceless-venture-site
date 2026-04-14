@@ -92,16 +92,16 @@ const fallbackMetrics = [
 
 const fallbackSegments = [
   {
-    title: "Passive Investors",
-    body: "Earn passive income through structured real estate investments backed by data and operational discipline.",
-    ctaLabel: "View Opportunities",
-    ctaHref: "/investments",
+    title: "Borrowers",
+    body: "Secure financing for acquisitions, rehab projects, bridge timelines, and refinance scenarios.",
+    ctaLabel: "Get Financing",
+    ctaHref: "/get-financing",
   },
   {
-    title: "Active Investors",
-    body: "Scale your portfolio with access to capital, analytics, and execution support.",
-    ctaLabel: "Request Funding Information",
-    ctaHref: "/capital-rates",
+    title: "Operators",
+    body: "Move faster with loan programs built around execution speed, leverage clarity, and responsive underwriting.",
+    ctaLabel: "View Financing",
+    ctaHref: "/get-financing",
   },
   {
     title: "Sellers",
@@ -119,10 +119,10 @@ const fallbackSegments = [
 
 const fallbackPlatformCards = [
   {
-    title: "Investments",
-    body: "Curated passive and active investment opportunities.",
-    ctaLabel: "View Opportunities",
-    ctaHref: "/investments",
+    title: "Get Financing",
+    body: "Loan programs for fix-and-flip, refinance, bridge, and rental strategies.",
+    ctaLabel: "Apply Now",
+    ctaHref: "/get-financing",
   },
   {
     title: "Properties",
@@ -176,11 +176,28 @@ const formatDisplayValue = (value: string | null | undefined) =>
 const truncate = (value: string, limit: number) =>
   value.length > limit ? `${value.slice(0, limit).trim()}...` : value;
 
+const normalizeRemovedHref = (href: string | null | undefined, fallbackHref: string) =>
+  href === "/capital-rates" || href === "/investments" ? fallbackHref : href ?? fallbackHref;
+
+const normalizeRemovedLabel = (
+  href: string | null | undefined,
+  label: string | null | undefined,
+  fallbackLabel: string,
+) => (href === "/capital-rates" || href === "/investments" ? fallbackLabel : label ?? fallbackLabel);
+
 const getPropertyProgressPercent = (status: string | null | undefined) => {
   const normalizedStatus = String(status ?? "").trim().toUpperCase();
 
-  if (normalizedStatus.includes("AVAILABLE")) {
+  if (normalizedStatus.includes("FOR_SALE") || normalizedStatus.includes("AVAILABLE")) {
     return 64;
+  }
+
+  if (
+    normalizedStatus.includes("IN_PROGRESS") ||
+    normalizedStatus.includes("RENOV") ||
+    normalizedStatus.includes("REHAB")
+  ) {
+    return 76;
   }
 
   if (normalizedStatus.includes("COMING")) {
@@ -302,19 +319,34 @@ export default async function Home() {
     getSingletonPage("CASE_STUDIES_INDEX"),
   ]);
 
-  const defaultHeroSubheadline =
+  const legacyHeroHeadline = "Vertically-Integrated Real Estate & PropTech Investments";
+  const legacyHeroSubheadline =
     "Build wealth through institutional-grade real estate opportunities guided by data, technology, and disciplined execution.";
+  const defaultHeroSubheadline =
+    "Access reliable financing for acquisitions, rehab execution, bridge needs, and refinance strategies with a team built for real estate operators.";
   const heroHeadline =
-    homePage?.heroHeadline ?? "Vertically-Integrated Real Estate & PropTech Investments";
+    homePage?.heroHeadline === legacyHeroHeadline
+      ? "Get Financing for Your Real Estate Deals"
+      : homePage?.heroHeadline ?? "Get Financing for Your Real Estate Deals";
   const heroSubheadline =
-    homePage?.heroSubheadline ?? defaultHeroSubheadline;
+    homePage?.heroSubheadline === legacyHeroSubheadline
+      ? defaultHeroSubheadline
+      : homePage?.heroSubheadline ?? defaultHeroSubheadline;
   const primaryCta = {
-    href: homePage?.heroPrimaryCtaHref ?? "/investments",
-    label: homePage?.heroPrimaryCtaLabel ?? "View Opportunities",
+    href: normalizeRemovedHref(homePage?.heroPrimaryCtaHref, "/get-financing"),
+    label: normalizeRemovedLabel(
+      homePage?.heroPrimaryCtaHref,
+      homePage?.heroPrimaryCtaLabel,
+      "Get Financing",
+    ),
   };
   const secondaryCta = {
-    href: homePage?.heroSecondaryCtaHref ?? "/cash-offer",
-    label: homePage?.heroSecondaryCtaLabel ?? "Get a Cash Offer",
+    href: normalizeRemovedHref(homePage?.heroSecondaryCtaHref, "/cash-offer"),
+    label: normalizeRemovedLabel(
+      homePage?.heroSecondaryCtaHref,
+      homePage?.heroSecondaryCtaLabel,
+      "Get a Cash Offer",
+    ),
   };
   const homeMetrics = homePage?.metrics ?? [];
   const homeSegments = homePage?.segments ?? [];
@@ -335,9 +367,39 @@ export default async function Home() {
         }))
       : fallbackMetrics;
 
-  const segments = homeSegments.length ? homeSegments : fallbackSegments;
-  const platformCards = homePlatformCards.length ? homePlatformCards : fallbackPlatformCards;
-  const caseHighlights = homeCaseHighlights.length ? homeCaseHighlights : fallbackCaseHighlights;
+  const segments = (homeSegments.length ? homeSegments : fallbackSegments).map((segment, index) => ({
+    ...segment,
+    ctaHref: normalizeRemovedHref(
+      segment.ctaHref,
+      index === 2 ? "/cash-offer" : index === 3 ? "/properties" : "/get-financing",
+    ),
+    ctaLabel: normalizeRemovedLabel(
+      segment.ctaHref,
+      segment.ctaLabel,
+      index === 2 ? "Get a Cash Offer" : index === 3 ? "Request Details" : index === 1 ? "View Financing" : "Get Financing",
+    ),
+  }));
+  const platformCards = (homePlatformCards.length ? homePlatformCards : fallbackPlatformCards).map(
+    (card, index) => ({
+      ...card,
+      ctaHref: normalizeRemovedHref(
+        card.ctaHref,
+        index === 1 ? "/properties" : index === 2 ? "/calculators" : "/get-financing",
+      ),
+      ctaLabel: normalizeRemovedLabel(
+        card.ctaHref,
+        card.ctaLabel,
+        index === 1 ? "Request Details" : index === 2 ? "View Calculators" : "Apply Now",
+      ),
+    }),
+  );
+  const caseHighlights = (
+    homeCaseHighlights.length ? homeCaseHighlights : fallbackCaseHighlights
+  ).map((highlight) => ({
+    ...highlight,
+    ctaHref: normalizeRemovedHref(highlight.ctaHref, "/case-studies"),
+    ctaLabel: normalizeRemovedLabel(highlight.ctaHref, highlight.ctaLabel, "See Case Studies"),
+  }));
   const whoWeHelpShowcaseCards = segments.slice(0, 4).map((segment, index) => ({
     ...whoWeHelpVisuals[index % whoWeHelpVisuals.length],
     body: segment.body,
@@ -440,26 +502,37 @@ export default async function Home() {
       homePage?.aboutSectionParagraphTwo ??
         segments.slice(0, 2).map((segment) => segment.body).join(" "),
     ].filter(Boolean),
-    primaryCtaHref: homePage?.aboutSectionPrimaryCtaHref ?? primaryCta.href,
-    primaryCtaLabel: homePage?.aboutSectionPrimaryCtaLabel ?? primaryCta.label,
-    secondaryCtaHref: homePage?.aboutSectionSecondaryCtaHref ?? secondaryCta.href,
-    secondaryCtaLabel: homePage?.aboutSectionSecondaryCtaLabel ?? secondaryCta.label,
+    primaryCtaHref: normalizeRemovedHref(homePage?.aboutSectionPrimaryCtaHref, primaryCta.href),
+    primaryCtaLabel: normalizeRemovedLabel(
+      homePage?.aboutSectionPrimaryCtaHref,
+      homePage?.aboutSectionPrimaryCtaLabel,
+      primaryCta.label,
+    ),
+    secondaryCtaHref: normalizeRemovedHref(
+      homePage?.aboutSectionSecondaryCtaHref,
+      secondaryCta.href,
+    ),
+    secondaryCtaLabel: normalizeRemovedLabel(
+      homePage?.aboutSectionSecondaryCtaHref,
+      homePage?.aboutSectionSecondaryCtaLabel,
+      secondaryCta.label,
+    ),
     imageAlt: homePage?.aboutSectionImageAlt ?? "Interior bedroom",
     imageUrl: homePage?.aboutSectionImageUrl ?? aboutSectionImage.src,
   };
   const heroHeadingLines =
-    heroHeadline === "Vertically-Integrated Real Estate & PropTech Investments"
+    heroHeadline === "Get Financing for Your Real Estate Deals"
       ? [
-          "Vertically-Integrated",
-          "Real Estate & PropTech",
-          "Investments",
+          "Get Financing",
+          "for Your",
+          "Real Estate Deals",
         ]
       : [heroHeadline];
   const heroSubheadlineLines =
     heroSubheadline === defaultHeroSubheadline
       ? [
-          "Build wealth through institutional-grade real estate opportunities",
-          "guided by data, technology, and disciplined execution.",
+          "Access reliable financing for acquisitions, rehab execution,",
+          "bridge needs, and refinance strategies.",
         ]
       : null;
   const homeSectionTitleClassName =
@@ -467,7 +540,7 @@ export default async function Home() {
   const homeSectionSubtitleClassName =
     "text-[15px] font-normal leading-[1.5] tracking-[-0.01em] sm:text-[16px] lg:max-w-none lg:text-[14px] lg:leading-[20px] lg:tracking-[0]";
   return (
-    <SiteShell cta={primaryCta}>
+    <SiteShell>
       <section className="w-full">
         <div
           className="relative isolate overflow-hidden bg-[#09152d] min-h-[620px] sm:min-h-[660px] lg:min-h-0 lg:aspect-[3327/1392] 2xl:aspect-[3327/1280]"
@@ -692,28 +765,15 @@ export default async function Home() {
         className="relative overflow-hidden bg-white pt-[84px] pb-[74px] sm:pt-[90px] sm:pb-[82px] lg:pt-[88px] lg:pb-[72px]"
         style={{ fontFamily: "var(--font-poppins), sans-serif" }}
       >
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute bottom-[-82px] left-[-300px] h-[560px] w-[1320px] opacity-[0.98] sm:bottom-[-94px] sm:left-[-280px] sm:h-[620px] sm:w-[1460px] lg:bottom-[-108px] lg:left-[-250px] lg:h-[700px] lg:w-[1640px]">
-            <Image
-              alt=""
-              aria-hidden
-              className="h-full w-full object-contain object-left-bottom"
-              priority
-              sizes="1640px"
-              src={featuredPropertiesSectionBg}
-            />
-          </div>
-          <div className="absolute right-[-420px] top-[126px] h-[470px] w-[1120px] scale-x-[-1] opacity-[0.74] sm:right-[-380px] sm:top-[118px] sm:h-[540px] sm:w-[1260px] lg:right-[-320px] lg:top-[112px] lg:h-[610px] lg:w-[1420px]">
-            <Image
-              alt=""
-              aria-hidden
-              className="h-full w-full object-contain object-right-top"
-              sizes="1420px"
-              src={featuredPropertiesSectionBg}
-            />
-          </div>
-          <div className="absolute inset-x-0 top-0 h-[220px] bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.34)_58%,rgba(255,255,255,0)_100%)]" />
-        </div>
+        <Image
+          alt=""
+          aria-hidden
+          className="object-cover object-center"
+          fill
+          sizes="100vw"
+          src={testimonialBg}
+        />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.34)_58%,rgba(255,255,255,0)_100%)]" />
 
         <div className="relative mx-auto w-full max-w-[1905px] px-4 sm:px-6 lg:px-[180px] 2xl:px-[220px]">
           <div className="mx-auto mt-[-52px] max-w-[1000px] text-center lg:mt-[-48px] lg:max-w-[858px] 2xl:max-w-[1020px]">
@@ -766,14 +826,14 @@ export default async function Home() {
                 className={`text-center text-white ${homeSectionTitleClassName}`}
                 style={{ color: "#ffffff", fontFamily: "var(--font-poppins), sans-serif", fontWeight: 700 }}
               >
-                Our Investment Opportunities
+                Flexible Financing Solutions
               </h2>
               <div className="mt-[8px] flex justify-center lg:mt-[2px]">
                 <p
                   className={`max-w-[720px] text-center text-white/84 ${homeSectionSubtitleClassName}`}
                   style={{ color: "rgba(255,255,255,0.84)", fontFamily: "var(--font-poppins), sans-serif" }}
                 >
-                  Discover carefully curated investment opportunities designed to generate sustainable returns.
+                  Compare active lending programs and move directly into the application flow that fits your deal.
                 </p>
               </div>
             </div>

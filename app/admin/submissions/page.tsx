@@ -7,7 +7,7 @@ export default async function AdminSubmissionsPage() {
   const submissions = await getFormSubmissionsAdmin();
 
   return (
-    <AdminShell title="Submissions" subtitle="Review every form submission, monitor email delivery, and verify incoming lead details.">
+    <AdminShell title="Submissions" subtitle="Review every form submission, monitor email and webhook delivery, and verify incoming lead details.">
       <div className="space-y-4">
         {submissions.length ? (
           submissions.map((submission) => (
@@ -25,8 +25,13 @@ export default async function AdminSubmissionsPage() {
                     {submission.sourcePath ? ` • ${submission.sourcePath}` : ""}
                   </p>
                 </div>
-                <div className="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">
-                  Email {submission.submissionEmailStatus}
+                <div className="flex flex-wrap gap-2">
+                  <div className="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">
+                    Email {submission.submissionEmailStatus}
+                  </div>
+                  <div className="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">
+                    Webhook {submission.submissionWebhookStatus}
+                  </div>
                 </div>
               </div>
               <dl className="mt-6 grid gap-4 md:grid-cols-2">
@@ -39,6 +44,9 @@ export default async function AdminSubmissionsPage() {
               </dl>
               {submission.emailError ? (
                 <p className="mt-4 text-sm text-rose-600">{submission.emailError}</p>
+              ) : null}
+              {submission.webhookError ? (
+                <p className="mt-2 text-sm text-rose-600">{submission.webhookError}</p>
               ) : null}
             </article>
           ))

@@ -1,22 +1,38 @@
-import Image from "next/image";
-
 import aboutSectionImage from "@/app/assets/aboutsectionimage.jpg";
 import featuredPropertiesLeftImage from "@/app/assets/featuredpropertieslegftboximage.png";
 import featuredPropertiesRightLowerImage from "@/app/assets/featuredpropoertiesrightboxlowerimage.jpg";
 import featuredPropertiesRightUpperImage from "@/app/assets/featuredpropertiesstaicrightupperboximages.jpg";
 import heroSectionImage from "@/app/assets/herosectionimage.jpg";
-import {
-  StandardCollectionCardLink,
-  ThreeUpCollectionGrid,
-  standardCollectionButtonClassName,
-} from "@/components/public/collection-card-layout";
-import { EmptyCollectionCard } from "@/components/public/marketing-ui";
 import { PageSectionHero } from "@/components/public/page-section-hero";
+import { PropertyStageFilter } from "@/components/public/property-stage-filter";
 import { SiteShell } from "@/components/public/site-shell";
 import { getPublishedProperties, getSingletonPage } from "@/lib/data/public";
 import { resolvePrimaryImage } from "@/lib/media";
+import {
+  formatPropertyStatusLabel,
+  getPropertyPortfolioStage,
+  getPropertyStageContent,
+  parsePropertyHighlights,
+  propertyPortfolioStageOrder,
+  type PropertyPortfolioStage,
+} from "@/lib/property-portfolio";
 
 export const revalidate = 300;
+
+type PortfolioCard = {
+  address: string;
+  bulletItems: string[];
+  ctaLabel: string;
+  href: string;
+  id: string;
+  imageAlt: string;
+  imageUrl: string;
+  propertyType: string;
+  statItems: Array<{ label: string; value: string }>;
+  strategy: string;
+  summary: string;
+  title: string;
+};
 
 const fallbackImages = [
   featuredPropertiesLeftImage.src,
@@ -26,44 +42,83 @@ const fallbackImages = [
   heroSectionImage.src,
 ];
 
-const fallbackProperties = [
-  {
-    address: "Illustrative property sourced through our network",
-    annualReturn: "Available",
-    id: "fallback-property-1",
-    imageUrl: featuredPropertiesLeftImage.src,
-    progressPercent: 64,
-    propertyType: "Commercial",
-    raisedSummary: "Representative listing preview aligned with the phase-1 layout requirements.",
-    strategy: "Buy & Hold",
-    title: "Illustrative Property",
-    href: "/properties",
-  },
-  {
-    address: "Illustrative property sourced through our network",
-    annualReturn: "Coming Soon",
-    id: "fallback-property-2",
-    imageUrl: featuredPropertiesRightUpperImage.src,
-    progressPercent: 64,
-    propertyType: "Residential",
-    raisedSummary: "Representative listing preview aligned with the phase-1 layout requirements.",
-    strategy: "Value-Add",
-    title: "Illustrative Property",
-    href: "/properties",
-  },
-  {
-    address: "Illustrative property sourced through our network",
-    annualReturn: "Under Contract",
-    id: "fallback-property-3",
-    imageUrl: featuredPropertiesRightLowerImage.src,
-    progressPercent: 64,
-    propertyType: "Multifamily",
-    raisedSummary: "Representative listing preview aligned with the phase-1 layout requirements.",
-    strategy: "Turnkey",
-    title: "Illustrative Property",
-    href: "/properties",
-  },
-];
+const legacyPropertiesPageTitles = new Set(["Available Properties", "Property Portfolio"]);
+const legacyPropertiesPageIntros = new Set([
+  "Explore a selection of properties sourced through our acquisition channels and partner network.",
+  "Explore Pryceless Ventures' portfolio across properties for sale, completed executions, and renovation projects currently in progress.",
+]);
+
+const fallbackPortfolioCards: Record<PropertyPortfolioStage, PortfolioCard[]> = {
+  FOR_SALE: [
+    {
+      address: "Illustrative active listing",
+      bulletItems: [
+        "Showcase the property, positioning, and buyer-fit story here.",
+        "Use the inquiry flow to collect interest on active inventory.",
+      ],
+      ctaLabel: "Request Details",
+      href: "/properties",
+      id: "fallback-property-for-sale",
+      imageAlt: "Illustrative for-sale property",
+      imageUrl: featuredPropertiesLeftImage.src,
+      propertyType: "Residential",
+      statItems: [
+        { label: "Status", value: "For Sale" },
+        { label: "Property Type", value: "Residential" },
+      ],
+      strategy: "Fix & Flip",
+      summary:
+        "Active portfolio listing preview aligned with the current Pryceless property card design.",
+      title: "Illustrative For Sale Property",
+    },
+  ],
+  SOLD: [
+    {
+      address: "Illustrative completed execution",
+      bulletItems: [
+        "Use sold deals to show underwriting discipline and execution skill.",
+        "Purchase, rehab, and sale outcomes can be surfaced on the card.",
+      ],
+      ctaLabel: "View Underwriting",
+      href: "/properties",
+      id: "fallback-property-sold",
+      imageAlt: "Illustrative sold property",
+      imageUrl: featuredPropertiesRightUpperImage.src,
+      propertyType: "Residential",
+      statItems: [
+        { label: "Purchase Price", value: "$248,000" },
+        { label: "Selling Price", value: "$389,000" },
+      ],
+      strategy: "Value-Add",
+      summary:
+        "Completed Pryceless project preview showing how sold assets can act like mini case studies.",
+      title: "Illustrative Sold Property",
+    },
+  ],
+  IN_PROGRESS: [
+    {
+      address: "Illustrative renovation project",
+      bulletItems: [
+        "Keep this profile updated with rehab milestones and current notes.",
+        "Add new site photos so the renovation story evolves over time.",
+      ],
+      ctaLabel: "View Progress",
+      href: "/properties",
+      id: "fallback-property-in-progress",
+      imageAlt: "Illustrative renovation project",
+      imageUrl: featuredPropertiesRightLowerImage.src,
+      propertyType: "Residential",
+      statItems: [
+        { label: "Current Phase", value: "Interior Framing" },
+        { label: "Target Finish", value: "Q3 2026" },
+      ],
+      strategy: "Fix & Flip",
+      summary:
+        "Active rehab preview showing how in-progress properties can share renovation updates and fresh images.",
+      title: "Illustrative In Progress Property",
+    },
+  ],
+};
 
 const formatDisplayValue = (value: string | null | undefined) =>
   String(value ?? "")
@@ -75,66 +130,35 @@ const formatDisplayValue = (value: string | null | undefined) =>
 const truncate = (value: string, limit: number) =>
   value.length > limit ? `${value.slice(0, limit).trim()}...` : value;
 
-const getPropertyProgressPercent = (status: string | null | undefined) => {
-  const normalizedStatus = String(status ?? "").trim().toUpperCase();
+const getCardStatItems = ({
+  metrics,
+  propertyType,
+  stage,
+  statusLabel,
+}: {
+  metrics: Array<{ label: string; value: string }>;
+  propertyType: string;
+  stage: PropertyPortfolioStage;
+  statusLabel: string;
+}) => {
+  const metricItems = metrics.slice(0, 2).map((item) => ({
+    label: truncate(item.label, 22),
+    value: truncate(item.value, 24),
+  }));
 
-  if (normalizedStatus.includes("AVAILABLE")) {
-    return 64;
-  }
+  const fallbackItems =
+    stage === "FOR_SALE"
+      ? [
+          { label: "Status", value: statusLabel || "For Sale" },
+          { label: "Property Type", value: propertyType },
+        ]
+      : [
+          { label: "Stage", value: formatDisplayValue(stage) },
+          { label: "Property Type", value: propertyType },
+        ];
 
-  if (normalizedStatus.includes("COMING")) {
-    return 42;
-  }
-
-  if (normalizedStatus.includes("UNDER") || normalizedStatus.includes("PENDING")) {
-    return 82;
-  }
-
-  if (normalizedStatus.includes("SOLD") || normalizedStatus.includes("CLOSED")) {
-    return 100;
-  }
-
-  return 56;
+  return [...metricItems, ...fallbackItems].slice(0, 2);
 };
-
-function LocationPinIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      viewBox="0 0 14 18"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M7 16.5c2.4-3.2 3.6-5.6 3.6-7.2A3.6 3.6 0 1 0 3.4 9.3c0 1.6 1.2 4 3.6 7.2Z"
-        fill="currentColor"
-      />
-      <circle cx="7" cy="7.1" fill="#fff" r="1.55" />
-    </svg>
-  );
-}
-
-function ClockIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      viewBox="0 0 14 14"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="7" cy="7" fill="currentColor" r="5.8" />
-      <path
-        d="M7 4.15v3.1l2.03 1.17"
-        stroke="#fff"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.25"
-      />
-    </svg>
-  );
-}
 
 export default async function PropertiesPage() {
   const [page, properties] = await Promise.all([
@@ -142,136 +166,93 @@ export default async function PropertiesPage() {
     getPublishedProperties(),
   ]);
 
+  const heroTitle =
+    page?.pageTitle && !legacyPropertiesPageTitles.has(page.pageTitle)
+      ? page.pageTitle
+      : "Properties";
   const heroIntro =
-    page?.intro ??
-    "Explore a selection of properties sourced through our acquisition channels and partner network.";
-  const cardCtaLabel = page?.ctaLabel ?? "Request Details";
+    page?.intro && !legacyPropertiesPageIntros.has(page.intro)
+      ? page.intro
+      : "Browse for-sale listings, sold deals, and active rehab updates.";
 
-  const propertyCards = properties.length
-    ? properties.map((property, index) => {
-        const fallbackCard = fallbackProperties[index % fallbackProperties.length];
-        const propertyImage = resolvePrimaryImage(property) || fallbackImages[index % fallbackImages.length];
-        const location = [property.locationCity, property.locationState].filter(Boolean).join(", ");
+  const groupedCards = {
+    FOR_SALE: [] as PortfolioCard[],
+    SOLD: [] as PortfolioCard[],
+    IN_PROGRESS: [] as PortfolioCard[],
+  };
 
-        return {
-          address: truncate(location || property.title || fallbackCard.address, 34),
-          annualReturn: formatDisplayValue(property.status) || fallbackCard.annualReturn,
-          href: `/properties/${property.slug}`,
-          id: property.id,
-          imageUrl: propertyImage,
-          progressPercent: getPropertyProgressPercent(property.status),
-          propertyType: formatDisplayValue(property.propertyType) || fallbackCard.propertyType,
-          raisedSummary: truncate(property.summary, 92),
-          strategy: formatDisplayValue(property.strategy) || fallbackCard.strategy,
-          title: truncate(property.locationCity?.trim() || fallbackCard.title, 22),
-        };
-      })
-    : fallbackProperties;
+  properties.forEach((property, index) => {
+    const stage = getPropertyPortfolioStage(property.status);
+    const fallbackCard =
+      fallbackPortfolioCards[stage][index % fallbackPortfolioCards[stage].length];
+    const propertyImage =
+      resolvePrimaryImage(property) || fallbackImages[index % fallbackImages.length];
+    const location = [property.locationCity, property.locationState].filter(Boolean).join(", ");
+    const propertyType = formatDisplayValue(property.propertyType) || fallbackCard.propertyType;
+    const strategy = formatDisplayValue(property.strategy) || fallbackCard.strategy;
+    const statusLabel = formatPropertyStatusLabel(property.status);
+    const parsedHighlights = parsePropertyHighlights(
+      property.highlights.map((item) => item.highlight),
+    );
+    const stageContent = getPropertyStageContent(stage);
+    const bulletItems = (
+      parsedHighlights.bullets.length
+        ? parsedHighlights.bullets
+        : fallbackCard.bulletItems
+    ).map((item) => truncate(item, 48));
+
+    groupedCards[stage].push({
+      address: truncate(location || property.title || fallbackCard.address, 34),
+      bulletItems,
+      ctaLabel:
+        stage === "FOR_SALE"
+          ? page?.ctaLabel ?? stageContent.cardCtaLabel
+          : stageContent.cardCtaLabel,
+      href: `/properties/${property.slug}`,
+      id: property.id,
+      imageAlt: `${property.title} portfolio property`,
+      imageUrl: propertyImage,
+      propertyType,
+      statItems: getCardStatItems({
+        metrics: parsedHighlights.metrics,
+        propertyType,
+        stage,
+        statusLabel,
+      }),
+      strategy,
+      summary: truncate(property.summary || fallbackCard.summary, 92),
+      title: truncate(property.title || fallbackCard.title, 42),
+    });
+  });
+
+  const portfolioSections = propertyPortfolioStageOrder
+    .map((stage) => {
+      const stageContent = getPropertyStageContent(stage);
+
+      return {
+        emptyMessage: stageContent.emptyMessage,
+        cards: properties.length ? groupedCards[stage] : fallbackPortfolioCards[stage],
+        count: groupedCards[stage].length,
+        helper:
+          stage === "FOR_SALE"
+            ? "See active listings"
+            : stage === "SOLD"
+              ? "See sold properties"
+              : "See current rehab projects",
+        stage,
+        title: stageContent.indexTitle,
+      };
+    });
 
   return (
     <SiteShell cta={{ href: "/cash-offer", label: "Sell a Property" }}>
       <div className="pb-[92px]">
-        <PageSectionHero
-          currentLabel={page?.pageTitle ?? "Properties"}
-          intro={heroIntro}
-          title={page?.pageTitle ?? "Available Properties"}
-        />
+        <PageSectionHero currentLabel={heroTitle} intro={heroIntro} title={heroTitle} />
 
         <section className="bg-white px-4 pt-[48px] sm:px-6 lg:px-0 lg:pt-[64px] 2xl:pt-[76px]">
           <div className="mx-auto w-full 2xl:max-w-[1760px] 2xl:px-[164px]">
-            <div className="mx-auto flex max-w-[662px] flex-col items-center text-center 2xl:mx-0 2xl:max-w-[720px] 2xl:items-start 2xl:text-left">
-              <p className="text-center whitespace-nowrap text-[15px] font-medium uppercase leading-[20px] tracking-[0.03em] text-[#bf9375] lg:text-[15.5px] lg:leading-[22px] 2xl:text-left">
-                Investment Deals
-              </p>
-              <h2 className="mt-[8px] w-full text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[-0.02em] 2xl:max-w-[720px] 2xl:text-[42px] 2xl:leading-[1.08] 2xl:tracking-[-0.04em]">
-                {page?.pageTitle ?? "Available Properties"}
-              </h2>
-            </div>
-
-            <div className="mx-auto mt-[42px] w-full 2xl:mt-[48px]">
-              {propertyCards.length ? (
-                <ThreeUpCollectionGrid
-                  desktopCardWidth={320}
-                  desktopGap={38}
-                  wideDesktopCardWidth={456}
-                  wideDesktopGap={32}
-                >
-                  {propertyCards.map((property) => (
-                    <StandardCollectionCardLink href={property.href} key={property.id}>
-                      <div className="px-[13px] pt-[13px]">
-                        <div className="relative h-[196px] overflow-hidden rounded-[14px] 2xl:h-[248px]">
-                          <Image
-                            alt={`${property.title} featured property`}
-                            className="object-cover"
-                            fill
-                            sizes="(max-width: 1535px) 320px, 456px"
-                            src={property.imageUrl}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-1 flex-col px-[13px] pb-[16px] pt-[14px]">
-                        <h3 className="min-h-[42px] text-left text-[19px] font-bold leading-[1.12] tracking-[-0.02em] text-[rgba(15,23,42,1)] 2xl:min-h-[50px] 2xl:text-[22px]">
-                          {property.title}
-                        </h3>
-
-                        <p className="mt-[6px] flex items-center gap-[5px] text-left text-[11.5px] font-normal leading-[16px] tracking-[0] text-[rgba(97,97,97,1)] 2xl:text-[12.5px]">
-                          <LocationPinIcon className="h-[13px] w-[11px] shrink-0 text-[rgba(43,47,56,1)]" />
-                          <span className="truncate">{property.address}</span>
-                        </p>
-
-                        <div className="mt-[11px] h-[8px] overflow-hidden rounded-full bg-[rgba(231,236,242,1)]">
-                          <div
-                            className="h-full rounded-full bg-[linear-gradient(90deg,#29d869_0%,#39cf7b_100%)]"
-                            style={{ width: `${property.progressPercent}%` }}
-                          />
-                        </div>
-
-                        <p className="mt-[8px] text-left text-[11.5px] font-normal leading-[16px] tracking-[0] text-[rgba(97,97,97,1)] 2xl:text-[12.5px] 2xl:leading-[1.55]">
-                          {property.raisedSummary}
-                        </p>
-
-                        <div className="mt-[15px] grid grid-cols-2 border-y border-[rgba(215,215,215,1)]">
-                          <div className="px-[13px] py-[9px]">
-                            <p className="text-left text-[11px] font-normal leading-[16px] tracking-[0] text-[rgba(97,97,97,1)] 2xl:text-[11.5px]">
-                              Status
-                            </p>
-                            <p className="mt-[2px] text-left text-[11.5px] font-semibold leading-[16px] tracking-[0] text-[rgba(53,53,53,1)] 2xl:text-[13px]">
-                              {property.annualReturn}
-                            </p>
-                          </div>
-                          <div className="border-l border-[rgba(215,215,215,1)] px-[13px] py-[9px]">
-                            <p className="text-left text-[11px] font-normal leading-[16px] tracking-[0] text-[rgba(97,97,97,1)] 2xl:text-[11.5px]">
-                              Property Type
-                            </p>
-                            <p className="mt-[2px] text-left text-[11.5px] font-semibold leading-[16px] tracking-[0] text-[rgba(53,53,53,1)] 2xl:text-[13px]">
-                              {property.propertyType}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="mt-auto flex items-center justify-between gap-[12px] pt-[20px]">
-                          <div className="min-w-0">
-                            <p className="text-left text-[10px] font-normal leading-[14px] tracking-[0] text-[rgba(97,97,97,1)] 2xl:text-[10.5px]">
-                              Strategy
-                            </p>
-                            <div className="mt-[3px] flex items-center gap-[4px]">
-                              <ClockIcon className="h-[11px] w-[11px] shrink-0 text-[rgba(43,47,56,1)]" />
-                              <p className="truncate text-left text-[13px] font-bold leading-[16px] tracking-[0] text-[rgba(15,23,42,1)] 2xl:text-[14px]">
-                                {property.strategy}
-                              </p>
-                            </div>
-                          </div>
-
-                          <span className={`${standardCollectionButtonClassName} 2xl:max-w-[188px] 2xl:text-[13px]`}>{cardCtaLabel}</span>
-                        </div>
-                      </div>
-                    </StandardCollectionCardLink>
-                  ))}
-                </ThreeUpCollectionGrid>
-              ) : (
-                <EmptyCollectionCard message="Published properties will appear here after the admin team publishes them." />
-              )}
+            <div className="mx-auto mt-[12px] w-full 2xl:mt-[18px]">
+              <PropertyStageFilter sections={portfolioSections} />
             </div>
 
             {page?.disclaimer ? (

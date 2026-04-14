@@ -1,20 +1,22 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { CalculatorWorkbench } from "@/components/public/calculator-workbench";
+import { PageSectionHero } from "@/components/public/page-section-hero";
 import {
   DetailBadgeRow,
-  DetailBreadcrumbs,
   DetailGlassPanel,
   DetailNarrativeBlock,
   DetailPageCanvas,
   DetailSection,
   DetailSectionHeading,
   detailPrimaryButtonClassName,
-  detailSecondaryButtonClassName,
 } from "@/components/public/slug-detail-ui";
 import { SiteShell } from "@/components/public/site-shell";
-import { normalizeCalculatorType } from "@/lib/calculator-content";
+import {
+  getCanonicalCalculatorPath,
+  normalizeCalculatorType,
+} from "@/lib/calculator-content";
 import { getPublishedCalculator } from "@/lib/data/public";
 
 export const revalidate = 300;
@@ -39,6 +41,12 @@ export default async function CalculatorDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const canonicalPath = getCanonicalCalculatorPath({ slug });
+
+  if (canonicalPath !== `/calculators/${slug}`) {
+    redirect(canonicalPath);
+  }
+
   const publishedCalculator = await getPublishedCalculator(slug);
   const calculator = publishedCalculator
     ? {
@@ -51,51 +59,48 @@ export default async function CalculatorDetailPage({
     notFound();
   }
 
+  const canonicalTypePath = getCanonicalCalculatorPath({
+    calculatorType: calculator.calculatorType,
+    slug,
+  });
+
+  if (canonicalTypePath !== `/calculators/${slug}`) {
+    redirect(canonicalTypePath);
+  }
+
   const descriptionParagraphs = splitParagraphs(calculator.shortDescription);
   const disclaimerParagraphs = splitParagraphs(calculator.disclaimer);
 
   return (
-    <SiteShell cta={{ href: "/capital-rates", label: "Request Funding Info" }}>
+    <SiteShell>
       <DetailPageCanvas>
-        <DetailSection className="pb-16 pt-10 sm:pt-12 lg:pb-20 lg:pt-14">
-          <DetailBreadcrumbs currentLabel={calculator.title} href="/calculators" hrefLabel="Calculators" />
+        <PageSectionHero
+          currentLabel={calculator.title}
+          intro={calculator.shortDescription}
+          title={calculator.title}
+        />
 
-          <div className="mt-7 max-w-[760px]">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.34em] text-[#bf9375] sm:text-[13px]">
-              Calculator Detail
-            </p>
-            <h1 className="mt-4 text-[32px] font-semibold leading-[1.04] tracking-[-0.045em] text-[#111827] sm:text-[46px] lg:text-[56px]">
-              {calculator.title}
-            </h1>
-            <p className="mt-5 max-w-[640px] text-[16px] leading-[1.85] text-slate-700 sm:text-[17px]">
-              {calculator.shortDescription}
-            </p>
-
-            <div className="mt-7">
+        <section className="bg-white px-4 pt-[40px] sm:px-6 sm:pt-[44px] lg:px-0 lg:pt-[56px] 2xl:pt-[64px]">
+          <div className="mx-auto w-full max-w-[1480px] 2xl:max-w-[1760px] lg:px-[125px] 2xl:px-[164px]">
+            <div className="flex flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
               <DetailBadgeRow items={[formatDisplayValue(calculator.calculatorType)]} />
-            </div>
-
-            <div className="mt-7 flex flex-wrap gap-3">
               <Link className={detailPrimaryButtonClassName} href="/calculators">
                 Browse Calculators
               </Link>
-              <Link className={detailSecondaryButtonClassName} href="/capital-rates">
-                Request Funding Information
-              </Link>
+            </div>
+
+            <div className="mt-7">
+              <CalculatorWorkbench
+                calculatorType={calculator.calculatorType}
+                disclaimer={calculator.disclaimer}
+                shortDescription={calculator.shortDescription}
+                title={calculator.title}
+              />
             </div>
           </div>
-        </DetailSection>
+        </section>
 
-        <DetailSection className="pb-14 lg:pb-18">
-          <CalculatorWorkbench
-            calculatorType={calculator.calculatorType}
-            disclaimer={calculator.disclaimer}
-            shortDescription={calculator.shortDescription}
-            title={calculator.title}
-          />
-        </DetailSection>
-
-        <DetailSection className="pb-14 lg:pb-18">
+        <DetailSection className="pb-14 pt-10 lg:pb-18 lg:pt-12">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
             <DetailNarrativeBlock
               body={descriptionParagraphs.map((paragraph, index) => (

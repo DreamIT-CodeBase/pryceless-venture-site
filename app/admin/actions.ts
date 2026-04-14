@@ -10,6 +10,14 @@ import { requireAdminSession } from "@/lib/authz";
 import type { AdminFlash } from "@/lib/admin-flash";
 import { isAzureBlobStorageUrl } from "@/lib/blob";
 import { singletonPageGroups } from "@/lib/content-blueprint";
+import { parseFormFieldsEditorValue } from "@/lib/form-fields";
+import {
+  deleteFallbackLoanProgram,
+  ensureUniqueFallbackLoanProgramSlug,
+  getFallbackLoanProgram,
+  upsertFallbackLoanProgram,
+} from "@/lib/loan-program-fallback-store";
+import { getPropertyEditorStatus, propertyStatusValues } from "@/lib/property-portfolio";
 import { prisma } from "@/lib/prisma";
 import { asOptionalString, parseJson, slugify } from "@/lib/utils";
 
@@ -50,7 +58,7 @@ const baseEntitySchema = z.object({
 });
 
 const propertySchema = baseEntitySchema.extend({
-  status: z.enum(["AVAILABLE", "COMING_SOON", "UNDER_CONTRACT", "SOLD", "ILLUSTRATIVE"]),
+  status: z.enum(propertyStatusValues),
   locationCity: z.string().optional(),
   locationState: z.string().optional(),
   propertyType: z.enum(["SFR", "MULTIFAMILY", "COMMERCIAL", "LAND", "OTHER"]),
@@ -78,18 +86,47 @@ const caseStudySchema = baseEntitySchema.extend({
   outcomeSummary: z.string().min(10),
 });
 
+const blogPostSchema = baseEntitySchema.extend({
+  authorName: z.string().optional(),
+  category: z.string().min(2),
+  content: z.string().min(10),
+  excerpt: z.string().min(10),
+  featuredImageAlt: z.string().optional(),
+  featuredImageUrl: z.string().optional(),
+  readTime: z.string().optional(),
+});
+
 const calculatorSchema = baseEntitySchema.extend({
   calculatorType: z.enum(["ROI", "BRRRR", "MORTGAGE", "VALUE_ADD"]),
   shortDescription: z.string().optional(),
   disclaimer: z.string().min(10),
 });
 
+const loanProgramSchema = baseEntitySchema.extend({
+  shortDescription: z.string().min(10),
+  fullDescription: z.string().min(10),
+  interestRate: z.string().optional(),
+  ltv: z.string().optional(),
+  loanTerm: z.string().optional(),
+  fees: z.string().optional(),
+  minAmount: z.string().optional(),
+  maxAmount: z.string().optional(),
+  keyHighlights: z.string().optional(),
+  crmTag: z.string().optional(),
+  imageUrl: z.string().optional(),
+  imageAlt: z.string().optional(),
+  isActive: z.boolean(),
+  sortOrder: z.number().int().min(0),
+});
+
 const formSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   formName: z.string().min(2),
   slug: z.string().min(2),
   destination: z.enum(["EMAIL", "CRM", "BOTH"]),
   successMessage: z.string().min(5),
+  webhookUrl: z.string().optional(),
+  linkedLoanProgramId: z.string().optional(),
   isActive: z.boolean(),
 });
 
@@ -101,6 +138,17 @@ const parseSimpleLines = (value: string | undefined) =>
 
 const parsePipeRows = (value: string | undefined) =>
   parseSimpleLines(value).map((line) => line.split("|").map((segment) => segment.trim()));
+
+const parseOptionalDateValue = (value: string | null | undefined) => {
+  const trimmedValue = String(value ?? "").trim();
+
+  if (!trimmedValue) {
+    return undefined;
+  }
+
+  const parsedDate = new Date(trimmedValue);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
 
 const parseSingletonPageGroupRows = (
   group: { supportsBody?: boolean },
@@ -369,6 +417,324 @@ const handleWriteError = async (
   throw error;
 };
 
+const getBlogPostDelegate = () =>
+  (prisma as unknown as {
+    blogPost?: {
+      create: (args: unknown) => Promise<any>;
+      delete: (args: unknown) => Promise<any>;
+      findUnique: (args: unknown) => Promise<any>;
+      update: (args: unknown) => Promise<any>;
+    };
+  }).blogPost;
+
+const isBlogSchemaCompatibilityError = (error: unknown) => {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "";
+
+  return (
+    message.includes("Invalid object name") ||
+    message.includes("Unknown field") ||
+    message.includes("Unknown argument") ||
+    message.includes("Unknown selection field") ||
+    message.includes("blogPost") ||
+    message.includes("BlogPost") ||
+    message.includes("featuredImageUrl") ||
+    message.includes("featuredImageAlt") ||
+    message.includes("publishedAt") ||
+    message.includes("authorName") ||
+    message.includes("readTime") ||
+    message.includes("excerpt") ||
+    message.includes("content")
+  );
+};
+
+const redirectWithBlogMigrationError = async (path: string): Promise<never> =>
+  redirectWithErrorMessage(
+    path,
+    "Blog posts need the latest database migration applied and the dev server restarted before they can be edited from the CMS.",
+    "Migration required",
+  );
+
+const isFormSchemaCompatibilityError = (error: unknown) => {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "";
+
+  return (
+    message.includes("Unknown field `linkedLoanProgram`") ||
+    message.includes("Unknown argument `linkedLoanProgramId`") ||
+    message.includes("Unknown argument `webhookUrl`") ||
+    message.includes("Unknown argument `options`") ||
+    message.includes("Unknown field `options`") ||
+    message.includes("Unknown field `submissionWebhookStatus`") ||
+    message.includes("Unknown field `webhookError`") ||
+    message.includes("Invalid column name 'linkedLoanProgramId'") ||
+    message.includes("Invalid column name 'webhookUrl'") ||
+    message.includes("Invalid column name 'options'")
+  );
+};
+
+const isLoanProgramSchemaCompatibilityError = (error: unknown) => {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "";
+
+  return (
+    message.includes("Invalid object name") ||
+    message.includes("Unknown field") ||
+    message.includes("Unknown argument") ||
+    message.includes("Unknown selection field") ||
+    message.includes("loanProgram") ||
+    message.includes("LoanProgram")
+  );
+};
+
+const getExistingLoanProgramContext = async (id: string) => {
+  try {
+    return await prisma.loanProgram.findUnique({
+      where: { id },
+      select: {
+        crmTag: true,
+        fees: true,
+        fullDescription: true,
+        id: true,
+        imageAlt: true,
+        imageUrl: true,
+        interestRate: true,
+        isActive: true,
+        keyHighlights: true,
+        lifecycleStatus: true,
+        loanTerm: true,
+        ltv: true,
+        maxAmount: true,
+        minAmount: true,
+        shortDescription: true,
+        slug: true,
+        sortOrder: true,
+        title: true,
+      },
+    });
+  } catch (error) {
+    if (!isLoanProgramSchemaCompatibilityError(error)) {
+      throw error;
+    }
+
+    return getFallbackLoanProgram(id);
+  }
+};
+
+const ensureLoanProgramSlug = async ({
+  baseSlug,
+  currentId,
+}: {
+  baseSlug: string;
+  currentId?: string;
+}) => {
+  try {
+    return await ensureUniqueSlug({
+      baseSlug,
+      currentId,
+      fallback: "loan-program",
+      findBySlug: (slug) =>
+        prisma.loanProgram.findUnique({
+          where: { slug },
+          select: { id: true },
+        }),
+    });
+  } catch (error) {
+    if (!isLoanProgramSchemaCompatibilityError(error)) {
+      throw error;
+    }
+
+    return ensureUniqueFallbackLoanProgramSlug({ baseSlug, currentId });
+  }
+};
+
+const getExistingFormRelationContext = async (
+  id: string,
+): Promise<{
+  slug: string;
+  linkedLoanProgram?: {
+    slug: string;
+  } | null;
+} | null> => {
+  try {
+    return await prisma.formDefinition.findUnique({
+      where: { id },
+      select: {
+        linkedLoanProgram: {
+          select: {
+            slug: true,
+          },
+        },
+        slug: true,
+      },
+    });
+  } catch (error) {
+    if (!isFormSchemaCompatibilityError(error)) {
+      throw error;
+    }
+
+    return prisma.formDefinition.findUnique({
+      where: { id },
+      select: {
+        slug: true,
+      },
+    });
+  }
+};
+
+const persistFormDefinitionRecord = async ({
+  id,
+  destination,
+  formName,
+  isActive,
+  linkedLoanProgramId,
+  slug,
+  successMessage,
+  webhookUrl,
+}: {
+  id?: string;
+  destination: string;
+  formName: string;
+  isActive: boolean;
+  linkedLoanProgramId?: string;
+  slug: string;
+  successMessage: string;
+  webhookUrl?: string;
+}) => {
+  try {
+    const savedForm = id
+      ? await prisma.formDefinition.update({
+          where: { id },
+          data: {
+            formName,
+            slug,
+            destination,
+            successMessage,
+            webhookUrl,
+            linkedLoanProgramId,
+            isActive,
+          },
+          include: {
+            linkedLoanProgram: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        })
+      : await prisma.formDefinition.create({
+          data: {
+            formName,
+            slug,
+            destination,
+            successMessage,
+            webhookUrl,
+            linkedLoanProgramId,
+            isActive,
+          },
+          include: {
+            linkedLoanProgram: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        });
+
+    return {
+      savedForm,
+      supportsFinancingLinks: true,
+    };
+  } catch (error) {
+    if (!isFormSchemaCompatibilityError(error)) {
+      throw error;
+    }
+
+    const savedForm = id
+      ? await prisma.formDefinition.update({
+          where: { id },
+          data: {
+            formName,
+            slug,
+            destination,
+            successMessage,
+            isActive,
+          },
+        })
+      : await prisma.formDefinition.create({
+          data: {
+            formName,
+            slug,
+            destination,
+            successMessage,
+            isActive,
+          },
+        });
+
+    return {
+      savedForm: {
+        ...savedForm,
+        linkedLoanProgram: null,
+      },
+      supportsFinancingLinks: false,
+    };
+  }
+};
+
+const replaceFormDefinitionFields = async (
+  formDefinitionId: string,
+  fields: ReturnType<typeof parseFormFieldsEditorValue>,
+) => {
+  await prisma.formField.deleteMany({ where: { formDefinitionId } });
+
+  if (!fields.length) {
+    return;
+  }
+
+  try {
+    await prisma.formField.createMany({
+      data: fields.map((field, index) => ({
+        formDefinitionId,
+        fieldKey: field.fieldKey,
+        label: field.label,
+        type: field.type,
+        required: field.required,
+        placeholder: field.placeholder,
+        options: field.options?.length ? JSON.stringify(field.options) : undefined,
+        sortOrder: index,
+      })),
+    });
+  } catch (error) {
+    if (!isFormSchemaCompatibilityError(error)) {
+      throw error;
+    }
+
+    await prisma.formField.createMany({
+      data: fields.map((field, index) => ({
+        formDefinitionId,
+        fieldKey: field.fieldKey,
+        label: field.label,
+        type: field.type,
+        required: field.required,
+        placeholder: field.placeholder,
+        sortOrder: index,
+      })),
+    });
+  }
+};
+
 const ensureUniqueSlug = async ({
   baseSlug,
   currentId,
@@ -429,6 +795,20 @@ const revalidateCaseStudyCaches = (slug?: string | null) => {
   revalidateTag("case-studies", TAG_REVALIDATE_PROFILE);
   if (slug) {
     revalidateTag(`case-study:${slug}`, TAG_REVALIDATE_PROFILE);
+  }
+};
+
+const revalidateBlogCaches = (slug?: string | null) => {
+  revalidateTag("blogs", TAG_REVALIDATE_PROFILE);
+  if (slug) {
+    revalidateTag(`blog:${slug}`, TAG_REVALIDATE_PROFILE);
+  }
+};
+
+const revalidateLoanProgramCaches = (slug?: string | null) => {
+  revalidateTag("loan-programs", TAG_REVALIDATE_PROFILE);
+  if (slug) {
+    revalidateTag(`loan-program:${slug}`, TAG_REVALIDATE_PROFILE);
   }
 };
 
@@ -635,7 +1015,7 @@ export const saveProperty = async (formData: FormData) => {
     title: rawTitle,
     slug: slugify(String(formData.get("slug") ?? formData.get("title") ?? "")),
     lifecycleStatus: intentToLifecycleStatus(formData),
-    status: String(formData.get("status") ?? ""),
+    status: getPropertyEditorStatus(asOptionalString(formData.get("status"))),
     locationCity: asOptionalString(formData.get("locationCity")),
     locationState: asOptionalString(formData.get("locationState")),
     propertyType: String(formData.get("propertyType") ?? ""),
@@ -914,6 +1294,175 @@ export const deleteInvestment = async (formData: FormData) => {
   });
 };
 
+export const saveLoanProgram = async (formData: FormData) => {
+  await requireAdminSession();
+
+  const id = await getSubmittedId(formData, "loan-programs");
+  const existingLoanProgram = id ? await getExistingLoanProgramContext(id) : null;
+  const editPath = id ? `/admin/loan-programs/${id}` : "/admin/loan-programs/new";
+  const parsed = loanProgramSchema.safeParse({
+    id,
+    title: String(formData.get("title") ?? "").trim(),
+    slug: slugify(String(formData.get("slug") ?? formData.get("title") ?? "")),
+    lifecycleStatus: intentToLifecycleStatus(formData),
+    shortDescription: String(formData.get("shortDescription") ?? "").trim(),
+    fullDescription: String(formData.get("fullDescription") ?? "").trim(),
+    interestRate: asOptionalString(formData.get("interestRate")),
+    ltv: asOptionalString(formData.get("ltv")),
+    loanTerm: asOptionalString(formData.get("loanTerm")),
+    fees: asOptionalString(formData.get("fees")),
+    minAmount: asOptionalString(formData.get("minAmount")),
+    maxAmount: asOptionalString(formData.get("maxAmount")),
+    keyHighlights: asOptionalString(formData.get("keyHighlights")),
+    crmTag: asOptionalString(formData.get("crmTag")),
+    imageUrl: asOptionalString(formData.get("imageUrl")),
+    imageAlt: asOptionalString(formData.get("imageAlt")),
+    isActive: Boolean(formData.get("isActive")),
+    sortOrder: Number(formData.get("sortOrder") ?? 0),
+  });
+
+  if (!parsed.success) {
+    await redirectWithValidationError(editPath, parsed.error);
+  }
+
+  const loanProgramData = {
+    ...parsed.data,
+    slug: await ensureLoanProgramSlug({
+      baseSlug: parsed.data.slug,
+      currentId: parsed.data.id,
+    }),
+  };
+
+  let loanProgram;
+
+  try {
+    loanProgram = loanProgramData.id
+      ? await prisma.loanProgram.update({
+          where: { id: loanProgramData.id },
+          data: {
+            title: loanProgramData.title,
+            slug: loanProgramData.slug,
+            lifecycleStatus: loanProgramData.lifecycleStatus,
+            shortDescription: loanProgramData.shortDescription,
+            fullDescription: loanProgramData.fullDescription,
+            interestRate: loanProgramData.interestRate,
+            ltv: loanProgramData.ltv,
+            loanTerm: loanProgramData.loanTerm,
+            fees: loanProgramData.fees,
+            minAmount: loanProgramData.minAmount,
+            maxAmount: loanProgramData.maxAmount,
+            keyHighlights: loanProgramData.keyHighlights,
+            crmTag: loanProgramData.crmTag,
+            imageUrl: loanProgramData.imageUrl,
+            imageAlt: loanProgramData.imageAlt,
+            isActive: loanProgramData.isActive,
+            sortOrder: loanProgramData.sortOrder,
+          },
+        })
+      : await prisma.loanProgram.create({
+          data: {
+            title: loanProgramData.title,
+            slug: loanProgramData.slug,
+            lifecycleStatus: loanProgramData.lifecycleStatus,
+            shortDescription: loanProgramData.shortDescription,
+            fullDescription: loanProgramData.fullDescription,
+            interestRate: loanProgramData.interestRate,
+            ltv: loanProgramData.ltv,
+            loanTerm: loanProgramData.loanTerm,
+            fees: loanProgramData.fees,
+            minAmount: loanProgramData.minAmount,
+            maxAmount: loanProgramData.maxAmount,
+            keyHighlights: loanProgramData.keyHighlights,
+            crmTag: loanProgramData.crmTag,
+            imageUrl: loanProgramData.imageUrl,
+            imageAlt: loanProgramData.imageAlt,
+            isActive: loanProgramData.isActive,
+            sortOrder: loanProgramData.sortOrder,
+          },
+        });
+  } catch (error) {
+    if (isLoanProgramSchemaCompatibilityError(error)) {
+      loanProgram = await upsertFallbackLoanProgram({
+        id: loanProgramData.id,
+        title: loanProgramData.title,
+        slug: loanProgramData.slug,
+        lifecycleStatus: loanProgramData.lifecycleStatus,
+        shortDescription: loanProgramData.shortDescription,
+        fullDescription: loanProgramData.fullDescription,
+        interestRate: loanProgramData.interestRate,
+        ltv: loanProgramData.ltv,
+        loanTerm: loanProgramData.loanTerm,
+        fees: loanProgramData.fees,
+        minAmount: loanProgramData.minAmount,
+        maxAmount: loanProgramData.maxAmount,
+        keyHighlights: loanProgramData.keyHighlights,
+        crmTag: loanProgramData.crmTag,
+        imageUrl: loanProgramData.imageUrl,
+        imageAlt: loanProgramData.imageAlt,
+        isActive: loanProgramData.isActive,
+        sortOrder: loanProgramData.sortOrder,
+      });
+    } else {
+      await handleWriteError(
+        error,
+        loanProgram?.id ? `/admin/loan-programs/${loanProgram.id}` : editPath,
+        "Loan program",
+      );
+    }
+  }
+
+  revalidatePath("/admin/loan-programs");
+  revalidatePath(`/admin/loan-programs/${loanProgram.id}`);
+  revalidatePath("/get-financing");
+  revalidatePath(`/get-financing/${loanProgram.slug}`);
+  if (existingLoanProgram?.slug && existingLoanProgram.slug !== loanProgram.slug) {
+    revalidatePath(`/get-financing/${existingLoanProgram.slug}`);
+    revalidateLoanProgramCaches(existingLoanProgram.slug);
+  }
+  revalidateLoanProgramCaches(loanProgram.slug);
+
+  const loanProgramFlash = getLifecycleFlash({
+    entityLabel: "Loan Program",
+    lifecycleStatus: loanProgramData.lifecycleStatus,
+    isNew: !loanProgramData.id,
+  });
+  await redirectWithSuccessMessage(
+    `/admin/loan-programs/${loanProgram.id}`,
+    loanProgramFlash.message,
+    loanProgramFlash,
+  );
+};
+
+export const deleteLoanProgram = async (formData: FormData) => {
+  await requireAdminSession();
+  const id = await getSubmittedId(formData, "loan-programs");
+  if (!id) {
+    return;
+  }
+
+  const existing = await getExistingLoanProgramContext(id);
+
+  try {
+    await prisma.loanProgram.delete({ where: { id } });
+  } catch (error) {
+    if (isLoanProgramSchemaCompatibilityError(error)) {
+      await deleteFallbackLoanProgram(id);
+    } else {
+      throw error;
+    }
+  }
+
+  revalidatePath("/admin/loan-programs");
+  revalidatePath("/get-financing");
+  if (existing?.slug) {
+    revalidatePath(`/get-financing/${existing.slug}`);
+  }
+  revalidateLoanProgramCaches(existing?.slug);
+  await redirectWithSuccessMessage("/admin/loan-programs", "Loan program deleted successfully.", {
+    title: "Loan program deleted",
+  });
+};
+
 export const saveCaseStudy = async (formData: FormData) => {
   await requireAdminSession();
 
@@ -1057,6 +1606,174 @@ export const deleteCaseStudy = async (formData: FormData) => {
   revalidateCaseStudyCaches(existing?.slug);
   await redirectWithSuccessMessage("/admin/case-studies", "Case study deleted successfully.", {
     title: "Case study deleted",
+  });
+};
+
+export const saveBlogPost = async (formData: FormData) => {
+  await requireAdminSession();
+
+  const blogPostDelegate = getBlogPostDelegate();
+  const id = await getSubmittedId(formData, "blogs");
+  const editPath = id ? `/admin/blogs/${id}` : "/admin/blogs/new";
+
+  if (!blogPostDelegate) {
+    await redirectWithBlogMigrationError(editPath);
+  }
+
+  const publishedAtInput = asOptionalString(formData.get("publishedAt"));
+  const publishedAt = parseOptionalDateValue(publishedAtInput);
+
+  if (publishedAtInput && !publishedAt) {
+    await redirectWithErrorMessage(
+      editPath,
+      "Published date is invalid. Choose a valid date before saving.",
+      "Invalid publish date",
+    );
+  }
+
+  const parsed = blogPostSchema.safeParse({
+    authorName: asOptionalString(formData.get("authorName")),
+    category: String(formData.get("category") ?? "").trim(),
+    content: String(formData.get("content") ?? "").trim(),
+    excerpt: String(formData.get("excerpt") ?? "").trim(),
+    featuredImageAlt: asOptionalString(formData.get("featuredImageAlt")),
+    featuredImageUrl: asOptionalString(formData.get("featuredImageUrl")),
+    id,
+    lifecycleStatus: intentToLifecycleStatus(formData),
+    readTime: asOptionalString(formData.get("readTime")),
+    slug: slugify(String(formData.get("slug") ?? formData.get("title") ?? "")),
+    title: String(formData.get("title") ?? "").trim(),
+  });
+
+  if (!parsed.success) {
+    await redirectWithValidationError(editPath, parsed.error);
+  }
+
+  let existingBlogPost: { publishedAt: Date | null; slug: string } | null = null;
+  let blogPost;
+
+  try {
+    existingBlogPost = parsed.data.id
+      ? await blogPostDelegate.findUnique({
+          where: { id: parsed.data.id },
+          select: {
+            publishedAt: true,
+            slug: true,
+          },
+        })
+      : null;
+
+    const slug = await ensureUniqueSlug({
+      baseSlug: parsed.data.slug,
+      currentId: parsed.data.id,
+      fallback: "blog-post",
+      findBySlug: (candidate) =>
+        blogPostDelegate.findUnique({
+          where: { slug: candidate },
+          select: { id: true },
+        }) as Promise<{ id: string } | null>,
+    });
+
+    const nextPublishedAt =
+      publishedAt ??
+      (parsed.data.lifecycleStatus === "PUBLISHED"
+        ? existingBlogPost?.publishedAt ?? new Date()
+        : existingBlogPost?.publishedAt ?? null);
+
+    const blogPostRecord = {
+      authorName: parsed.data.authorName,
+      category: parsed.data.category,
+      content: parsed.data.content,
+      excerpt: parsed.data.excerpt,
+      featuredImageAlt: parsed.data.featuredImageAlt,
+      featuredImageUrl: parsed.data.featuredImageUrl,
+      lifecycleStatus: parsed.data.lifecycleStatus,
+      publishedAt: nextPublishedAt,
+      readTime: parsed.data.readTime,
+      slug,
+      title: parsed.data.title,
+    };
+
+    blogPost = parsed.data.id
+      ? await blogPostDelegate.update({
+          where: { id: parsed.data.id },
+          data: blogPostRecord,
+        })
+      : await blogPostDelegate.create({
+          data: blogPostRecord,
+        });
+  } catch (error) {
+    if (isBlogSchemaCompatibilityError(error)) {
+      await redirectWithBlogMigrationError(editPath);
+    }
+
+    await handleWriteError(error, editPath, "Blog post");
+  }
+
+  revalidatePath("/admin/blogs");
+  revalidatePath(`/admin/blogs/${blogPost.id}`);
+  revalidatePath("/blogs");
+  revalidatePath(`/blogs/${blogPost.slug}`);
+  revalidatePath("/get-financing");
+  revalidatePath("/");
+  if (existingBlogPost?.slug && existingBlogPost.slug !== blogPost.slug) {
+    revalidatePath(`/blogs/${existingBlogPost.slug}`);
+    revalidateBlogCaches(existingBlogPost.slug);
+  }
+  revalidateBlogCaches(blogPost.slug);
+  const blogFlash = getLifecycleFlash({
+    entityLabel: "Blog post",
+    lifecycleStatus: parsed.data.lifecycleStatus,
+    isNew: !parsed.data.id,
+  });
+  await redirectWithSuccessMessage(
+    `/admin/blogs/${blogPost.id}`,
+    blogFlash.message,
+    blogFlash,
+  );
+};
+
+export const deleteBlogPost = async (formData: FormData) => {
+  await requireAdminSession();
+
+  const blogPostDelegate = getBlogPostDelegate();
+  const id = await getSubmittedId(formData, "blogs");
+
+  if (!id) {
+    return;
+  }
+
+  if (!blogPostDelegate) {
+    await redirectWithBlogMigrationError("/admin/blogs");
+  }
+
+  let existing: { slug: string } | null = null;
+
+  try {
+    existing = await blogPostDelegate.findUnique({
+      where: { id },
+      select: { slug: true },
+    });
+
+    await blogPostDelegate.delete({ where: { id } });
+  } catch (error) {
+    if (isBlogSchemaCompatibilityError(error)) {
+      await redirectWithBlogMigrationError("/admin/blogs");
+    }
+
+    throw error;
+  }
+
+  revalidatePath("/admin/blogs");
+  revalidatePath("/blogs");
+  revalidatePath("/get-financing");
+  revalidatePath("/");
+  if (existing?.slug) {
+    revalidatePath(`/blogs/${existing.slug}`);
+  }
+  revalidateBlogCaches(existing?.slug);
+  await redirectWithSuccessMessage("/admin/blogs", "Blog post deleted successfully.", {
+    title: "Blog post deleted",
   });
 };
 
@@ -1371,24 +2088,22 @@ export const saveSingletonPage = async (formData: FormData) => {
 export const saveFormDefinition = async (formData: FormData) => {
   await requireAdminSession();
 
-  const id = (await getSubmittedId(formData, "forms")) ?? "";
-  const existingForm = id
-    ? await prisma.formDefinition.findUnique({
-        where: { id },
-        select: { slug: true },
-      })
-    : null;
+  const id = await getSubmittedId(formData, "forms");
+  const existingForm = id ? await getExistingFormRelationContext(id) : null;
+  const editPath = id ? `/admin/forms/${id}` : "/admin/forms/new";
   const parsed = formSchema.safeParse({
     id,
     formName: String(formData.get("formName") ?? "").trim(),
     slug: slugify(String(formData.get("slug") ?? formData.get("formName") ?? "")),
     destination: String(formData.get("destination") ?? ""),
     successMessage: String(formData.get("successMessage") ?? "").trim(),
+    webhookUrl: asOptionalString(formData.get("webhookUrl")),
+    linkedLoanProgramId: asOptionalString(formData.get("linkedLoanProgramId")),
     isActive: Boolean(formData.get("isActive")),
   });
 
   if (!parsed.success) {
-    await redirectWithValidationError(`/admin/forms/${id}`, parsed.error);
+    await redirectWithValidationError(editPath, parsed.error);
   }
 
   const formDataParsed = {
@@ -1405,55 +2120,36 @@ export const saveFormDefinition = async (formData: FormData) => {
     }),
   };
 
-  const fieldRows = parsePipeRows(asOptionalString(formData.get("fieldsText")));
+  const fields = parseFormFieldsEditorValue(asOptionalString(formData.get("fieldsText")));
+  let savedForm;
 
   try {
-    await prisma.formDefinition.update({
-      where: { id: formDataParsed.id },
-      data: {
-        formName: formDataParsed.formName,
-        slug: formDataParsed.slug,
-        destination: formDataParsed.destination,
-        successMessage: formDataParsed.successMessage,
-        isActive: formDataParsed.isActive,
-      },
-    });
-
-    await prisma.formField.deleteMany({ where: { formDefinitionId: formDataParsed.id } });
-    if (fieldRows.length) {
-      await prisma.formField.createMany({
-        data: fieldRows
-          .filter((row) => row[0] && row[1] && row[2])
-          .map((row, index) => ({
-            formDefinitionId: formDataParsed.id,
-            fieldKey: slugify(row[0]).replace(/-/g, "_"),
-            label: row[1],
-            type: (row[2] || "TEXT").toUpperCase() as
-              | "TEXT"
-              | "EMAIL"
-              | "PHONE"
-              | "SELECT"
-              | "TEXTAREA",
-            required: (row[3] || "").toLowerCase() === "true",
-            sortOrder: index,
-          })),
-      });
-    }
+    const persistedForm = await persistFormDefinitionRecord(formDataParsed);
+    savedForm = persistedForm.savedForm;
+    await replaceFormDefinitionFields(savedForm.id, fields);
   } catch (error) {
-    await handleWriteError(error, `/admin/forms/${id}`, "Form");
+    await handleWriteError(error, savedForm?.id ? `/admin/forms/${savedForm.id}` : editPath, "Form");
   }
 
   revalidatePath("/admin/forms");
-  revalidatePath(`/admin/forms/${formDataParsed.id}`);
+  revalidatePath(`/admin/forms/${savedForm.id}`);
   revalidatePath("/cash-offer");
-  revalidatePath("/capital-rates");
   revalidatePath("/properties");
   revalidatePath("/investments");
-  revalidateFormCache(formDataParsed.slug);
-  if (existingForm?.slug && existingForm.slug !== formDataParsed.slug) {
+  revalidatePath("/get-financing");
+  revalidateFormCache(savedForm.slug);
+  if (existingForm?.slug && existingForm.slug !== savedForm.slug) {
     revalidateFormCache(existingForm.slug);
   }
-  await redirectWithSuccessMessage(`/admin/forms/${formDataParsed.id}`, "Form updated successfully.", {
+  if (existingForm?.linkedLoanProgram?.slug) {
+    revalidatePath(`/get-financing/${existingForm.linkedLoanProgram.slug}`);
+    revalidateLoanProgramCaches(existingForm.linkedLoanProgram.slug);
+  }
+  if (savedForm.linkedLoanProgram?.slug) {
+    revalidatePath(`/get-financing/${savedForm.linkedLoanProgram.slug}`);
+    revalidateLoanProgramCaches(savedForm.linkedLoanProgram.slug);
+  }
+  await redirectWithSuccessMessage(`/admin/forms/${savedForm.id}`, "Form updated successfully.", {
     title: "Form saved",
   });
 };
@@ -1518,7 +2214,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
   const property = existing
     ? await prisma.property.update({
         where: { id: existing.id },
-        data: {
+      data: {
           title: getAutosaveTitle({
             rawTitle,
             existingTitle: existing.title,
@@ -1526,7 +2222,9 @@ export const autosavePropertyDraft = async (formData: FormData) => {
           }),
           slug,
           lifecycleStatus: existing.lifecycleStatus ?? "DRAFT",
-          status: String(formData.get("status") ?? existing.status ?? "AVAILABLE"),
+          status: getPropertyEditorStatus(
+            asOptionalString(formData.get("status")) ?? existing.status ?? "FOR_SALE",
+          ),
           locationCity,
           locationState,
           propertyType: String(formData.get("propertyType") ?? existing.propertyType ?? "SFR"),
@@ -1544,7 +2242,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
           }),
           slug,
           lifecycleStatus: "DRAFT",
-          status: String(formData.get("status") ?? "AVAILABLE"),
+          status: getPropertyEditorStatus(asOptionalString(formData.get("status")) ?? "FOR_SALE"),
           locationCity,
           locationState,
           propertyType: String(formData.get("propertyType") ?? "SFR"),
@@ -1685,6 +2383,134 @@ export const autosaveInvestmentDraft = async (formData: FormData) => {
   };
 };
 
+export const autosaveLoanProgramDraft = async (formData: FormData) => {
+  await requireAdminSession();
+
+  const id = await getSubmittedId(formData, "loan-programs");
+  const existing = id ? await getExistingLoanProgramContext(id) : null;
+
+  const rawTitle = String(formData.get("title") ?? "").trim();
+  const shortDescription = String(formData.get("shortDescription") ?? "").trim();
+  const fullDescription = String(formData.get("fullDescription") ?? "").trim();
+  const keyHighlights = asOptionalString(formData.get("keyHighlights"));
+  const interestRate = asOptionalString(formData.get("interestRate"));
+  const ltv = asOptionalString(formData.get("ltv"));
+  const loanTerm = asOptionalString(formData.get("loanTerm"));
+  const minAmount = asOptionalString(formData.get("minAmount"));
+  const maxAmount = asOptionalString(formData.get("maxAmount"));
+
+  if (
+    !existing &&
+    !rawTitle &&
+    !shortDescription &&
+    !fullDescription &&
+    !keyHighlights &&
+    !interestRate &&
+    !ltv &&
+    !loanTerm &&
+    !minAmount &&
+    !maxAmount
+  ) {
+    return null;
+  }
+
+  const slug = await ensureLoanProgramSlug({
+    baseSlug: slugify(rawTitle) || existing?.slug || createAutosaveSlug("loan-program-draft"),
+    currentId: existing?.id,
+  });
+
+  let loanProgram;
+
+  try {
+    loanProgram = existing
+      ? await prisma.loanProgram.update({
+          where: { id: existing.id },
+          data: {
+            title: getAutosaveTitle({
+              rawTitle,
+              existingTitle: existing.title,
+              fallback: "Untitled loan program",
+            }),
+            slug,
+            lifecycleStatus: existing.lifecycleStatus ?? "DRAFT",
+            shortDescription,
+            fullDescription,
+            interestRate,
+            ltv,
+            loanTerm,
+            fees: asOptionalString(formData.get("fees")),
+            minAmount,
+            maxAmount,
+            keyHighlights,
+            crmTag: asOptionalString(formData.get("crmTag")),
+            imageUrl: asOptionalString(formData.get("imageUrl")),
+            imageAlt: asOptionalString(formData.get("imageAlt")),
+            isActive: Boolean(formData.get("isActive")),
+            sortOrder: Number(formData.get("sortOrder") ?? existing.sortOrder ?? 0),
+          },
+        })
+      : await prisma.loanProgram.create({
+          data: {
+            title: getAutosaveTitle({
+              rawTitle,
+              fallback: "Untitled loan program",
+            }),
+            slug,
+            lifecycleStatus: "DRAFT",
+            shortDescription,
+            fullDescription,
+            interestRate,
+            ltv,
+            loanTerm,
+            fees: asOptionalString(formData.get("fees")),
+            minAmount,
+            maxAmount,
+            keyHighlights,
+            crmTag: asOptionalString(formData.get("crmTag")),
+            imageUrl: asOptionalString(formData.get("imageUrl")),
+            imageAlt: asOptionalString(formData.get("imageAlt")),
+            isActive: Boolean(formData.get("isActive")),
+            sortOrder: Number(formData.get("sortOrder") ?? 0),
+          },
+        });
+  } catch (error) {
+    if (!isLoanProgramSchemaCompatibilityError(error)) {
+      throw error;
+    }
+
+    loanProgram = await upsertFallbackLoanProgram({
+      id: existing?.id,
+      title: getAutosaveTitle({
+        rawTitle,
+        existingTitle: existing?.title,
+        fallback: "Untitled loan program",
+      }),
+      slug,
+      lifecycleStatus: existing?.lifecycleStatus ?? "DRAFT",
+      shortDescription,
+      fullDescription,
+      interestRate,
+      ltv,
+      loanTerm,
+      fees: asOptionalString(formData.get("fees")),
+      minAmount,
+      maxAmount,
+      keyHighlights,
+      crmTag: asOptionalString(formData.get("crmTag")),
+      imageUrl: asOptionalString(formData.get("imageUrl")),
+      imageAlt: asOptionalString(formData.get("imageAlt")),
+      isActive: Boolean(formData.get("isActive")),
+      sortOrder: Number(formData.get("sortOrder") ?? existing?.sortOrder ?? 0),
+    });
+  }
+
+  return {
+    path: getAutosavePath("/admin/loan-programs", loanProgram.id),
+    recordId: loanProgram.id,
+    savedAt: loanProgram.updatedAt.toISOString(),
+  };
+};
+
 export const autosaveCaseStudyDraft = async (formData: FormData) => {
   await requireAdminSession();
 
@@ -1808,6 +2634,138 @@ export const autosaveCaseStudyDraft = async (formData: FormData) => {
     recordId: caseStudy.id,
     savedAt: caseStudy.updatedAt.toISOString(),
   };
+};
+
+export const autosaveBlogPostDraft = async (formData: FormData) => {
+  await requireAdminSession();
+
+  const blogPostDelegate = getBlogPostDelegate();
+
+  if (!blogPostDelegate) {
+    return null;
+  }
+
+  const id = await getSubmittedId(formData, "blogs");
+  let existing = null;
+
+  try {
+    existing = id
+      ? await blogPostDelegate.findUnique({
+          where: { id },
+          select: {
+            authorName: true,
+            category: true,
+            content: true,
+            excerpt: true,
+            featuredImageAlt: true,
+            featuredImageUrl: true,
+            id: true,
+            lifecycleStatus: true,
+            publishedAt: true,
+            readTime: true,
+            slug: true,
+            title: true,
+          },
+        })
+      : null;
+  } catch (error) {
+    if (isBlogSchemaCompatibilityError(error)) {
+      return null;
+    }
+
+    throw error;
+  }
+
+  const rawTitle = String(formData.get("title") ?? "").trim();
+  const excerpt = String(formData.get("excerpt") ?? "").trim();
+  const content = String(formData.get("content") ?? "").trim();
+  const category = asOptionalString(formData.get("category"));
+  const authorName = asOptionalString(formData.get("authorName"));
+  const readTime = asOptionalString(formData.get("readTime"));
+  const featuredImageUrl = asOptionalString(formData.get("featuredImageUrl"));
+  const featuredImageAlt = asOptionalString(formData.get("featuredImageAlt"));
+  const publishedAtInput = asOptionalString(formData.get("publishedAt"));
+  const publishedAt = parseOptionalDateValue(publishedAtInput);
+
+  if (
+    !existing &&
+    !rawTitle &&
+    !excerpt &&
+    !content &&
+    !category &&
+    !authorName &&
+    !readTime &&
+    !featuredImageUrl &&
+    !featuredImageAlt &&
+    !publishedAtInput
+  ) {
+    return null;
+  }
+
+  try {
+    const slug = await ensureUniqueSlug({
+      baseSlug: slugify(rawTitle) || existing?.slug || createAutosaveSlug("blog-post-draft"),
+      currentId: existing?.id,
+      fallback: "blog-post-draft",
+      findBySlug: (candidate) =>
+        blogPostDelegate.findUnique({
+          where: { slug: candidate },
+          select: { id: true },
+        }) as Promise<{ id: string } | null>,
+    });
+
+    const blogPost = existing
+      ? await blogPostDelegate.update({
+          where: { id: existing.id },
+          data: {
+            authorName,
+            category: category || existing.category || "Blog",
+            content,
+            excerpt,
+            featuredImageAlt,
+            featuredImageUrl,
+            lifecycleStatus: existing.lifecycleStatus ?? "DRAFT",
+            publishedAt: publishedAt ?? existing.publishedAt ?? null,
+            readTime,
+            slug,
+            title: getAutosaveTitle({
+              rawTitle,
+              existingTitle: existing.title,
+              fallback: "Untitled blog post",
+            }),
+          },
+        })
+      : await blogPostDelegate.create({
+          data: {
+            authorName,
+            category: category || "Blog",
+            content,
+            excerpt,
+            featuredImageAlt,
+            featuredImageUrl,
+            lifecycleStatus: "DRAFT",
+            publishedAt: publishedAt ?? null,
+            readTime,
+            slug,
+            title: getAutosaveTitle({
+              rawTitle,
+              fallback: "Untitled blog post",
+            }),
+          },
+        });
+
+    return {
+      path: getAutosavePath("/admin/blogs", blogPost.id),
+      recordId: blogPost.id,
+      savedAt: blogPost.updatedAt.toISOString(),
+    };
+  } catch (error) {
+    if (isBlogSchemaCompatibilityError(error)) {
+      return null;
+    }
+
+    throw error;
+  }
 };
 
 export const autosaveCalculatorDraft = async (formData: FormData) => {
@@ -2086,27 +3044,29 @@ export const autosaveSingletonPageDraft = async (formData: FormData) => {
 export const autosaveFormDefinitionDraft = async (formData: FormData) => {
   await requireAdminSession();
 
-  const id = (await getSubmittedId(formData, "forms")) ?? "";
-  if (!id) {
-    return null;
-  }
-
-  const existing = await prisma.formDefinition.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      slug: true,
-    },
-  });
-
-  if (!existing) {
-    return null;
-  }
+  const id = await getSubmittedId(formData, "forms");
+  const existing = id
+    ? await prisma.formDefinition.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          slug: true,
+        },
+      })
+    : null;
 
   const formName = String(formData.get("formName") ?? "").trim();
+  const successMessage = String(formData.get("successMessage") ?? "").trim();
+  const linkedLoanProgramId = asOptionalString(formData.get("linkedLoanProgramId"));
+  const fields = parseFormFieldsEditorValue(asOptionalString(formData.get("fieldsText")));
+
+  if (!existing && !formName && !successMessage && !linkedLoanProgramId && !fields.length) {
+    return null;
+  }
+
   const slug = await ensureUniqueSlug({
-    baseSlug: slugify(formName) || existing.slug || createAutosaveSlug("form-draft"),
-    currentId: existing.id,
+    baseSlug: slugify(formName) || existing?.slug || createAutosaveSlug("form-draft"),
+    currentId: existing?.id,
     fallback: "form-draft",
     findBySlug: (candidate) =>
       prisma.formDefinition.findUnique({
@@ -2115,45 +3075,25 @@ export const autosaveFormDefinitionDraft = async (formData: FormData) => {
       }),
   });
 
-  const formRecord = await prisma.formDefinition.update({
-    where: { id: existing.id },
-    data: {
-      formName: getAutosaveTitle({
-        rawTitle: formName,
-        fallback: "Untitled form",
-      }),
-      slug,
-      destination: String(formData.get("destination") ?? "EMAIL"),
-      successMessage: String(formData.get("successMessage") ?? "").trim(),
-      isActive: Boolean(formData.get("isActive")),
-    },
+  const { savedForm: formRecord } = await persistFormDefinitionRecord({
+    id: existing?.id,
+    formName: getAutosaveTitle({
+      rawTitle: formName,
+      fallback: "Untitled form",
+    }),
+    slug,
+    destination: String(formData.get("destination") ?? "EMAIL"),
+    successMessage: successMessage || "Thank you. Our team will follow up shortly.",
+    webhookUrl: asOptionalString(formData.get("webhookUrl")),
+    linkedLoanProgramId,
+    isActive: Boolean(formData.get("isActive")),
   });
 
-  const fieldRows = parsePipeRows(asOptionalString(formData.get("fieldsText")));
-  await prisma.formField.deleteMany({ where: { formDefinitionId: existing.id } });
-  if (fieldRows.length) {
-    await prisma.formField.createMany({
-      data: fieldRows
-        .filter((row) => row[0] && row[1] && row[2])
-        .map((row, index) => ({
-          formDefinitionId: existing.id,
-          fieldKey: slugify(row[0]).replace(/-/g, "_"),
-          label: row[1],
-          type: (row[2] || "TEXT").toUpperCase() as
-            | "TEXT"
-            | "EMAIL"
-            | "PHONE"
-            | "SELECT"
-            | "TEXTAREA",
-          required: (row[3] || "").toLowerCase() === "true",
-          sortOrder: index,
-        })),
-    });
-  }
+  await replaceFormDefinitionFields(formRecord.id, fields);
 
   return {
-    path: `/admin/forms/${existing.id}`,
-    recordId: existing.id,
+    path: `/admin/forms/${formRecord.id}`,
+    recordId: formRecord.id,
     savedAt: formRecord.updatedAt.toISOString(),
   };
 };

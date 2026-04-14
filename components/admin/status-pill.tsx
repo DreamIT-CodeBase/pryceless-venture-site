@@ -12,12 +12,12 @@ const tones = {
 
 const getTone = (normalized: string) => {
   if (
-    ["PUBLISHED", "AVAILABLE", "OPEN", "ACTIVE", "LIVE"].includes(normalized)
+    ["PUBLISHED", "AVAILABLE", "OPEN", "ACTIVE", "LIVE", "FOR_SALE"].includes(normalized)
   ) {
     return tones.emerald;
   }
 
-  if (["DRAFT", "COMING_SOON", "UNDER_CONTRACT"].includes(normalized)) {
+  if (["DRAFT", "COMING_SOON", "UNDER_CONTRACT", "IN_PROGRESS"].includes(normalized)) {
     return tones.amber;
   }
 
