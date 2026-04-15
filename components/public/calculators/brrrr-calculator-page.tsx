@@ -2,29 +2,18 @@
 
 import { useMemo, useState } from "react";
 
-import { calculateBrrrr, type BrrrrInputs } from "@/lib/calculator-engine";
+import {
+  calculateBrrrr,
+  defaultBrrrrInputs,
+  type BrrrrInputs,
+} from "@/lib/calculator-engine";
 
 import { CalculatorLayout, DonutChart, ResultRows, SliderInput } from "./calculator-ui";
 import { calculatorThemes, formatCurrency, formatPercent, ResetButton } from "./calculator-page-helpers";
 
-const defaultBrrrrPageInputs: BrrrrInputs = {
-  afterRepairValue: 11000000,
-  closingCosts: 180000,
-  downPaymentPercent: 20,
-  monthlyOperatingExpenses: 22000,
-  monthlyRent: 90000,
-  otherMonthlyIncome: 4000,
-  purchasePrice: 8200000,
-  refinanceInterestRate: 8.1,
-  refinanceLoanTermYears: 20,
-  refinanceLtvPercent: 75,
-  rehabBudget: 1400000,
-  vacancyRate: 5,
-};
-
 export function BrrrrCalculatorPage() {
   const theme = calculatorThemes.brrrr;
-  const [inputs, setInputs] = useState<BrrrrInputs>(defaultBrrrrPageInputs);
+  const [inputs, setInputs] = useState<BrrrrInputs>({ ...defaultBrrrrInputs });
   const results = useMemo(() => calculateBrrrr(inputs), [inputs]);
 
   const recoveredCash = Math.min(results.cashOutAtRefinance, results.initialCashRequired);
@@ -55,7 +44,7 @@ export function BrrrrCalculatorPage() {
             <ResetButton
               accentDark={theme.accentDark}
               accentSoft={theme.accentSoft}
-              onClick={() => setInputs(defaultBrrrrPageInputs)}
+              onClick={() => setInputs({ ...defaultBrrrrInputs })}
             />
           </div>
 
@@ -63,30 +52,30 @@ export function BrrrrCalculatorPage() {
             <SliderInput
               accent={theme.accent}
               label="Purchase price"
-              max={50000000}
-              min={500000}
-              prefix="₹"
-              step={100000}
+              max={2500000}
+              min={50000}
+              prefix="$"
+              step={10000}
               value={inputs.purchasePrice}
               onChange={setValue("purchasePrice")}
             />
             <SliderInput
               accent={theme.accent}
               label="Rehab budget"
-              max={15000000}
+              max={750000}
               min={0}
-              prefix="₹"
-              step={50000}
+              prefix="$"
+              step={5000}
               value={inputs.rehabBudget}
               onChange={setValue("rehabBudget")}
             />
             <SliderInput
               accent={theme.accent}
               label="After repair value (ARV)"
-              max={60000000}
-              min={500000}
-              prefix="₹"
-              step={100000}
+              max={3500000}
+              min={75000}
+              prefix="$"
+              step={10000}
               value={inputs.afterRepairValue}
               onChange={setValue("afterRepairValue")}
             />
@@ -103,7 +92,7 @@ export function BrrrrCalculatorPage() {
             <SliderInput
               accent={theme.accent}
               label="Refinance LTV"
-              max={90}
+              max={85}
               min={50}
               step={1}
               suffix="%"
@@ -113,10 +102,10 @@ export function BrrrrCalculatorPage() {
             <SliderInput
               accent={theme.accent}
               label="Monthly rent"
-              max={250000}
-              min={5000}
-              prefix="₹"
-              step={2500}
+              max={20000}
+              min={500}
+              prefix="$"
+              step={100}
               value={inputs.monthlyRent}
               onChange={setValue("monthlyRent")}
             />
@@ -129,20 +118,20 @@ export function BrrrrCalculatorPage() {
                 <SliderInput
                   accent={theme.accent}
                   label="Closing costs"
-                  max={1500000}
+                  max={100000}
                   min={0}
-                  prefix="₹"
-                  step={10000}
+                  prefix="$"
+                  step={1000}
                   value={inputs.closingCosts}
                   onChange={setValue("closingCosts")}
                 />
                 <SliderInput
                   accent={theme.accent}
                   label="Monthly operating expenses"
-                  max={150000}
+                  max={10000}
                   min={0}
-                  prefix="₹"
-                  step={1000}
+                  prefix="$"
+                  step={50}
                   value={inputs.monthlyOperatingExpenses}
                   onChange={setValue("monthlyOperatingExpenses")}
                 />
@@ -159,10 +148,10 @@ export function BrrrrCalculatorPage() {
                 <SliderInput
                   accent={theme.accent}
                   label="Other monthly income"
-                  max={75000}
+                  max={5000}
                   min={0}
-                  prefix="₹"
-                  step={1000}
+                  prefix="$"
+                  step={50}
                   value={inputs.otherMonthlyIncome}
                   onChange={setValue("otherMonthlyIncome")}
                 />
@@ -206,4 +195,3 @@ export function BrrrrCalculatorPage() {
     />
   );
 }
-

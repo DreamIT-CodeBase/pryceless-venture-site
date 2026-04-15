@@ -104,7 +104,7 @@ export function OpportunityCard({
         </h3>
 
         {metaText ? (
-          <div className="mt-[7px] flex items-start gap-[6px] text-[12px] leading-[16px] text-[#6b7280] 2xl:text-[13px]">
+          <div className="mt-[7px] flex min-h-[16px] items-start gap-[6px] text-[12px] leading-[16px] text-[#6b7280] 2xl:min-h-[18px] 2xl:text-[13px]">
             <OpportunityMetaIcon kind={metaIcon} />
             <p className="truncate">{metaText}</p>
           </div>
@@ -112,7 +112,7 @@ export function OpportunityCard({
 
         {summary ? (
           <p
-            className="mt-[9px] text-[12px] leading-[1.45] tracking-[0] text-[#6b7280] 2xl:text-[13px] 2xl:leading-[1.5]"
+            className="mt-[9px] min-h-[35px] text-[12px] leading-[1.45] tracking-[0] text-[#6b7280] 2xl:min-h-[39px] 2xl:text-[13px] 2xl:leading-[1.5]"
             style={{
               WebkitBoxOrient: "vertical",
               WebkitLineClamp: 2,
@@ -125,7 +125,7 @@ export function OpportunityCard({
         ) : null}
 
         {visibleBullets.length ? (
-          <div className="mt-[10px] space-y-[8px] text-[11.5px] leading-[1.4] text-[#646b75] 2xl:text-[12px]">
+          <div className="mt-[10px] min-h-[42px] space-y-[8px] text-[11.5px] leading-[1.4] text-[#646b75] 2xl:min-h-[46px] 2xl:text-[12px]">
             {visibleBullets.map((item, index) => (
               <div className="flex items-start gap-[6px]" key={`${title}-bullet-${index}`}>
                 <span className="mt-[2px] text-[12px] font-semibold leading-none text-[#16213e]">
@@ -146,38 +146,48 @@ export function OpportunityCard({
           </div>
         ) : null}
 
-        {visibleStats.length ? (
-          <div className="mt-[12px] grid border-y border-[#d7d7d7] text-left sm:grid-cols-2">
-            {visibleStats.map((item, index) => (
-              <div
-                className={`px-[13px] py-[9px] ${
-                  index === 0 && visibleStats.length > 1
-                    ? "border-b border-[#d7d7d7] sm:border-b-0 sm:border-r"
-                    : ""
-                }`}
-                key={`${title}-stat-${item.label}`}
-              >
-                <p className="text-[11px] leading-[16px] text-[#6b7280] 2xl:text-[11.5px]">
-                  {item.label}
-                </p>
-                <p className="mt-[2px] text-[13px] font-semibold leading-[18px] text-[#30343b] 2xl:text-[14px]">
-                  {item.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : null}
+        <div className="mt-auto">
+          {visibleStats.length ? (
+            <div className="mt-[12px] grid border-y border-[#d7d7d7] text-left sm:grid-cols-2 sm:min-h-[88px]">
+              {visibleStats.map((item, index) => (
+                <div
+                  className={`flex min-h-[74px] flex-col justify-start px-[13px] py-[9px] sm:min-h-[88px] ${
+                    index === 0 && visibleStats.length > 1
+                      ? "border-b border-[#d7d7d7] sm:border-b-0 sm:border-r"
+                      : ""
+                  }`}
+                  key={`${title}-stat-${item.label}`}
+                >
+                  <p className="text-[11px] leading-[16px] text-[#6b7280] 2xl:text-[11.5px]">
+                    {item.label}
+                  </p>
+                  <p
+                    className="mt-[2px] text-[13px] font-semibold leading-[18px] text-[#30343b] 2xl:text-[14px]"
+                    style={{
+                      WebkitBoxOrient: "vertical",
+                      WebkitLineClamp: 2,
+                      display: "-webkit-box",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
 
-        {footer ? (
-          <div className="mt-[10px] text-left text-[11px] leading-[16px] text-[#6b7280] 2xl:text-[11.5px]">
-            <span className="font-medium text-[#30343b]">{footer.label}:</span> {footer.value}
-          </div>
-        ) : null}
+          {footer ? (
+            <div className="mt-[10px] min-h-[16px] text-left text-[11px] leading-[16px] text-[#6b7280] 2xl:min-h-[18px] 2xl:text-[11.5px]">
+              <span className="font-medium text-[#30343b]">{footer.label}:</span> {footer.value}
+            </div>
+          ) : null}
 
-        <div className="pt-[16px]">
-          <span className={`${standardCollectionButtonClassName} max-w-[188px] whitespace-nowrap px-[20px] 2xl:max-w-[210px] 2xl:text-[13px]`}>
-            {ctaLabel}
-          </span>
+          <div className="pt-[16px]">
+            <span className={`${standardCollectionButtonClassName} max-w-[188px] px-[20px] 2xl:max-w-[210px] 2xl:text-[13px]`}>
+              {ctaLabel}
+            </span>
+          </div>
         </div>
       </div>
     </StandardCollectionCardLink>

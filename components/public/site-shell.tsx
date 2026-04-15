@@ -115,7 +115,7 @@ export async function SiteShell({
     },
   ];
   const footerHeadingClassName =
-    "!text-white text-[24px] font-bold leading-[26px] tracking-[0]";
+    "!text-white text-[24px] font-semibold leading-[26px] tracking-[0]";
   const footerRuleClassName = "mt-[15px] h-px w-full bg-[#19a7df]";
   const footerListLinkClassName =
     "block border-b border-white/18 text-[14px] leading-[30px] tracking-[0] !text-white transition hover:text-[var(--pv-sand)] sm:leading-[32px]";

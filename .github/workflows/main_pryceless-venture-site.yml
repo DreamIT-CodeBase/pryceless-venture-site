@@ -48,7 +48,7 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'pryceless-venture-ckdnbad2g9hqbad6'
+          app-name: 'pryceless-venture-site'
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DBE70EA7117D40DE8FFA55F9859194DB }}

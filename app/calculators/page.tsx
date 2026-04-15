@@ -9,11 +9,11 @@ import {
 import { getPublishedCalculators, getSingletonPage } from "@/lib/data/public";
 
 const calculatorTitleClassName =
-  "max-w-none whitespace-nowrap text-[17px] tracking-[-0.04em] sm:text-[18px]";
+  "max-w-none text-[17px] tracking-[-0.04em] sm:text-[18px]";
 const calculatorDescriptionClassName =
   "mx-auto w-fit max-w-full whitespace-normal text-center text-[13px] sm:text-[13.5px] sm:leading-[1.2]";
 const calculatorButtonTextClassName =
-  "max-w-none whitespace-nowrap text-[13.5px] sm:text-[14px]";
+  "max-w-none text-[13.5px] sm:text-[14px]";
 const calculatorTitleOffsetClassName = "mt-[26px] sm:mt-[30px]";
 const calculatorDescriptionOffsetClassName = "mt-[12px] sm:mt-[14px]";
 

@@ -22,6 +22,7 @@ export function InvestmentForm({ investment, forms, errorMessage }: InvestmentFo
       blobUrl: image.mediaFile.blobUrl,
       fileName: image.mediaFile.fileName,
       altText: image.altText ?? image.mediaFile.altText ?? "",
+      caption: image.caption ?? "",
     })) ?? [];
 
   return (

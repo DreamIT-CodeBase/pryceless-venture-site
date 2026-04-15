@@ -4,6 +4,11 @@ import { autosavePropertyDraft, deleteProperty, saveProperty } from "@/app/admin
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import { ImageManager } from "@/components/admin/image-manager";
 import { propertyStrategyOptions, propertyTypeOptions } from "@/lib/content-blueprint";
+import {
+  formatPropertyStandoutItemsForEditor,
+  formatPropertyStringListForEditor,
+  parsePropertyDetailContent,
+} from "@/lib/property-detail-content";
 import { getPropertyEditorStatus, propertyStatusOptions } from "@/lib/property-portfolio";
 
 type PropertyFormProps = {
@@ -13,12 +18,14 @@ type PropertyFormProps = {
 };
 
 export function PropertyForm({ property, forms, errorMessage }: PropertyFormProps) {
+  const detailContent = parsePropertyDetailContent(property?.detailContent);
   const images =
     property?.images?.map((image: any) => ({
       mediaFileId: image.mediaFileId,
       blobUrl: image.mediaFile.blobUrl,
       fileName: image.mediaFile.fileName,
       altText: image.altText ?? image.mediaFile.altText ?? "",
+      caption: image.caption ?? "",
     })) ?? [];
 
   return (
@@ -118,7 +125,7 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
             </label>
 
             <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Summary</span>
+              <span className="mb-2 block text-sm font-medium text-slate-700">Hero Summary</span>
               <textarea
                 className="min-h-32 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
                 defaultValue={property?.summary ?? ""}
@@ -126,18 +133,168 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
                 name="summary"
                 required
               />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                This short summary appears in the hero section and the featured property image callout.
+              </span>
             </label>
 
             <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Buyer Fit / Notes</span>
+              <span className="mb-2 block text-sm font-medium text-slate-700">Investment Overview / Long-form note</span>
               <textarea
                 className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
                 defaultValue={property?.buyerFit ?? ""}
                 name="buyerFit"
               />
               <span className="mt-2 block text-xs leading-5 text-slate-500">
-                Use this field for buyer fit on listings, execution commentary on sold deals, or renovation notes
-                on in-progress properties.
+                This powers the long narrative section on the slug page and can still hold buyer-fit or execution commentary.
+              </span>
+            </label>
+
+            <div className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/70 p-5 md:col-span-2">
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <h3 className="text-base font-semibold text-slate-900">Performance Metrics</h3>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    These populate the top four metric cards on the property slug page.
+                  </p>
+                </div>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">ROI</span>
+                  <input
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                    defaultValue={detailContent.performance.roi ?? ""}
+                    name="performanceRoi"
+                    placeholder="18%"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Cap Rate</span>
+                  <input
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                    defaultValue={detailContent.performance.capRate ?? ""}
+                    name="performanceCapRate"
+                    placeholder="7.2%"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Monthly Cash Flow</span>
+                  <input
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                    defaultValue={detailContent.performance.monthlyCashFlow ?? ""}
+                    name="performanceMonthlyCashFlow"
+                    placeholder="$1,200"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Investment Horizon</span>
+                  <input
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                    defaultValue={detailContent.performance.investmentHorizon ?? ""}
+                    name="performanceInvestmentHorizon"
+                    placeholder="5 Years"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/70 p-5 md:col-span-2">
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <h3 className="text-base font-semibold text-slate-900">Investment Snapshot</h3>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    These values populate the four large snapshot cards below the hero area.
+                  </p>
+                </div>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Purchase Price</span>
+                  <input
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                    defaultValue={detailContent.snapshot.purchasePrice ?? ""}
+                    name="snapshotPurchasePrice"
+                    placeholder="$285,000"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Estimated Rent</span>
+                  <input
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                    defaultValue={detailContent.snapshot.estimatedRent ?? ""}
+                    name="snapshotEstimatedRent"
+                    placeholder="$2,400/mo"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Renovation Cost</span>
+                  <input
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                    defaultValue={detailContent.snapshot.renovationCost ?? ""}
+                    name="snapshotRenovationCost"
+                    placeholder="$45,000"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">ARV</span>
+                  <input
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                    defaultValue={detailContent.snapshot.arv ?? ""}
+                    name="snapshotArv"
+                    placeholder="$365,000"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Why This Deal Stands Out</span>
+              <textarea
+                className="min-h-32 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={formatPropertyStandoutItemsForEditor(detailContent.standoutItems)}
+                name="standoutItemsText"
+                placeholder={"One standout card per line.\nStrong Rental Demand | Charlotte MSA shows 14% population growth over 3 years"}
+              />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                Use the format <span className="font-semibold text-slate-700">Title | Description</span>. Up to four cards render on the public page.
+              </span>
+            </label>
+
+            <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Ideal Investor Profile</span>
+              <textarea
+                className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={formatPropertyStringListForEditor(detailContent.investorProfile)}
+                name="investorProfileText"
+                placeholder={"One profile tag per line.\nPassive Income"}
+              />
+            </label>
+
+            <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Prime Location Benefits</span>
+              <textarea
+                className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={formatPropertyStringListForEditor(detailContent.locationBenefits)}
+                name="locationBenefitsText"
+                placeholder={"One location benefit per line.\n15 minutes to Uptown Charlotte"}
+              />
+            </label>
+
+            <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Google Maps Link</span>
+              <input
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={detailContent.googleMapsUrl ?? ""}
+                name="googleMapsUrl"
+                placeholder="Paste a Google Maps share or embed link"
+              />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                Paste a Google Maps share link, embed link, or even a searchable address. The public page will render it inside the map panel.
               </span>
             </label>
 

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { CSSProperties, ReactNode } from "react";
 
 const joinClasses = (...classes: Array<string | undefined>) => classes.filter(Boolean).join(" ");
-const sliderBoundFormatter = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
+const sliderBoundFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
 const parseNumericValue = (rawValue: string) => {
   const parsed = Number(rawValue);
@@ -406,7 +406,7 @@ export function CalculatorLayout({
         <div className="mt-4 divide-y divide-[#edf2f8]">
           {[
             { href: "/calculators/roi", label: "ROI Calculator" },
-            { href: "/calculators/mortgage", label: "EMI Calculator" },
+            { href: "/calculators/mortgage", label: "Mortgage Calculator" },
             { href: "/calculators/brrrr", label: "BRRRR Calculator" },
             { href: "/calculators/value-add", label: "Value-Add Analysis" },
           ].map((item) => {

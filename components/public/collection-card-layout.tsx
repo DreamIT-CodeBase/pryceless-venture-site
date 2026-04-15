@@ -7,7 +7,7 @@ export const COLLECTION_CARD_TABLET_GAP = 24;
 export const COLLECTION_CARD_MOBILE_GAP = 16;
 
 export const standardCollectionButtonClassName =
-  "mt-auto inline-flex min-h-[39px] w-full max-w-[160px] items-center justify-center rounded-[4px] bg-[#18314b] px-[18px] py-2 text-center text-[12px] font-semibold leading-none text-white transition-colors duration-300 group-hover:bg-[#234766] hover:bg-[#234766]";
+  "mt-auto inline-flex min-h-[44px] w-full max-w-[180px] items-center justify-center self-start rounded-[8px] bg-[#18314b] px-4 py-2.5 text-center text-[13px] font-semibold leading-[1.2] text-white transition-colors duration-300 group-hover:bg-[#234766] hover:bg-[#234766]";
 
 export function ThreeUpCollectionGrid({
   children,
@@ -55,7 +55,7 @@ export function StandardCollectionCard({
   className?: string;
 } & ComponentPropsWithoutRef<"article">) {
   const resolvedClassName =
-    `flex min-h-[420px] flex-col overflow-hidden rounded-[18px] border border-[rgba(215,215,215,1)] bg-white sm:min-h-[484px] ${className}`.trim();
+    `flex h-full min-h-[420px] flex-col overflow-hidden rounded-[18px] border border-[rgba(215,215,215,1)] bg-white sm:min-h-[484px] ${className}`.trim();
 
   return (
     <article {...articleProps} className={resolvedClassName}>
@@ -74,7 +74,7 @@ export function StandardCollectionCardLink({
   href: string;
 }) {
   const resolvedClassName =
-    `group flex min-h-[420px] flex-col overflow-hidden rounded-[18px] border border-[rgba(215,215,215,1)] bg-white transition-transform duration-300 hover:-translate-y-[2px] sm:min-h-[484px] ${className}`.trim();
+    `group flex h-full min-h-[420px] flex-col overflow-hidden rounded-[18px] border border-[rgba(215,215,215,1)] bg-white transition-transform duration-300 hover:-translate-y-[2px] sm:min-h-[484px] ${className}`.trim();
 
   return (
     <Link className={resolvedClassName} href={href}>

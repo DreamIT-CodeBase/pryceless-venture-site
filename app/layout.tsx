@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   title: "Pryceless Venture",
   description:
     "Real estate financing, acquisitions, and analytics for operators, borrowers, and deal-focused teams.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

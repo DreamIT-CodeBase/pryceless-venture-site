@@ -19,7 +19,7 @@ export default async function EditPropertyPage({
   if (!property) notFound();
 
   return (
-    <AdminShell title={property.title} subtitle="Update lifecycle status, highlights, inquiry forms, and the primary image.">
+    <AdminShell title={property.title} subtitle="Update lifecycle status, slug-page metrics, map content, inquiry forms, and the primary image.">
       <PropertyForm errorMessage={errorMessage} forms={forms} property={property} />
     </AdminShell>
   );

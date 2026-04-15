@@ -100,9 +100,11 @@ export default async function BlogsPage() {
                           {blogPost.readTime ? <span>{blogPost.readTime}</span> : null}
                         </div>
 
-                        <span className={`${standardCollectionButtonClassName} mt-[22px] max-w-[170px]`}>
-                          Read Article
-                        </span>
+                        <div className="mt-auto pt-[22px]">
+                          <span className={`${standardCollectionButtonClassName} max-w-[170px]`}>
+                            Read Article
+                          </span>
+                        </div>
                       </div>
                     </StandardCollectionCardLink>
                   ))}

@@ -103,6 +103,22 @@ const isFormSchemaSyncFailure = (error: unknown) => {
   );
 };
 
+const isPropertyDetailSchemaSyncFailure = (error: unknown) => {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const errorWithMessage = error as { message?: string };
+  const message = errorWithMessage.message ?? "";
+
+  return (
+    message.includes("Invalid column name 'detailContent'") ||
+    message.includes("The column `detailContent` does not exist") ||
+    message.includes("Unknown field `detailContent`") ||
+    message.includes("Unknown selection field `detailContent`")
+  );
+};
+
 const warnFallbackOnce = (label: string, reason: string) => {
   if (warnedFallbackLabels.has(label)) {
     return;
@@ -320,7 +336,7 @@ const propertyListSelect = {
   },
 } as const;
 
-const propertyDetailBaseSelect = {
+const propertyDetailCoreSelect = {
   buyerFit: true,
   locationCity: true,
   locationState: true,
@@ -347,6 +363,30 @@ const propertyDetailBaseSelect = {
   },
 } as const;
 
+const propertyDetailBaseSelect = {
+  ...propertyDetailCoreSelect,
+  detailContent: true,
+} as const;
+
+const formFieldSelect = {
+  fieldKey: true,
+  id: true,
+  label: true,
+  options: true,
+  placeholder: true,
+  required: true,
+  type: true,
+} as const;
+
+const legacyFormFieldSelect = {
+  fieldKey: true,
+  id: true,
+  label: true,
+  placeholder: true,
+  required: true,
+  type: true,
+} as const;
+
 const propertyDetailSelect = {
   ...propertyDetailBaseSelect,
   inquiryForm: {
@@ -356,15 +396,52 @@ const propertyDetailSelect = {
       successMessage: true,
       fields: {
         orderBy: { sortOrder: "asc" as const },
-        select: {
-          fieldKey: true,
-          id: true,
-          label: true,
-          options: true,
-          placeholder: true,
-          required: true,
-          type: true,
-        },
+        select: formFieldSelect,
+      },
+    },
+  },
+} as const;
+
+const propertyDetailLegacyFormSelect = {
+  ...propertyDetailBaseSelect,
+  inquiryForm: {
+    select: {
+      formName: true,
+      slug: true,
+      successMessage: true,
+      fields: {
+        orderBy: { sortOrder: "asc" as const },
+        select: legacyFormFieldSelect,
+      },
+    },
+  },
+} as const;
+
+const propertyDetailLegacyContentSelect = {
+  ...propertyDetailCoreSelect,
+  inquiryForm: {
+    select: {
+      formName: true,
+      slug: true,
+      successMessage: true,
+      fields: {
+        orderBy: { sortOrder: "asc" as const },
+        select: formFieldSelect,
+      },
+    },
+  },
+} as const;
+
+const propertyDetailLegacySchemaSelect = {
+  ...propertyDetailCoreSelect,
+  inquiryForm: {
+    select: {
+      formName: true,
+      slug: true,
+      successMessage: true,
+      fields: {
+        orderBy: { sortOrder: "asc" as const },
+        select: legacyFormFieldSelect,
       },
     },
   },
@@ -420,15 +497,44 @@ const investmentDetailSelect = {
       successMessage: true,
       fields: {
         orderBy: { sortOrder: "asc" as const },
-        select: {
-          fieldKey: true,
-          id: true,
-          label: true,
-          options: true,
-          placeholder: true,
-          required: true,
-          type: true,
-        },
+        select: formFieldSelect,
+      },
+    },
+  },
+  highlights: {
+    orderBy: { sortOrder: "asc" as const },
+    select: {
+      highlight: true,
+    },
+  },
+  primaryImage: primaryInvestmentImageSelect,
+  images: {
+    orderBy: { sortOrder: "asc" as const },
+    select: {
+      altText: true,
+      caption: true,
+      mediaFile: mediaFileBlobSelect,
+    },
+  },
+} as const;
+
+const investmentDetailLegacyFormSelect = {
+  assetType: true,
+  minimumInvestmentDisplay: true,
+  returnsDisclaimer: true,
+  slug: true,
+  status: true,
+  strategy: true,
+  summary: true,
+  title: true,
+  dealPacketForm: {
+    select: {
+      formName: true,
+      slug: true,
+      successMessage: true,
+      fields: {
+        orderBy: { sortOrder: "asc" as const },
+        select: legacyFormFieldSelect,
       },
     },
   },
@@ -598,15 +704,39 @@ const loanProgramDetailSelect = {
       successMessage: true,
       fields: {
         orderBy: { sortOrder: "asc" as const },
-        select: {
-          fieldKey: true,
-          id: true,
-          label: true,
-          options: true,
-          placeholder: true,
-          required: true,
-          type: true,
-        },
+        select: formFieldSelect,
+      },
+    },
+  },
+} as const;
+
+const loanProgramDetailLegacyFormSelect = {
+  fees: true,
+  fullDescription: true,
+  imageAlt: true,
+  imageUrl: true,
+  interestRate: true,
+  keyHighlights: true,
+  loanTerm: true,
+  ltv: true,
+  maxAmount: true,
+  minAmount: true,
+  shortDescription: true,
+  slug: true,
+  title: true,
+  forms: {
+    where: {
+      isActive: true,
+    },
+    orderBy: { updatedAt: "desc" as const },
+    take: 1,
+    select: {
+      formName: true,
+      slug: true,
+      successMessage: true,
+      fields: {
+        orderBy: { sortOrder: "asc" as const },
+        select: legacyFormFieldSelect,
       },
     },
   },
@@ -618,17 +748,75 @@ const activeFormSelect = {
   successMessage: true,
   fields: {
     orderBy: { sortOrder: "asc" as const },
-    select: {
-      fieldKey: true,
-      id: true,
-      label: true,
-      options: true,
-      placeholder: true,
-      required: true,
-      type: true,
-    },
+    select: formFieldSelect,
   },
 } as const;
+
+const normalizeLegacyForm = <T extends { fields: Array<Record<string, unknown>> } | null>(
+  form: T,
+) =>
+  form
+    ? {
+        ...form,
+        fields: form.fields.map((field) => ({
+          ...field,
+          options: null as string | null,
+        })),
+      }
+    : form;
+
+const normalizeLegacyForms = <T extends { fields: Array<Record<string, unknown>> }>(forms: T[]) =>
+  forms.map((form) => ({
+    ...form,
+    fields: form.fields.map((field) => ({
+      ...field,
+      options: null as string | null,
+    })),
+  }));
+
+type PublishedPropertyRecord = Prisma.PropertyGetPayload<{
+  select: typeof propertyDetailSelect;
+}>;
+
+type PublishedPropertyLegacyFormRecord = Prisma.PropertyGetPayload<{
+  select: typeof propertyDetailLegacyFormSelect;
+}>;
+
+type PublishedPropertyLegacyContentRecord = Prisma.PropertyGetPayload<{
+  select: typeof propertyDetailLegacyContentSelect;
+}>;
+
+type PublishedPropertyLegacySchemaRecord = Prisma.PropertyGetPayload<{
+  select: typeof propertyDetailLegacySchemaSelect;
+}>;
+
+const normalizePublishedPropertyRecord = (
+  property:
+    | PublishedPropertyRecord
+    | PublishedPropertyLegacyFormRecord
+    | PublishedPropertyLegacyContentRecord
+    | PublishedPropertyLegacySchemaRecord
+    | null,
+  options?: {
+    legacyForm?: boolean;
+    missingDetailContent?: boolean;
+  },
+) => {
+  if (!property) {
+    return null;
+  }
+
+  return {
+    ...property,
+    detailContent:
+      options?.missingDetailContent || !("detailContent" in property)
+        ? null
+        : property.detailContent ?? null,
+    inquiryForm: options?.legacyForm
+      ? normalizeLegacyForm(property.inquiryForm)
+      : property.inquiryForm,
+  };
+};
 
 const getSeedActiveForm = (slug: string) => {
   const definition = formDefinitionsSeed.find((form) => form.slug === slug);
@@ -863,12 +1051,10 @@ const getBlogPostDelegate = () => {
 
 const getHomePageCached = unstable_cache(
   () =>
-    withPublicFallback("home-page", null, () =>
-      prisma.homePage.findUnique({
-        where: { id: "home" },
-        select: homePageSelect,
-      }),
-    ),
+    prisma.homePage.findUnique({
+      where: { id: "home" },
+      select: homePageSelect,
+    }),
   ["public-home-page"],
   {
     revalidate: PUBLIC_REVALIDATE_SECONDS,
@@ -878,13 +1064,11 @@ const getHomePageCached = unstable_cache(
 
 const getPublishedPropertiesCached = unstable_cache(
   () =>
-    withPublicFallback("published-properties", [], () =>
-      prisma.property.findMany({
-        where: { lifecycleStatus: "PUBLISHED" },
-        orderBy: { updatedAt: "desc" },
-        select: propertyListSelect,
-      }),
-    ),
+    prisma.property.findMany({
+      where: { lifecycleStatus: "PUBLISHED" },
+      orderBy: { updatedAt: "desc" },
+      select: propertyListSelect,
+    }),
   ["public-published-properties"],
   {
     revalidate: PUBLIC_REVALIDATE_SECONDS,
@@ -894,13 +1078,11 @@ const getPublishedPropertiesCached = unstable_cache(
 
 const getPublishedInvestmentsCached = unstable_cache(
   () =>
-    withPublicFallback("published-investments", [], () =>
-      prisma.investment.findMany({
-        where: { lifecycleStatus: "PUBLISHED" },
-        orderBy: { updatedAt: "desc" },
-        select: investmentListSelect,
-      }),
-    ),
+    prisma.investment.findMany({
+      where: { lifecycleStatus: "PUBLISHED" },
+      orderBy: { updatedAt: "desc" },
+      select: investmentListSelect,
+    }),
   ["public-published-investments"],
   {
     revalidate: PUBLIC_REVALIDATE_SECONDS,
@@ -910,13 +1092,11 @@ const getPublishedInvestmentsCached = unstable_cache(
 
 const getPublishedCaseStudiesCached = unstable_cache(
   () =>
-    withPublicFallback("published-case-studies", [], () =>
-      prisma.caseStudy.findMany({
-        where: { lifecycleStatus: "PUBLISHED" },
-        orderBy: { updatedAt: "desc" },
-        select: caseStudyListSelect,
-      }),
-    ),
+    prisma.caseStudy.findMany({
+      where: { lifecycleStatus: "PUBLISHED" },
+      orderBy: { updatedAt: "desc" },
+      select: caseStudyListSelect,
+    }),
   ["public-published-case-studies"],
   {
     revalidate: PUBLIC_REVALIDATE_SECONDS,
@@ -937,13 +1117,23 @@ const getPublishedBlogPostsCached = unstable_cache(
       return Promise.resolve(fallback);
     }
 
-    return withBlogFallback("published-blog-posts", fallback, () =>
-      blogPostDelegate.findMany({
+    return blogPostDelegate
+      .findMany({
         where: { lifecycleStatus: "PUBLISHED" },
         orderBy: [{ publishedAt: "desc" }, { updatedAt: "desc" }],
         select: blogPostListSelect,
-      }) as Promise<SeedBackedBlogPostListItem[]>,
-    );
+      })
+      .catch((error) => {
+        if (isBlogSchemaSyncFailure(error)) {
+          warnFallbackOnce(
+            "published-blog-posts",
+            "blog schema is unavailable, using seed data instead.",
+          );
+          return fallback;
+        }
+
+        throw error;
+      }) as Promise<SeedBackedBlogPostListItem[]>;
   },
   ["public-published-blog-posts"],
   {
@@ -954,13 +1144,11 @@ const getPublishedBlogPostsCached = unstable_cache(
 
 const getPublishedCalculatorsCached = unstable_cache(
   () =>
-    withPublicFallback("published-calculators", [], () =>
-      prisma.calculator.findMany({
-        where: { lifecycleStatus: "PUBLISHED" },
-        orderBy: { updatedAt: "desc" },
-        select: calculatorListSelect,
-      }),
-    ),
+    prisma.calculator.findMany({
+      where: { lifecycleStatus: "PUBLISHED" },
+      orderBy: { updatedAt: "desc" },
+      select: calculatorListSelect,
+    }),
   ["public-published-calculators"],
   {
     revalidate: PUBLIC_REVALIDATE_SECONDS,
@@ -981,16 +1169,26 @@ const getPublishedLoanProgramsCached = unstable_cache(
       return Promise.resolve(fallback);
     }
 
-    return withLoanProgramFallback("published-loan-programs", fallback, () =>
-      loanProgramDelegate.findMany({
+    return loanProgramDelegate
+      .findMany({
         where: {
           isActive: true,
           lifecycleStatus: "PUBLISHED",
         },
         orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
         select: loanProgramListSelect,
-      }) as Promise<SeedBackedLoanProgramListItem[]>,
-    );
+      })
+      .catch((error) => {
+        if (isSchemaSyncFailure(error)) {
+          warnFallbackOnce(
+            "published-loan-programs",
+            "loan program schema is unavailable, using seed data instead.",
+          );
+          return fallback;
+        }
+
+        throw error;
+      }) as Promise<SeedBackedLoanProgramListItem[]>;
   },
   ["public-published-loan-programs"],
   {
@@ -999,78 +1197,167 @@ const getPublishedLoanProgramsCached = unstable_cache(
   },
 );
 
-export const getHomePage = async () => getHomePageCached();
+export const getHomePage = async () =>
+  withPublicFallback("home-page", null, () => getHomePageCached());
 
 export const getSingletonPage = async (key: string) =>
-  unstable_cache(
-    () =>
-      withPublicFallback(`singleton-page:${key}`, mergeSingletonPageWithSeed(null, key), () =>
+  withPublicFallback(`singleton-page:${key}`, mergeSingletonPageWithSeed(null, key), () =>
+    unstable_cache(
+      () =>
         prisma.singletonPage.findUnique({
           where: { key: key as never },
           select: singletonPageSelect,
         }).then((page) => mergeSingletonPageWithSeed(page, key)),
-      ),
-    ["public-singleton-page", key],
-    {
-      revalidate: PUBLIC_REVALIDATE_SECONDS,
-      tags: [`singleton-page:${key}`],
-    },
-  )();
+      ["public-singleton-page", key],
+      {
+        revalidate: PUBLIC_REVALIDATE_SECONDS,
+        tags: [`singleton-page:${key}`],
+      },
+    )(),
+  );
 
-export const getPublishedProperties = async () => getPublishedPropertiesCached();
+export const getPublishedProperties = async () =>
+  withPublicFallback("published-properties", [], () => getPublishedPropertiesCached());
 
 export const getPublishedProperty = async (slug: string) =>
-  unstable_cache(
-    () =>
-      withPublicFallback(`published-property:${slug}`, null, () =>
-        prisma.property.findFirst({
-          where: {
-            slug,
-            lifecycleStatus: "PUBLISHED",
+  withPublicFallback(`published-property:${slug}`, null, () =>
+    unstable_cache(
+      async () => {
+        const attempts = [
+          {
+            select: propertyDetailSelect,
+            legacyForm: false,
+            missingDetailContent: false,
+            retryable: (error: unknown) =>
+              isFormSchemaSyncFailure(error) || isPropertyDetailSchemaSyncFailure(error),
           },
-          select: propertyDetailSelect,
-        }),
-      ),
-    ["public-published-property", slug],
-    {
-      revalidate: PUBLIC_REVALIDATE_SECONDS,
-      tags: ["properties", `property:${slug}`],
-    },
-  )();
+          {
+            select: propertyDetailLegacyFormSelect,
+            legacyForm: true,
+            missingDetailContent: false,
+            retryable: (error: unknown) => isPropertyDetailSchemaSyncFailure(error),
+          },
+          {
+            select: propertyDetailLegacyContentSelect,
+            legacyForm: false,
+            missingDetailContent: true,
+            retryable: (error: unknown) => isFormSchemaSyncFailure(error),
+          },
+          {
+            select: propertyDetailLegacySchemaSelect,
+            legacyForm: true,
+            missingDetailContent: true,
+            retryable: () => false,
+          },
+        ] as const;
 
-export const getPublishedInvestments = async () => getPublishedInvestmentsCached();
+        for (const attempt of attempts) {
+          try {
+            const property = await prisma.property.findFirst({
+              where: {
+                slug,
+                lifecycleStatus: "PUBLISHED",
+              },
+              select: attempt.select,
+            });
+
+            if (attempt.legacyForm || attempt.missingDetailContent) {
+              const reasons = [
+                attempt.missingDetailContent
+                  ? "property detail content column is unavailable"
+                  : null,
+                attempt.legacyForm ? "form option metadata is unavailable" : null,
+              ]
+                .filter(Boolean)
+                .join(" and ");
+
+              warnFallbackOnce(`published-property:${slug}`, `${reasons}, using a compatible query.`);
+            }
+
+            return normalizePublishedPropertyRecord(property, {
+              legacyForm: attempt.legacyForm,
+              missingDetailContent: attempt.missingDetailContent,
+            });
+          } catch (error) {
+            if (!attempt.retryable(error)) {
+              throw error;
+            }
+          }
+        }
+      },
+      ["public-published-property", slug],
+      {
+        revalidate: PUBLIC_REVALIDATE_SECONDS,
+        tags: ["properties", `property:${slug}`],
+      },
+    )(),
+  );
+
+export const getPublishedInvestments = async () =>
+  withPublicFallback("published-investments", [], () => getPublishedInvestmentsCached());
 
 export const getPublishedInvestment = async (slug: string) =>
-  unstable_cache(
-    () =>
-      withPublicFallback(`published-investment:${slug}`, null, () =>
-        prisma.investment.findFirst({
-          where: {
-            slug,
-            lifecycleStatus: "PUBLISHED",
-          },
-          select: investmentDetailSelect,
-        }),
-      ),
-    ["public-published-investment", slug],
-    {
-      revalidate: PUBLIC_REVALIDATE_SECONDS,
-      tags: ["investments", `investment:${slug}`],
-    },
-  )();
+  withPublicFallback(`published-investment:${slug}`, null, () =>
+    unstable_cache(
+      async () => {
+        try {
+          return await prisma.investment.findFirst({
+            where: {
+              slug,
+              lifecycleStatus: "PUBLISHED",
+            },
+            select: investmentDetailSelect,
+          });
+        } catch (error) {
+          if (!isFormSchemaSyncFailure(error)) {
+            throw error;
+          }
 
-export const getPublishedCaseStudies = async () => getPublishedCaseStudiesCached();
+          warnFallbackOnce(
+            `published-investment:${slug}`,
+            "form schema is unavailable, retrying without form option metadata.",
+          );
+
+          const investment = await prisma.investment.findFirst({
+            where: {
+              slug,
+              lifecycleStatus: "PUBLISHED",
+            },
+            select: investmentDetailLegacyFormSelect,
+          });
+
+          return investment
+            ? {
+                ...investment,
+                dealPacketForm: normalizeLegacyForm(investment.dealPacketForm),
+              }
+            : null;
+        }
+      },
+      ["public-published-investment", slug],
+      {
+        revalidate: PUBLIC_REVALIDATE_SECONDS,
+        tags: ["investments", `investment:${slug}`],
+      },
+    )(),
+  );
+
+export const getPublishedCaseStudies = async () =>
+  withPublicFallback("published-case-studies", [], () => getPublishedCaseStudiesCached());
 
 export const getPublishedBlogPosts = async (limit?: number) => {
-  const posts = await getPublishedBlogPostsCached();
+  const fallback = getSeedBlogPostList();
+  const posts = await withPublicFallback("published-blog-posts", fallback, () =>
+    getPublishedBlogPostsCached(),
+  );
 
   return typeof limit === "number" ? posts.slice(0, limit) : posts;
 };
 
 export const getPublishedCaseStudy = async (slug: string) =>
-  unstable_cache(
-    () =>
-      withPublicFallback(`published-case-study:${slug}`, null, () =>
+  withPublicFallback(`published-case-study:${slug}`, null, () =>
+    unstable_cache(
+      () =>
         prisma.caseStudy.findFirst({
           where: {
             slug,
@@ -1078,17 +1365,18 @@ export const getPublishedCaseStudy = async (slug: string) =>
           },
           select: caseStudyDetailSelect,
         }),
-      ),
-    ["public-published-case-study", slug],
-    {
-      revalidate: PUBLIC_REVALIDATE_SECONDS,
-      tags: ["case-studies", `case-study:${slug}`],
-    },
-  )();
+      ["public-published-case-study", slug],
+      {
+        revalidate: PUBLIC_REVALIDATE_SECONDS,
+        tags: ["case-studies", `case-study:${slug}`],
+      },
+    )(),
+  );
 
 export const getPublishedBlogPost = async (slug: string) =>
-  unstable_cache(
-    () => {
+  withPublicFallback(`published-blog-post:${slug}`, getSeedBlogPostDetail(slug), () =>
+    unstable_cache(
+      () => {
       const fallback = getSeedBlogPostDetail(slug);
       const blogPostDelegate = getBlogPostDelegate();
 
@@ -1100,29 +1388,41 @@ export const getPublishedBlogPost = async (slug: string) =>
         return Promise.resolve(fallback);
       }
 
-      return withBlogFallback(`published-blog-post:${slug}`, fallback, () =>
-        blogPostDelegate.findFirst({
+      return blogPostDelegate
+        .findFirst({
           where: {
             slug,
             lifecycleStatus: "PUBLISHED",
           },
           select: blogPostDetailSelect,
-        }) as Promise<SeedBackedBlogPostDetailItem | null>,
-      );
-    },
-    ["public-published-blog-post", slug],
-    {
-      revalidate: PUBLIC_REVALIDATE_SECONDS,
-      tags: ["blogs", `blog:${slug}`],
-    },
-  )();
+        })
+        .catch((error) => {
+          if (isBlogSchemaSyncFailure(error)) {
+            warnFallbackOnce(
+              `published-blog-post:${slug}`,
+              "blog schema is unavailable, using seed data instead.",
+            );
+            return fallback;
+          }
 
-export const getPublishedCalculators = async () => getPublishedCalculatorsCached();
+          throw error;
+        }) as Promise<SeedBackedBlogPostDetailItem | null>;
+      },
+      ["public-published-blog-post", slug],
+      {
+        revalidate: PUBLIC_REVALIDATE_SECONDS,
+        tags: ["blogs", `blog:${slug}`],
+      },
+    )(),
+  );
+
+export const getPublishedCalculators = async () =>
+  withPublicFallback("published-calculators", [], () => getPublishedCalculatorsCached());
 
 export const getPublishedCalculator = async (slug: string) =>
-  unstable_cache(
-    () =>
-      withPublicFallback(`published-calculator:${slug}`, null, () =>
+  withPublicFallback(`published-calculator:${slug}`, null, () =>
+    unstable_cache(
+      () =>
         prisma.calculator.findFirst({
           where: {
             slug,
@@ -1130,55 +1430,105 @@ export const getPublishedCalculator = async (slug: string) =>
           },
           select: calculatorListSelect,
         }),
-      ),
-    ["public-published-calculator", slug],
-    {
-      revalidate: PUBLIC_REVALIDATE_SECONDS,
-      tags: ["calculators", `calculator:${slug}`],
-    },
-  )();
+      ["public-published-calculator", slug],
+      {
+        revalidate: PUBLIC_REVALIDATE_SECONDS,
+        tags: ["calculators", `calculator:${slug}`],
+      },
+    )(),
+  );
 
-export const getPublishedLoanPrograms = async () => getPublishedLoanProgramsCached();
+export const getPublishedLoanPrograms = async () =>
+  withPublicFallback("published-loan-programs", await getSeedLoanProgramList(), () =>
+    getPublishedLoanProgramsCached(),
+  );
 
 export const getPublishedLoanProgram = async (slug: string) =>
-  unstable_cache(
-    async () => {
-      const fallback = await getSeedLoanProgramDetail(slug);
-      const loanProgramDelegate = getLoanProgramDelegate();
+  withPublicFallback(`published-loan-program:${slug}`, await getSeedLoanProgramDetail(slug), () =>
+    unstable_cache(
+      async () => {
+        const fallback = await getSeedLoanProgramDetail(slug);
+        const loanProgramDelegate = getLoanProgramDelegate();
 
-      if (!loanProgramDelegate) {
-        warnFallbackOnce(
-          `published-loan-program:${slug}`,
-          "Prisma loanProgram delegate is unavailable, using seed data instead.",
-        );
-        return fallback;
-      }
+        if (!loanProgramDelegate) {
+          warnFallbackOnce(
+            `published-loan-program:${slug}`,
+            "Prisma loanProgram delegate is unavailable, using seed data instead.",
+          );
+          return fallback;
+        }
 
-      return withLoanProgramFallback(`published-loan-program:${slug}`, fallback, () =>
-        loanProgramDelegate.findFirst({
-          where: {
-            slug,
-            isActive: true,
-            lifecycleStatus: "PUBLISHED",
-          },
-          select: loanProgramDetailSelect,
-        }) as Promise<SeedBackedLoanProgramDetailItem | null>,
-      );
-    },
-    ["public-published-loan-program", slug],
-    {
-      revalidate: PUBLIC_REVALIDATE_SECONDS,
-      tags: ["loan-programs", `loan-program:${slug}`],
-    },
-  )();
+        try {
+          return (await loanProgramDelegate.findFirst({
+            where: {
+              slug,
+              isActive: true,
+              lifecycleStatus: "PUBLISHED",
+            },
+            select: loanProgramDetailSelect,
+          })) as SeedBackedLoanProgramDetailItem | null;
+        } catch (error) {
+          if (isSchemaSyncFailure(error)) {
+            warnFallbackOnce(
+              `published-loan-program:${slug}`,
+              "loan program schema is unavailable, using seed data instead.",
+            );
+            return fallback;
+          }
+
+          if (!isFormSchemaSyncFailure(error)) {
+            throw error;
+          }
+
+          warnFallbackOnce(
+            `published-loan-program:${slug}`,
+            "form schema is unavailable, retrying without form option metadata.",
+          );
+
+          try {
+            const program = (await loanProgramDelegate.findFirst({
+              where: {
+                slug,
+                isActive: true,
+                lifecycleStatus: "PUBLISHED",
+              },
+              select: loanProgramDetailLegacyFormSelect,
+            })) as SeedBackedLoanProgramDetailItem | null;
+
+            return program
+              ? {
+                  ...program,
+                  forms: normalizeLegacyForms(program.forms),
+                }
+              : null;
+          } catch (error) {
+            if (!isSchemaSyncFailure(error)) {
+              throw error;
+            }
+
+            warnFallbackOnce(
+              `published-loan-program:${slug}`,
+              "loan program schema is unavailable, using seed data instead.",
+            );
+            return fallback;
+          }
+        }
+      },
+      ["public-published-loan-program", slug],
+      {
+        revalidate: PUBLIC_REVALIDATE_SECONDS,
+        tags: ["loan-programs", `loan-program:${slug}`],
+      },
+    )(),
+  );
 
 export const getActiveFormBySlug = async (slug: string) =>
-  unstable_cache(
-    () => {
-      const fallback = getSeedActiveForm(slug);
+  withPublicFallback(`active-form:${slug}`, getSeedActiveForm(slug), () =>
+    unstable_cache(
+      () => {
+        const fallback = getSeedActiveForm(slug);
 
-      return withPublicFallback(`active-form:${slug}`, fallback, () =>
-        prisma.formDefinition
+        return prisma.formDefinition
           .findFirst({
             where: {
               slug,
@@ -1197,12 +1547,12 @@ export const getActiveFormBySlug = async (slug: string) =>
             }
 
             throw error;
-          }),
-      );
-    },
-    ["public-active-form", slug],
-    {
-      revalidate: PUBLIC_REVALIDATE_SECONDS,
-      tags: [`form:${slug}`],
-    },
-  )();
+          });
+      },
+      ["public-active-form", slug],
+      {
+        revalidate: PUBLIC_REVALIDATE_SECONDS,
+        tags: [`form:${slug}`],
+      },
+    )(),
+  );

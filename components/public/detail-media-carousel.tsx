@@ -67,6 +67,7 @@ export function DetailMediaCarousel({
   };
 
   const activeItem = safeItems[activeIndex];
+  const hasActiveMeta = Boolean(activeItem.eyebrow || activeItem.title || activeItem.caption);
 
   return (
     <div
@@ -123,30 +124,9 @@ export function DetailMediaCarousel({
                   sizes={imageSizes}
                   src={item.src}
                 />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0)_42%,rgba(255,255,255,0.62)_100%)]" />
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5 sm:p-6 lg:p-7">
-          <div className="max-w-[420px] rounded-[24px] border border-[rgba(191,147,117,0.22)] bg-white/92 px-4 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:px-5">
-            {activeItem.eyebrow ? (
-              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[var(--pv-sand)]">
-                {activeItem.eyebrow}
-              </p>
-            ) : null}
-            {activeItem.title ? (
-              <h3 className="mt-2 text-[22px] font-semibold leading-[1.08] tracking-[-0.03em] text-[#111827] sm:text-[24px]">
-                {activeItem.title}
-              </h3>
-            ) : null}
-            {activeItem.caption ? (
-              <p className="mt-2 text-[13px] leading-[1.65] text-slate-600 sm:text-[14px]">
-                {activeItem.caption}
-              </p>
-            ) : null}
-          </div>
         </div>
 
         {safeItems.length > 1 ? (

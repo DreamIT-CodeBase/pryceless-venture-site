@@ -194,12 +194,12 @@ export const singletonPageGroups: Record<
     {
       key: "hero_heading_tail",
       label: "Hero Heading Tail",
-      placeholder: "Built for Real Estate Operators",
+      placeholder: "for Active Investors",
     },
     {
       key: "hero_feature_cards",
       label: "Hero Feature Cards",
-      placeholder: "Quick draws with photo inspection",
+      placeholder: "Fast draw requests",
     },
     {
       key: "hero_metric_labels",
@@ -221,7 +221,7 @@ export const singletonPageGroups: Record<
       key: "highlights_section_content",
       label: "Highlights Section Content",
       placeholder:
-        "Why borrowers choose {program} | Use this section to understand the structure, speed, and underwriting advantages that make this program a strong fit for real estate execution.",
+        "Why investors choose {program} | Built for quick purchases, rehab draws, and exit timelines that reward decisive execution.",
       supportsBody: true,
     },
     {
@@ -238,7 +238,7 @@ export const singletonPageGroups: Record<
       key: "terms_section_content",
       label: "Terms Section Content",
       placeholder:
-        "Core underwriting details | Review the high-level structure before moving into the application flow.",
+        "Core underwriting snapshot | Key pricing, leverage, and loan size details to review before you apply.",
       supportsBody: true,
     },
     {
@@ -463,10 +463,10 @@ export const singletonPageSeed = [
     ctaHref: "#apply-now",
     items: [
       { groupKey: "hero_eyebrow", title: "Loan Program" },
-      { groupKey: "hero_heading_tail", title: "Built for Real Estate Operators" },
-      { groupKey: "hero_feature_cards", title: "Quick draws with photo inspection" },
-      { groupKey: "hero_feature_cards", title: "Close and fund with speed and clarity" },
-      { groupKey: "hero_feature_cards", title: "Leverage matched to deal execution" },
+      { groupKey: "hero_heading_tail", title: "for Active Investors" },
+      { groupKey: "hero_feature_cards", title: "Fast draw requests" },
+      { groupKey: "hero_feature_cards", title: "Quick closings" },
+      { groupKey: "hero_feature_cards", title: "Rehab-ready leverage" },
       { groupKey: "hero_metric_labels", title: "Interest Rate" },
       { groupKey: "hero_metric_labels", title: "LTV / LTC" },
       { groupKey: "hero_metric_labels", title: "Loan Term" },
@@ -474,15 +474,15 @@ export const singletonPageSeed = [
       { groupKey: "highlights_section_eyebrow", title: "Program Highlights" },
       {
         groupKey: "highlights_section_content",
-        title: "Why borrowers choose {program}",
-        body: "Use this section to understand the structure, speed, and underwriting advantages that make this program a strong fit for real estate execution.",
+        title: "Why investors choose {program}",
+        body: "Built for quick purchases, rehab draws, and exit timelines that reward decisive execution.",
       },
       { groupKey: "overview_section_eyebrow", title: "Overview" },
       { groupKey: "terms_section_eyebrow", title: "Rate and Terms" },
       {
         groupKey: "terms_section_content",
-        title: "Core underwriting details",
-        body: "Review the high-level structure before moving into the application flow.",
+        title: "Core underwriting snapshot",
+        body: "Key pricing, leverage, and loan size details to review before you apply.",
       },
       { groupKey: "term_detail_labels", title: "Interest Rate" },
       { groupKey: "term_detail_labels", title: "Loan Term" },
@@ -752,9 +752,9 @@ export const loanProgramSeed = [
     slug: "fix-flip",
     lifecycleStatus: "PUBLISHED",
     shortDescription:
-      "Fast-turn capital to acquire, renovate, and reposition value-add residential deals with confidence.",
+      "Fast capital for residential acquisition, rehab, and resale.",
     fullDescription:
-      "Move quickly on strong renovation opportunities without forcing your capital stack. This program is built for investors who need acquisition funding and rehab support aligned with scope, timing, and exit strategy.\n\nBest fit for operators managing contractor draws, tight hold periods, and resale or refinance timelines. The structure is designed to help you stay decisive at purchase, disciplined during rehab, and prepared for exit.",
+      "Move quickly on strong renovation opportunities without overcomplicating your capital stack. This program is designed for investors who need acquisition funding, rehab support, and a clean path from closing through exit.\n\nBest fit for operators managing contractor draws, tight hold periods, and resale or refinance timelines. The structure is built to keep execution clear at purchase, disciplined during rehab, and ready for the next step once the work is complete.",
     interestRate: "Starting at 9.75%",
     ltv: "Up to 85% LTC / 70% ARV",
     loanTerm: "12-18 months",
@@ -762,7 +762,7 @@ export const loanProgramSeed = [
     minAmount: "$75,000",
     maxAmount: "$3,000,000",
     keyHighlights:
-      "Acquire and renovate under one streamlined structure.\nBuilt for resale, BRRRR, and refinance-focused exits.\nSupports fast-moving investors with draw-based rehab execution.",
+      "One structure can cover acquisition and rehab under a single execution plan.\nDraw-based disbursements help match capital to renovation progress.\nBuilt for investors targeting a clean sale or refinance exit.",
     crmTag: "fix-flip",
     imageUrl: getDefaultLoanProgramImage("fix-flip"),
     imageAlt: "Fix and flip financing",

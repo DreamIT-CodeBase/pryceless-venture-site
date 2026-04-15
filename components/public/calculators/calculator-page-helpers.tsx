@@ -51,17 +51,17 @@ export const calculatorThemes: Record<CalculatorPageKind, CalculatorTheme> = {
   },
 };
 
-const currencyFormatter = new Intl.NumberFormat("en-IN", {
-  currency: "INR",
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  currency: "USD",
   maximumFractionDigits: 0,
   style: "currency",
 });
 
-const numberFormatter = new Intl.NumberFormat("en-IN", {
+const numberFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
 });
 
-const ratioFormatter = new Intl.NumberFormat("en-IN", {
+const ratioFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
   minimumFractionDigits: 2,
 });
@@ -72,7 +72,7 @@ export const formatPercent = (value: number, digits = 1) => `${value.toFixed(dig
 export const formatRatio = (value: number | null) =>
   value == null ? "N/A" : `${ratioFormatter.format(value)}x`;
 export const formatYears = (value: number | null) =>
-  value == null ? "N/A" : `${numberFormatter.format(value)} yrs`;
+  value == null ? "N/A" : `${numberFormatter.format(value)} years`;
 export const shareOfTotal = (value: number, total: number) => (total > 0 ? (value / total) * 100 : 0);
 
 export function SnapshotPanel({

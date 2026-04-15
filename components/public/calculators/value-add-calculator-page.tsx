@@ -2,28 +2,18 @@
 
 import { useMemo, useState } from "react";
 
-import { calculateValueAdd, type ValueAddInputs } from "@/lib/calculator-engine";
+import {
+  calculateValueAdd,
+  defaultValueAddInputs,
+  type ValueAddInputs,
+} from "@/lib/calculator-engine";
 
 import { CalculatorLayout, DonutChart, ResultRows, SliderInput } from "./calculator-ui";
 import { calculatorThemes, formatCurrency, formatPercent, formatYears, ResetButton } from "./calculator-page-helpers";
 
-const defaultValueAddPageInputs: ValueAddInputs = {
-  annualOperatingExpensesCurrent: 2200000,
-  annualOperatingExpensesStabilized: 2450000,
-  annualOtherIncomeCurrent: 90000,
-  annualOtherIncomeStabilized: 180000,
-  avgCurrentRent: 22000,
-  avgStabilizedRent: 29500,
-  currentOccupancyPercent: 86,
-  exitCapRatePercent: 7.25,
-  renovationBudget: 3600000,
-  stabilizedOccupancyPercent: 95,
-  unitCount: 12,
-};
-
 export function ValueAddCalculatorPage() {
   const theme = calculatorThemes["value-add"];
-  const [inputs, setInputs] = useState<ValueAddInputs>(defaultValueAddPageInputs);
+  const [inputs, setInputs] = useState<ValueAddInputs>({ ...defaultValueAddInputs });
   const results = useMemo(() => calculateValueAdd(inputs), [inputs]);
 
   const setValue = <K extends keyof ValueAddInputs>(key: K) => (value: number) =>
@@ -50,7 +40,7 @@ export function ValueAddCalculatorPage() {
           title="Budget vs value created"
         />
       }
-      description="Compare current vs stabilized operations to see if NOI lift supports your renovation budget."
+      description="Compare current vs stabilized operations to see whether NOI growth justifies the renovation budget."
       inputPanel={
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -58,7 +48,7 @@ export function ValueAddCalculatorPage() {
             <ResetButton
               accentDark={theme.accentDark}
               accentSoft={theme.accentSoft}
-              onClick={() => setInputs(defaultValueAddPageInputs)}
+              onClick={() => setInputs({ ...defaultValueAddInputs })}
             />
           </div>
 
@@ -66,7 +56,7 @@ export function ValueAddCalculatorPage() {
             <SliderInput
               accent={theme.accent}
               label="Unit count"
-              max={200}
+              max={250}
               min={1}
               step={1}
               value={inputs.unitCount}
@@ -74,21 +64,21 @@ export function ValueAddCalculatorPage() {
             />
             <SliderInput
               accent={theme.accent}
-              label="Current avg rent / unit"
-              max={100000}
-              min={2000}
-              prefix="₹"
-              step={500}
+              label="Current average rent per unit"
+              max={5000}
+              min={500}
+              prefix="$"
+              step={25}
               value={inputs.avgCurrentRent}
               onChange={setValue("avgCurrentRent")}
             />
             <SliderInput
               accent={theme.accent}
-              label="Stabilized avg rent / unit"
-              max={120000}
-              min={2000}
-              prefix="₹"
-              step={500}
+              label="Stabilized average rent per unit"
+              max={7000}
+              min={500}
+              prefix="$"
+              step={25}
               value={inputs.avgStabilizedRent}
               onChange={setValue("avgStabilizedRent")}
             />
@@ -105,10 +95,10 @@ export function ValueAddCalculatorPage() {
             <SliderInput
               accent={theme.accent}
               label="Renovation budget"
-              max={20000000}
+              max={2500000}
               min={0}
-              prefix="₹"
-              step={100000}
+              prefix="$"
+              step={5000}
               value={inputs.renovationBudget}
               onChange={setValue("renovationBudget")}
             />
@@ -141,40 +131,40 @@ export function ValueAddCalculatorPage() {
                 <SliderInput
                   accent={theme.accent}
                   label="Current other income (annual)"
-                  max={1000000}
+                  max={250000}
                   min={0}
-                  prefix="₹"
-                  step={10000}
+                  prefix="$"
+                  step={1000}
                   value={inputs.annualOtherIncomeCurrent}
                   onChange={setValue("annualOtherIncomeCurrent")}
                 />
                 <SliderInput
                   accent={theme.accent}
                   label="Stabilized other income (annual)"
-                  max={1000000}
+                  max={250000}
                   min={0}
-                  prefix="₹"
-                  step={10000}
+                  prefix="$"
+                  step={1000}
                   value={inputs.annualOtherIncomeStabilized}
                   onChange={setValue("annualOtherIncomeStabilized")}
                 />
                 <SliderInput
                   accent={theme.accent}
                   label="Current operating expenses (annual)"
-                  max={10000000}
+                  max={2000000}
                   min={0}
-                  prefix="₹"
-                  step={50000}
+                  prefix="$"
+                  step={5000}
                   value={inputs.annualOperatingExpensesCurrent}
                   onChange={setValue("annualOperatingExpensesCurrent")}
                 />
                 <SliderInput
                   accent={theme.accent}
                   label="Stabilized operating expenses (annual)"
-                  max={12000000}
+                  max={2500000}
                   min={0}
-                  prefix="₹"
-                  step={50000}
+                  prefix="$"
+                  step={5000}
                   value={inputs.annualOperatingExpensesStabilized}
                   onChange={setValue("annualOperatingExpensesStabilized")}
                 />
@@ -198,4 +188,3 @@ export function ValueAddCalculatorPage() {
     />
   );
 }
-

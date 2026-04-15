@@ -17,6 +17,7 @@ import {
   getFallbackLoanProgram,
   upsertFallbackLoanProgram,
 } from "@/lib/loan-program-fallback-store";
+import { stringifyPropertyDetailContent } from "@/lib/property-detail-content";
 import { getPropertyEditorStatus, propertyStatusValues } from "@/lib/property-portfolio";
 import { prisma } from "@/lib/prisma";
 import { asOptionalString, parseJson, slugify } from "@/lib/utils";
@@ -26,6 +27,7 @@ type UploadedImagePayload = {
   blobUrl: string;
   fileName: string;
   altText?: string;
+  caption?: string;
 };
 
 type HomeTestimonialInput = {
@@ -44,6 +46,7 @@ const dedupeUploadedImages = (images: UploadedImagePayload[]) => {
       ...existing,
       ...image,
       altText: image.altText ?? existing?.altText,
+      caption: image.caption ?? existing?.caption,
     });
   }
 
@@ -138,6 +141,35 @@ const parseSimpleLines = (value: string | undefined) =>
 
 const parsePipeRows = (value: string | undefined) =>
   parseSimpleLines(value).map((line) => line.split("|").map((segment) => segment.trim()));
+
+const parsePropertyStandoutRows = (value: string | undefined) =>
+  parsePipeRows(value)
+    .map((row) => ({
+      description: row.slice(1).join(" | ").trim(),
+      title: row[0]?.trim() ?? "",
+    }))
+    .filter((item) => item.title && item.description)
+    .slice(0, 4);
+
+const buildPropertyDetailContent = (formData: FormData) =>
+  stringifyPropertyDetailContent({
+    googleMapsUrl: asOptionalString(formData.get("googleMapsUrl")),
+    investorProfile: parseSimpleLines(asOptionalString(formData.get("investorProfileText"))),
+    locationBenefits: parseSimpleLines(asOptionalString(formData.get("locationBenefitsText"))),
+    performance: {
+      capRate: asOptionalString(formData.get("performanceCapRate")),
+      investmentHorizon: asOptionalString(formData.get("performanceInvestmentHorizon")),
+      monthlyCashFlow: asOptionalString(formData.get("performanceMonthlyCashFlow")),
+      roi: asOptionalString(formData.get("performanceRoi")),
+    },
+    snapshot: {
+      arv: asOptionalString(formData.get("snapshotArv")),
+      estimatedRent: asOptionalString(formData.get("snapshotEstimatedRent")),
+      purchasePrice: asOptionalString(formData.get("snapshotPurchasePrice")),
+      renovationCost: asOptionalString(formData.get("snapshotRenovationCost")),
+    },
+    standoutItems: parsePropertyStandoutRows(asOptionalString(formData.get("standoutItemsText"))),
+  });
 
 const parseOptionalDateValue = (value: string | null | undefined) => {
   const trimmedValue = String(value ?? "").trim();
@@ -858,6 +890,7 @@ const upsertPropertyImages = async (
         propertyId,
         mediaFileId: image.mediaFileId,
         altText: image.altText,
+        caption: image.caption,
         sortOrder: index,
       },
     });
@@ -908,6 +941,7 @@ const upsertInvestmentImages = async (
         investmentId,
         mediaFileId: image.mediaFileId,
         altText: image.altText,
+        caption: image.caption,
         sortOrder: index,
       },
     });
@@ -958,6 +992,7 @@ const upsertCaseStudyImages = async (
         caseStudyId,
         mediaFileId: image.mediaFileId,
         altText: image.altText,
+        caption: image.caption,
         sortOrder: index,
       },
     });
@@ -1031,6 +1066,7 @@ export const saveProperty = async (formData: FormData) => {
 
   const propertyData = {
     ...parsed.data,
+    detailContent: buildPropertyDetailContent(formData),
     slug: await ensureUniqueSlug({
       baseSlug: parsed.data.slug,
       currentId: parsed.data.id,
@@ -1064,6 +1100,7 @@ export const saveProperty = async (formData: FormData) => {
             strategy: propertyData.strategy,
             summary: propertyData.summary,
             buyerFit: propertyData.buyerFit,
+            detailContent: propertyData.detailContent,
             inquiryFormId: propertyData.inquiryFormId,
           },
         })
@@ -1079,6 +1116,7 @@ export const saveProperty = async (formData: FormData) => {
             strategy: propertyData.strategy,
             summary: propertyData.summary,
             buyerFit: propertyData.buyerFit,
+            detailContent: propertyData.detailContent,
             inquiryFormId: propertyData.inquiryFormId,
           },
         });
@@ -2173,6 +2211,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
           strategy: true,
           summary: true,
           buyerFit: true,
+          detailContent: true,
           inquiryFormId: true,
         },
       })
@@ -2183,6 +2222,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
   const buyerFit = asOptionalString(formData.get("buyerFit"));
   const locationCity = asOptionalString(formData.get("locationCity"));
   const locationState = asOptionalString(formData.get("locationState"));
+  const detailContent = buildPropertyDetailContent(formData);
   const highlights = parseSimpleLines(asOptionalString(formData.get("highlightsText")));
   const images = dedupeUploadedImages(parseImages(formData));
   const primaryMediaFileId = parsePrimaryMediaFileId(formData);
@@ -2194,6 +2234,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
     !buyerFit &&
     !locationCity &&
     !locationState &&
+    !detailContent &&
     !highlights.length &&
     !images.length
   ) {
@@ -2231,6 +2272,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
           strategy: String(formData.get("strategy") ?? existing.strategy ?? "FIX_FLIP"),
           summary,
           buyerFit,
+          detailContent,
           inquiryFormId: asOptionalString(formData.get("inquiryFormId")),
         },
       })
@@ -2249,6 +2291,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
           strategy: String(formData.get("strategy") ?? "FIX_FLIP"),
           summary,
           buyerFit,
+          detailContent,
           inquiryFormId: asOptionalString(formData.get("inquiryFormId")),
         },
       });

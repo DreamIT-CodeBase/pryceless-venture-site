@@ -92,7 +92,7 @@ export function ShowcaseActionCard({
       <div className="mx-auto flex w-full max-w-[252px] flex-1 flex-col items-center pt-[22px] text-center sm:pt-[24px] 2xl:max-w-[284px]">
         <h3
           className={joinClasses(
-            "mx-auto mt-5 max-w-full px-2 text-center text-[18px] font-semibold leading-[1.18] tracking-[0] text-[#182544] whitespace-nowrap sm:mt-[20px] sm:text-[19px] sm:leading-[1.2] 2xl:text-[20px]",
+            "mx-auto mt-5 max-w-full px-2 text-center text-[18px] font-semibold leading-[1.18] tracking-[0] text-[#182544] sm:mt-[20px] sm:text-[19px] sm:leading-[1.2] 2xl:text-[20px]",
             titleClassName,
           )}
         >
@@ -117,7 +117,7 @@ export function ShowcaseActionCard({
             href={href}
             style={{ color: "#ffffff" }}
           >
-            <span className="inline-flex w-full items-center justify-center whitespace-nowrap text-center leading-[1.2] !text-white" style={{ color: "#ffffff" }}>
+            <span className="inline-flex w-full items-center justify-center text-center leading-[1.2] !text-white" style={{ color: "#ffffff" }}>
               {ctaLabel}
             </span>
           </Link>

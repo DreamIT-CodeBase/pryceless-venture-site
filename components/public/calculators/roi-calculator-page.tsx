@@ -2,28 +2,18 @@
 
 import { useMemo, useState } from "react";
 
-import { calculateRoi, type RoiInputs } from "@/lib/calculator-engine";
+import {
+  calculateRoi,
+  defaultRoiInputs,
+  type RoiInputs,
+} from "@/lib/calculator-engine";
 
 import { CalculatorLayout, DonutChart, ResultRows, SliderInput } from "./calculator-ui";
 import { calculatorThemes, formatCurrency, formatPercent, ResetButton } from "./calculator-page-helpers";
 
-const defaultRoiPageInputs: RoiInputs = {
-  annualAppreciationRate: 5,
-  closingCosts: 250000,
-  downPaymentPercent: 25,
-  interestRate: 8.25,
-  loanTermYears: 20,
-  monthlyOperatingExpenses: 18000,
-  monthlyRent: 95000,
-  otherMonthlyIncome: 5000,
-  purchasePrice: 12000000,
-  rehabBudget: 1500000,
-  vacancyRate: 6,
-};
-
 export function RoiCalculatorPage() {
   const theme = calculatorThemes.roi;
-  const [inputs, setInputs] = useState<RoiInputs>(defaultRoiPageInputs);
+  const [inputs, setInputs] = useState<RoiInputs>({ ...defaultRoiInputs });
   const results = useMemo(() => calculateRoi(inputs), [inputs]);
 
   const annualOperatingExpenses = inputs.monthlyOperatingExpenses * 12;
@@ -60,7 +50,7 @@ export function RoiCalculatorPage() {
             <ResetButton
               accentDark={theme.accentDark}
               accentSoft={theme.accentSoft}
-              onClick={() => setInputs(defaultRoiPageInputs)}
+              onClick={() => setInputs({ ...defaultRoiInputs })}
             />
           </div>
 
@@ -68,30 +58,30 @@ export function RoiCalculatorPage() {
             <SliderInput
               accent={theme.accent}
               label="Purchase price"
-              max={50000000}
-              min={1000000}
-              prefix="₹"
-              step={100000}
+              max={5000000}
+              min={50000}
+              prefix="$"
+              step={10000}
               value={inputs.purchasePrice}
               onChange={setValue("purchasePrice")}
             />
             <SliderInput
               accent={theme.accent}
               label="Monthly rent"
-              max={250000}
-              min={10000}
-              prefix="₹"
-              step={2500}
+              max={25000}
+              min={500}
+              prefix="$"
+              step={100}
               value={inputs.monthlyRent}
               onChange={setValue("monthlyRent")}
             />
             <SliderInput
               accent={theme.accent}
               label="Monthly operating expenses"
-              max={100000}
-              min={2000}
-              prefix="₹"
-              step={1000}
+              max={10000}
+              min={100}
+              prefix="$"
+              step={50}
               value={inputs.monthlyOperatingExpenses}
               onChange={setValue("monthlyOperatingExpenses")}
             />
@@ -134,20 +124,20 @@ export function RoiCalculatorPage() {
                 <SliderInput
                   accent={theme.accent}
                   label="Rehab budget"
-                  max={10000000}
+                  max={750000}
                   min={0}
-                  prefix="₹"
-                  step={50000}
+                  prefix="$"
+                  step={5000}
                   value={inputs.rehabBudget}
                   onChange={setValue("rehabBudget")}
                 />
                 <SliderInput
                   accent={theme.accent}
                   label="Closing costs"
-                  max={1500000}
+                  max={150000}
                   min={0}
-                  prefix="₹"
-                  step={10000}
+                  prefix="$"
+                  step={1000}
                   value={inputs.closingCosts}
                   onChange={setValue("closingCosts")}
                 />
@@ -164,10 +154,10 @@ export function RoiCalculatorPage() {
                 <SliderInput
                   accent={theme.accent}
                   label="Other monthly income"
-                  max={75000}
+                  max={5000}
                   min={0}
-                  prefix="₹"
-                  step={1000}
+                  prefix="$"
+                  step={50}
                   value={inputs.otherMonthlyIncome}
                   onChange={setValue("otherMonthlyIncome")}
                 />
@@ -201,4 +191,3 @@ export function RoiCalculatorPage() {
     />
   );
 }
-

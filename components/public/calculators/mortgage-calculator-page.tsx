@@ -2,41 +2,39 @@
 
 import { useMemo, useState } from "react";
 
-import { calculateEMI } from "@/lib/calculator-engine";
+import {
+  calculateMortgage,
+  defaultMortgageInputs,
+  type MortgageInputs,
+} from "@/lib/calculator-engine";
 
 import { CalculatorLayout, DonutChart, ResultRows, SliderInput } from "./calculator-ui";
 import { calculatorThemes, formatCurrency, formatPercent, ResetButton, shareOfTotal } from "./calculator-page-helpers";
 
-const defaultMortgageInputs = {
-  annualRate: 6.5,
-  loanAmount: 1000000,
-  years: 5,
-};
-
 export function MortgageCalculatorPage() {
   const theme = calculatorThemes.mortgage;
-  const [loanAmount, setLoanAmount] = useState(defaultMortgageInputs.loanAmount);
-  const [annualRate, setAnnualRate] = useState(defaultMortgageInputs.annualRate);
-  const [years, setYears] = useState(defaultMortgageInputs.years);
+  const [inputs, setInputs] = useState<MortgageInputs>({ ...defaultMortgageInputs });
 
-  const mortgage = useMemo(() => calculateEMI(loanAmount, annualRate, years), [annualRate, loanAmount, years]);
-  const interestShare = shareOfTotal(mortgage.totalInterest, mortgage.totalAmount);
+  const mortgage = useMemo(() => calculateMortgage(inputs), [inputs]);
+  const escrowShare = shareOfTotal(mortgage.monthlyEscrows, mortgage.totalMonthlyPayment);
+  const setValue = <K extends keyof MortgageInputs>(key: K) => (value: number) =>
+    setInputs((current) => ({ ...current, [key]: value }));
 
   return (
     <CalculatorLayout
-      calculatorTitle="Monthly EMI summary"
+      calculatorTitle="Monthly payment snapshot"
       chartPanel={
         <DonutChart
-          centerLabel="Interest Share"
-          centerValue={formatPercent(interestShare)}
+          centerLabel="Escrow share"
+          centerValue={formatPercent(escrowShare)}
           segments={[
-            { color: "#eef2ff", label: "Principal amount", value: loanAmount },
-            { color: theme.accent, label: "Interest amount", value: mortgage.totalInterest },
+            { color: "#eef2ff", label: "Principal & interest", value: mortgage.monthlyPrincipalAndInterest },
+            { color: theme.accent, label: "Taxes, insurance, HOA & PMI", value: mortgage.monthlyEscrows },
           ]}
-          title="Principal vs interest"
+          title="Monthly payment mix"
         />
       }
-      description="Adjust amount, interest rate, and tenure to instantly see your EMI and total repayment."
+      description="Adjust U.S. mortgage assumptions to estimate principal, interest, escrows, and total monthly payment."
       inputPanel={
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -44,60 +42,115 @@ export function MortgageCalculatorPage() {
             <ResetButton
               accentDark={theme.accentDark}
               accentSoft={theme.accentSoft}
-              onClick={() => {
-                setLoanAmount(defaultMortgageInputs.loanAmount);
-                setAnnualRate(defaultMortgageInputs.annualRate);
-                setYears(defaultMortgageInputs.years);
-              }}
+              onClick={() => setInputs({ ...defaultMortgageInputs })}
             />
           </div>
 
           <div className="mt-4">
             <SliderInput
               accent={theme.accent}
-              label="Loan amount"
-              max={50000000}
-              min={100000}
-              prefix="₹"
-              step={50000}
-              value={loanAmount}
-              onChange={setLoanAmount}
+              label="Purchase price"
+              max={5000000}
+              min={75000}
+              prefix="$"
+              step={10000}
+              value={inputs.purchasePrice}
+              onChange={setValue("purchasePrice")}
             />
             <SliderInput
               accent={theme.accent}
-              label="Rate of interest (p.a.)"
-              max={18}
+              label="Down payment"
+              max={40}
+              min={5}
+              step={1}
+              suffix="%"
+              value={inputs.downPaymentPercent}
+              onChange={setValue("downPaymentPercent")}
+            />
+            <SliderInput
+              accent={theme.accent}
+              label="Interest rate"
+              max={12}
               min={1}
               step={0.1}
               suffix="%"
-              value={annualRate}
-              onChange={setAnnualRate}
+              value={inputs.interestRate}
+              onChange={setValue("interestRate")}
             />
             <SliderInput
               accent={theme.accent}
-              label="Loan tenure"
+              label="Loan term"
               max={30}
-              min={1}
+              min={5}
               step={1}
               suffix="Yr"
-              value={years}
-              onChange={setYears}
+              value={inputs.loanTermYears}
+              onChange={setValue("loanTermYears")}
             />
+            <SliderInput
+              accent={theme.accent}
+              label="Annual property tax"
+              max={60000}
+              min={0}
+              prefix="$"
+              step={250}
+              value={inputs.annualPropertyTax}
+              onChange={setValue("annualPropertyTax")}
+            />
+            <SliderInput
+              accent={theme.accent}
+              label="Annual insurance"
+              max={12000}
+              min={0}
+              prefix="$"
+              step={100}
+              value={inputs.annualInsurance}
+              onChange={setValue("annualInsurance")}
+            />
+
+            <details className="mt-4 rounded-[18px] border border-[#e7edf4] bg-white px-4 py-4">
+              <summary className="cursor-pointer text-[14px] font-semibold text-[#243752]">
+                Advanced options
+              </summary>
+              <div className="mt-4">
+                <SliderInput
+                  accent={theme.accent}
+                  label="Monthly HOA"
+                  max={2000}
+                  min={0}
+                  prefix="$"
+                  step={25}
+                  value={inputs.monthlyHoa}
+                  onChange={setValue("monthlyHoa")}
+                />
+                <SliderInput
+                  accent={theme.accent}
+                  label="Monthly PMI"
+                  max={800}
+                  min={0}
+                  prefix="$"
+                  step={10}
+                  value={inputs.monthlyPmi}
+                  onChange={setValue("monthlyPmi")}
+                />
+              </div>
+            </details>
           </div>
         </>
       }
       resultPanel={
         <ResultRows
           items={[
-            { label: "Monthly EMI", value: formatCurrency(mortgage.emi) },
-            { label: "Principal amount", value: formatCurrency(loanAmount) },
-            { label: "Total interest", value: formatCurrency(mortgage.totalInterest) },
-            { label: "Total amount", value: formatCurrency(mortgage.totalAmount) },
+            { label: "Total monthly payment", value: formatCurrency(mortgage.totalMonthlyPayment) },
+            { label: "Principal & interest", value: formatCurrency(mortgage.monthlyPrincipalAndInterest) },
+            { label: "Taxes, insurance, HOA & PMI", value: formatCurrency(mortgage.monthlyEscrows) },
+            { label: "Down payment", value: formatCurrency(mortgage.downPaymentAmount) },
+            { label: "Loan amount", value: formatCurrency(mortgage.loanAmount) },
           ]}
         />
       }
       theme={theme}
-      title="Mortgage EMI Calculator"
+      title="Mortgage Payment Calculator"
     />
   );
 }

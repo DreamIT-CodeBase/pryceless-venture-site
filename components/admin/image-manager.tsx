@@ -8,6 +8,7 @@ type ImageItem = {
   blobUrl: string;
   fileName: string;
   altText?: string;
+  caption?: string;
 };
 
 type ImageManagerProps = {
@@ -44,6 +45,7 @@ export function ImageManager({
         ...existing,
         ...image,
         altText: image.altText ?? existing?.altText,
+        caption: image.caption ?? existing?.caption,
       });
     }
 
@@ -95,7 +97,7 @@ export function ImageManager({
             Image Gallery
           </h3>
           <p className="mt-1 text-sm text-slate-500">
-            Upload multiple images and pick one primary image for the public site.
+            Upload multiple images, add alt text plus captions, and pick one primary image for the public site.
           </p>
         </div>
         <label className="inline-flex cursor-pointer items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white">
@@ -171,6 +173,25 @@ export function ImageManager({
                         current.map((item) =>
                           item.mediaFileId === image.mediaFileId
                             ? { ...item, altText: event.target.value }
+                            : item,
+                        ),
+                      )
+                    }
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Caption
+                  </span>
+                  <textarea
+                    className="min-h-24 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none ring-0 transition focus:border-slate-400"
+                    value={image.caption ?? ""}
+                    onChange={(event) =>
+                      setImages((current) =>
+                        current.map((item) =>
+                          item.mediaFileId === image.mediaFileId
+                            ? { ...item, caption: event.target.value }
                             : item,
                         ),
                       )

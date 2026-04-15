@@ -13,7 +13,7 @@ export default async function NewPropertyPage({
   const errorMessage = (await searchParams)?.error;
 
   return (
-    <AdminShell title="New Property" subtitle="Create a draft property, attach an inquiry form, and upload media.">
+    <AdminShell title="New Property" subtitle="Create a draft property, add slug-page metrics plus map content, attach an inquiry form, and upload media.">
       <PropertyForm errorMessage={errorMessage} forms={forms} />
     </AdminShell>
   );
