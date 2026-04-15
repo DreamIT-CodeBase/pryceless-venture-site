@@ -574,7 +574,7 @@ export default async function Home() {
                         {line}
                       </span>
                     ))}
-                    <span className="hidden sm:block lg:hidden" style={{ textWrap: "balance" }}>
+                    <span className="pv-text-balance hidden sm:block lg:hidden">
                       {heroHeadline}
                     </span>
                     {heroHeadingLines.map((line) => (
@@ -584,7 +584,7 @@ export default async function Home() {
                     ))}
                   </>
                 ) : (
-                  <span className="block" style={{ textWrap: "balance" }}>
+                  <span className="pv-text-balance block">
                     {heroHeadline}
                   </span>
                 )}
@@ -597,7 +597,7 @@ export default async function Home() {
                 >
                   {heroSubheadlineLines ? (
                     <>
-                      <span className="lg:hidden" style={{ textWrap: "balance" }}>{heroSubheadline}</span>
+                      <span className="pv-text-balance lg:hidden">{heroSubheadline}</span>
                       {heroSubheadlineLines.map((line) => (
                         <span className="hidden lg:block lg:whitespace-nowrap" key={line}>
                           {line}
@@ -605,7 +605,7 @@ export default async function Home() {
                       ))}
                     </>
                   ) : (
-                    <span style={{ textWrap: "balance" }}>{heroSubheadline}</span>
+                    <span className="pv-text-balance">{heroSubheadline}</span>
                   )}
                 </p>
 
@@ -668,18 +668,18 @@ export default async function Home() {
 
       <section className="bg-white py-[54px] sm:py-[72px] lg:py-[56px]">
         <div className="mx-auto w-full max-w-[1905px] px-4 sm:px-6 lg:px-[135px] 2xl:px-[180px]">
-          <div className="grid gap-y-8 lg:grid-cols-[720px_minmax(0,1fr)_520px] lg:items-start lg:gap-y-12 2xl:grid-cols-[780px_minmax(48px,1fr)_580px] 2xl:gap-y-14">
-            <div className="lg:col-start-1 lg:w-[720px] lg:pt-[2px] 2xl:w-[780px]">
-            <h2 className="max-w-none whitespace-nowrap text-[clamp(18px,5.5vw,22px)] font-bold leading-[1.02] tracking-[-0.05em] text-[#16203b] sm:whitespace-normal sm:text-[48px] lg:text-[42px] lg:leading-[54px] lg:tracking-[-0.045em] lg:text-[#0f172a] 2xl:text-[48px] 2xl:leading-[58px]">
+          <div className="grid gap-y-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)] lg:items-center lg:gap-x-[64px] lg:gap-y-12 2xl:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)] 2xl:gap-x-[84px] 2xl:gap-y-14">
+            <div className="min-w-0 lg:max-w-[720px] lg:pt-[2px] 2xl:max-w-[780px]">
+            <h2 className="pv-text-balance max-w-none whitespace-normal text-[clamp(18px,5.5vw,22px)] font-bold leading-[1.02] tracking-[-0.05em] text-[#16203b] sm:text-[48px] lg:text-[42px] lg:leading-[54px] lg:tracking-[-0.045em] lg:text-[#0f172a] 2xl:text-[48px] 2xl:leading-[58px]">
               {aboutSection.title}
             </h2>
 
-            <div className="mt-[18px] lg:mt-[21px] lg:max-w-[655px] 2xl:max-w-[720px]">
+            <div className="mt-[18px] min-w-0 lg:mt-[21px] lg:max-w-[655px] 2xl:max-w-[720px]">
               {aboutSection.paragraphs.map((paragraph, index) => (
                 <div key={`${paragraph}-${index}`}>
                   {index ? <div aria-hidden="true" className="h-[18px] lg:h-[12px]" /> : null}
                   <p
-                    className="max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[655px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48] 2xl:max-w-[720px] 2xl:text-[18px] 2xl:leading-[27px]"
+                    className="pv-text-pretty max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[655px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48] 2xl:max-w-[720px] 2xl:text-[18px] 2xl:leading-[27px]"
                     style={{ wordSpacing: "0.03em" }}
                   >
                     {paragraph}
@@ -712,12 +712,11 @@ export default async function Home() {
           </div>
 
             <div
-              className="relative mx-auto w-full max-w-[420px] overflow-hidden rounded-[28px] shadow-[0_18px_40px_rgba(15,23,42,0.08)] lg:col-start-3 lg:mx-0 lg:h-[356px] lg:w-[520px] lg:max-w-none lg:justify-self-end lg:rounded-[14px] lg:shadow-none 2xl:h-[396px] 2xl:w-[580px]"
-              style={{ aspectRatio: "520 / 356" }}
+              className="pv-media-frame relative mx-auto w-full max-w-[420px] aspect-[520/356] overflow-hidden rounded-[28px] shadow-[0_18px_40px_rgba(15,23,42,0.08)] lg:mx-0 lg:h-[356px] lg:w-full lg:max-w-[520px] lg:justify-self-end lg:rounded-[14px] lg:shadow-none 2xl:h-[396px] 2xl:max-w-[580px]"
             >
               <img
                 alt={aboutSection.imageAlt}
-                className="h-full w-full object-cover"
+                className="object-cover object-center"
                 loading="lazy"
                 src={aboutSection.imageUrl}
               />
@@ -750,8 +749,8 @@ export default async function Home() {
                   {item.value}
                 </p>
                 <p
-                  className="max-w-[124px] text-[14px] font-normal leading-[1.18] tracking-[-0.02em] text-[#2a2e35] sm:max-w-[150px] sm:text-[16px] lg:max-w-none lg:min-h-[20px] lg:whitespace-nowrap lg:text-[16px] lg:leading-[20px] lg:tracking-[0]"
-                  style={{ marginTop: "clamp(10px, 1.5vw, 16px)", textWrap: "balance" }}
+                  className="pv-text-balance max-w-[124px] text-[14px] font-normal leading-[1.18] tracking-[-0.02em] text-[#2a2e35] sm:max-w-[150px] sm:text-[16px] lg:max-w-none lg:min-h-[20px] lg:whitespace-nowrap lg:text-[16px] lg:leading-[20px] lg:tracking-[0]"
+                  style={{ marginTop: "clamp(10px, 1.5vw, 16px)" }}
                 >
                   {item.label}
                 </p>

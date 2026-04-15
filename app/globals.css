@@ -31,6 +31,12 @@ body {
   color: var(--pv-ink);
   font-family: var(--font-poppins), sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-kerning: normal;
+  font-synthesis-weight: none;
+  font-synthesis-style: none;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -58,6 +64,7 @@ a {
 img {
   display: block;
   max-width: 100%;
+  height: auto;
 }
 
 button,
@@ -95,6 +102,36 @@ select {
 
 .pv-card-shadow {
   box-shadow: 0 22px 52px rgba(20, 49, 79, 0.08);
+}
+
+.pv-text-balance,
+.pv-text-pretty {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+@supports (text-wrap: balance) {
+  .pv-text-balance {
+    overflow-wrap: normal;
+    text-wrap: balance;
+  }
+}
+
+@supports (text-wrap: pretty) {
+  .pv-text-pretty {
+    overflow-wrap: normal;
+    text-wrap: pretty;
+  }
+}
+
+.pv-media-frame {
+  min-width: 0;
+}
+
+.pv-media-frame > img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
 }
 
 .pv-soft-line {
