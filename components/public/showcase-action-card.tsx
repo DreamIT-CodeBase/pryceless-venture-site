@@ -19,7 +19,7 @@ export function ShowcasePanelCard({
   return (
     <article
       className={joinClasses(
-        "flex min-h-[280px] w-full max-w-[320px] flex-col items-center rounded-[18px] px-4 pb-4 pt-4 text-center sm:min-h-[306px] sm:px-[18px] sm:pb-[18px] sm:pt-[18px] 2xl:min-h-[332px] 2xl:max-w-[348px] 2xl:px-[22px] 2xl:pb-[22px] 2xl:pt-[22px]",
+        "group flex min-h-[280px] w-full min-w-0 max-w-full flex-col items-center rounded-[18px] px-4 pb-4 pt-4 text-center pv-interactive-card transition-[transform,box-shadow,border-color] duration-300 sm:min-h-[306px] sm:max-w-[320px] sm:px-[18px] sm:pb-[18px] sm:pt-[18px] 2xl:min-h-[332px] 2xl:max-w-[348px] 2xl:px-[22px] 2xl:pb-[22px] 2xl:pt-[22px]",
         className,
       )}
       style={style}
@@ -111,7 +111,7 @@ export function ShowcaseActionCard({
         <div className={joinClasses("mx-auto mt-auto flex w-full max-w-[210px] justify-center pt-[18px]", buttonWrapClassName)}>
           <Link
             className={joinClasses(
-              "inline-flex min-h-[44px] w-full max-w-none items-center justify-center rounded-[10px] border border-[#284868] bg-[linear-gradient(180deg,#1d3a59_0%,#11283e_100%)] px-6 py-3 text-center text-[13px] font-semibold leading-[16px] tracking-[-0.01em] !text-white shadow-[0_10px_22px_rgba(17,40,62,0.18)] transition-all duration-200 hover:-translate-y-[1px] hover:border-[#33577d] hover:!text-white hover:shadow-[0_14px_26px_rgba(17,40,62,0.22)] visited:!text-white 2xl:min-h-[48px] 2xl:text-[13.5px]",
+              "inline-flex min-h-[44px] w-full max-w-none items-center justify-center rounded-[10px] border border-[#284868] bg-[linear-gradient(180deg,#1d3a59_0%,#11283e_100%)] px-6 py-3 text-center text-[13px] font-semibold leading-[16px] tracking-[-0.01em] !text-white shadow-[0_10px_22px_rgba(17,40,62,0.18)] pv-interactive-button transition-[transform,box-shadow,border-color,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_14px_26px_rgba(17,40,62,0.22)] hover:border-[#33577d] hover:!text-white visited:!text-white 2xl:min-h-[48px] 2xl:text-[13.5px]",
               buttonClassName,
             )}
             href={href}

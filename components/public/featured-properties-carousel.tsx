@@ -33,7 +33,7 @@ const FEATURED_PROPERTY_2XL_GAP = 44;
 const FEATURED_PROPERTY_TABLET_GAP = 26;
 const FEATURED_PROPERTY_MOBILE_GAP = 16;
 const featuredPropertyButtonClassName =
-  "inline-flex min-h-[44px] w-full max-w-[168px] items-center justify-center rounded-[8px] bg-[#18314b] px-[18px] py-2.5 text-center text-[12.5px] font-semibold leading-[1.2] text-white transition-all duration-300 group-hover:bg-[#234766] hover:bg-[#234766]";
+  "inline-flex min-h-[44px] w-full max-w-[168px] items-center justify-center rounded-[8px] bg-[#18314b] px-[18px] py-2.5 text-center text-[12.5px] font-semibold leading-[1.2] text-white pv-interactive-button transition-[background-color,box-shadow,transform] duration-300 group-hover:-translate-y-[1px] group-hover:bg-[#234766] group-hover:shadow-[0_12px_24px_rgba(24,49,75,0.16)] hover:bg-[#234766]";
 
 function LocationPinIcon({ className = "" }: { className?: string }) {
   return (

@@ -18,10 +18,13 @@
   box-sizing: border-box;
 }
 
-html[data-scroll-behavior="smooth"] {
-  scroll-behavior: smooth;
+html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+html[data-scroll-behavior="smooth"] {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -104,6 +107,52 @@ select {
   box-shadow: 0 22px 52px rgba(20, 49, 79, 0.08);
 }
 
+.pv-interactive-card,
+.pv-interactive-button {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition-property: transform, box-shadow, border-color, background-color, color, filter;
+  transition-duration: 220ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pv-interactive-card,
+.pv-interactive-button {
+  will-change: transform, box-shadow;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pv-interactive-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--pv-hover-card-shadow, 0 18px 40px rgba(15, 23, 42, 0.08));
+  }
+
+  .pv-interactive-button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--pv-hover-button-shadow, 0 14px 28px rgba(15, 23, 42, 0.14));
+  }
+}
+
+.pv-interactive-card:active,
+.pv-interactive-button:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-interactive-card,
+  .pv-interactive-button {
+    transition-duration: 0.01ms;
+  }
+
+  .pv-interactive-card:hover,
+  .pv-interactive-card:active,
+  .pv-interactive-button:hover,
+  .pv-interactive-button:active {
+    transform: none;
+  }
+}
+
 .pv-text-balance,
 .pv-text-pretty {
   overflow-wrap: anywhere;
@@ -132,6 +181,17 @@ select {
   height: 100%;
   width: 100%;
   object-fit: cover;
+}
+
+.pv-glass-surface {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .pv-glass-surface {
+    background-color: rgba(255, 255, 255, 0.98);
+  }
 }
 
 .pv-soft-line {

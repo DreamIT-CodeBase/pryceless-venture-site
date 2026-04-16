@@ -65,14 +65,14 @@ export function GetStartedModalTrigger({
   if (!form) {
     return variant === "desktop" ? (
       <Link
-        className="inline-flex h-[50px] w-[196px] items-center justify-center rounded-[6px] bg-[#18357a] px-[14px] text-[15px] font-medium leading-none text-white transition-none hover:bg-[#18357a] hover:text-white"
+        className="inline-flex h-[50px] w-[196px] items-center justify-center rounded-[6px] bg-[#18357a] px-[14px] text-[15px] font-medium leading-none text-white pv-interactive-button transition-[transform,box-shadow,filter] duration-300 hover:bg-[#18357a] hover:text-white hover:brightness-[1.03]"
         href="/cash-offer"
       >
         {triggerLabel}
       </Link>
     ) : (
       <Link
-        className="mt-4 inline-flex h-[50px] w-full items-center justify-center rounded-[10px] bg-[#18357a] px-5 text-[15px] font-medium leading-none !text-white transition hover:bg-[#18357a] hover:!text-white visited:!text-white"
+        className="mt-4 inline-flex h-[50px] w-full items-center justify-center rounded-[10px] bg-[#18357a] px-5 text-[15px] font-medium leading-none !text-white pv-interactive-button transition-[transform,box-shadow,filter] duration-300 hover:bg-[#18357a] hover:!text-white hover:brightness-[1.03] visited:!text-white"
         href="/cash-offer"
         onClick={onTriggerClick}
       >
@@ -85,7 +85,7 @@ export function GetStartedModalTrigger({
     <>
       {variant === "desktop" ? (
         <button
-          className="inline-flex h-[50px] w-[196px] items-center justify-center gap-[9px] rounded-[6px] bg-[#18357a] px-[14px] text-[15px] font-medium leading-none text-white transition-none hover:bg-[#18357a] hover:text-white"
+          className="inline-flex h-[50px] w-[196px] items-center justify-center gap-[9px] rounded-[6px] bg-[#18357a] px-[14px] text-[15px] font-medium leading-none text-white pv-interactive-button transition-[transform,box-shadow,filter] duration-300 hover:bg-[#18357a] hover:text-white hover:brightness-[1.03]"
           onClick={handleOpen}
           type="button"
         >
@@ -107,7 +107,7 @@ export function GetStartedModalTrigger({
         </button>
       ) : (
         <button
-          className="mt-4 inline-flex h-[50px] w-full items-center justify-center rounded-[10px] bg-[#18357a] px-5 text-[15px] font-medium leading-none !text-white transition hover:bg-[#18357a] hover:!text-white"
+          className="mt-4 inline-flex h-[50px] w-full items-center justify-center rounded-[10px] bg-[#18357a] px-5 text-[15px] font-medium leading-none !text-white pv-interactive-button transition-[transform,box-shadow,filter] duration-300 hover:bg-[#18357a] hover:!text-white hover:brightness-[1.03]"
           onClick={handleOpen}
           type="button"
         >
@@ -151,7 +151,7 @@ export function GetStartedModalTrigger({
               form={form}
               layout="wide"
               sourcePath={pathname || "/"}
-              submitButtonClassName="rounded-[14px] bg-[#0f2438] px-8 py-3 hover:bg-[#18314b] md:min-w-[124px]"
+              submitButtonClassName="rounded-[14px] bg-[#0f2438] px-8 py-3 pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 hover:bg-[#18314b] md:min-w-[124px]"
               submitLabel="Submit"
               title="Connect with Us"
             />

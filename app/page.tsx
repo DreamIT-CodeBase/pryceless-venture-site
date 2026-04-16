@@ -543,7 +543,7 @@ export default async function Home() {
     <SiteShell>
       <section className="w-full">
         <div
-          className="relative isolate overflow-hidden bg-[#09152d] min-h-[620px] sm:min-h-[660px] lg:min-h-0 lg:aspect-[3327/1392] 2xl:aspect-[3327/1280]"
+          className="relative isolate overflow-hidden bg-[#09152d] min-h-[620px] sm:min-h-[660px] lg:min-h-0 lg:aspect-[3327/1392]"
         >
           <Image
             src={heroSectionImage}
@@ -556,12 +556,12 @@ export default async function Home() {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,18,39,0.72)_0%,rgba(7,18,39,0.5)_30%,rgba(7,18,39,0.22)_56%,rgba(7,18,39,0.78)_100%)] lg:bg-[linear-gradient(90deg,rgba(7,18,39,0.95)_0%,rgba(7,18,39,0.92)_15%,rgba(7,18,39,0.8)_27%,rgba(7,18,39,0.54)_39%,rgba(7,18,39,0.24)_52%,rgba(7,18,39,0.06)_64%,rgba(7,18,39,0)_74%)]" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,14,31,0.14)_0%,rgba(5,14,31,0)_34%,rgba(5,14,31,0.16)_62%,rgba(5,14,31,0.5)_100%)] lg:bg-[linear-gradient(180deg,rgba(5,14,31,0.12)_0%,rgba(5,14,31,0.02)_36%,rgba(5,14,31,0.12)_100%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_36%,rgba(199,152,114,0.3)_0%,rgba(199,152,114,0.14)_18%,rgba(199,152,114,0)_42%)] lg:hidden" />
-          <div className="absolute inset-y-0 left-0 hidden w-[62%] bg-[linear-gradient(90deg,rgba(9,20,42,0.56)_0%,rgba(9,20,42,0.36)_36%,rgba(9,20,42,0.12)_70%,rgba(9,20,42,0)_100%)] sm:w-[52%] lg:block lg:w-[44%] 2xl:w-[40%]" />
+          <div className="absolute inset-y-0 left-0 hidden w-[62%] bg-[linear-gradient(90deg,rgba(9,20,42,0.56)_0%,rgba(9,20,42,0.36)_36%,rgba(9,20,42,0.12)_70%,rgba(9,20,42,0)_100%)] sm:w-[52%] lg:block lg:w-[44%]" />
 
-          <div className="relative z-10 flex h-full w-full items-start px-5 pb-[52px] pt-[292px] sm:px-10 sm:py-[64px] lg:items-start lg:pl-[135px] lg:pr-[135px] lg:pt-[128px] 2xl:pl-[176px] 2xl:pr-[176px] 2xl:pt-[154px]">
-            <div className="flex w-full max-w-[372px] flex-col gap-[16px] sm:max-w-[520px] sm:gap-[22px] lg:max-w-[650px] lg:gap-[24px] 2xl:max-w-[780px] 2xl:gap-[28px]">
+          <div className="relative z-10 flex h-full w-full items-start px-5 pb-[52px] pt-[292px] sm:px-10 sm:py-[64px] lg:items-start lg:pl-[135px] lg:pr-[135px] lg:pt-[128px]">
+            <div className="flex w-full max-w-[372px] flex-col gap-[16px] sm:max-w-[520px] sm:gap-[22px] lg:max-w-[650px] lg:gap-[24px]">
               <h1
-                className="font-semibold text-[29px] leading-[1.06] tracking-[-0.055em] sm:text-[35px] sm:leading-[1.08] lg:text-[46px] lg:font-normal lg:leading-[1.2] lg:tracking-[-0.016em] 2xl:text-[58px] 2xl:leading-[1.14]"
+                className="font-semibold text-[29px] leading-[1.06] tracking-[-0.055em] sm:text-[35px] sm:leading-[1.08] lg:text-[46px] lg:font-normal lg:leading-[1.2] lg:tracking-[-0.016em]"
                 style={{ color: "#ffffff", wordSpacing: "0.02em" }}
               >
                 {heroHeadingLines.length > 1 ? (
@@ -592,7 +592,7 @@ export default async function Home() {
 
               <div className="flex flex-col gap-[16px] sm:gap-[22px] lg:gap-[24px]">
                 <p
-                  className="max-w-[340px] text-[16px] font-normal leading-[1.56] tracking-[-0.012em] text-white/95 sm:max-w-[470px] sm:text-[20px] lg:w-[560px] lg:max-w-none lg:text-[14.5px] lg:leading-[1.62] lg:tracking-[0] 2xl:w-[680px] 2xl:text-[16px] 2xl:leading-[1.72]"
+                  className="max-w-[340px] text-[16px] font-normal leading-[1.56] tracking-[-0.012em] text-white/95 sm:max-w-[470px] sm:text-[20px] lg:w-[560px] lg:max-w-none lg:text-[14.5px] lg:leading-[1.62] lg:tracking-[0]"
                   style={{ color: "rgba(255,255,255,0.94)", wordSpacing: "0.03em" }}
                 >
                   {heroSubheadlineLines ? (
@@ -609,22 +609,22 @@ export default async function Home() {
                   )}
                 </p>
 
-                <div className="flex w-full max-w-[372px] flex-row items-center gap-3.5 sm:w-auto sm:max-w-none sm:gap-4 lg:gap-[18px] 2xl:gap-[22px]">
+                <div className="flex w-full max-w-[372px] flex-row flex-wrap items-center gap-3.5 sm:w-auto sm:max-w-none sm:flex-nowrap sm:gap-4 lg:gap-[18px]">
                   <Link
                     href={primaryCta.href}
-                    className="inline-flex min-h-[44px] min-w-0 flex-1 items-center justify-center rounded-[12px] bg-white px-4 py-2.5 text-[14px] font-semibold tracking-[-0.02em] text-[#111827] shadow-[0_14px_32px_rgba(0,0,0,0.16)] transition-colors hover:bg-white sm:h-[50px] sm:w-[214px] sm:flex-none sm:px-5 sm:py-2.5 sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(6,18,37,0.12)] 2xl:h-[38px] 2xl:w-[182px] 2xl:text-[13.5px]"
+                    className="inline-flex min-h-[44px] min-w-0 flex-1 items-center justify-center rounded-[12px] bg-white px-4 py-2.5 text-[14px] font-semibold tracking-[-0.02em] text-[#111827] shadow-[0_14px_32px_rgba(0,0,0,0.16)] pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 hover:bg-white sm:h-[50px] sm:w-[214px] sm:flex-none sm:px-5 sm:py-2.5 sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(6,18,37,0.12)]"
                   >
-                    <span className="whitespace-nowrap lg:inline-flex lg:h-[18px] lg:w-[126px] lg:items-center lg:justify-center lg:text-center 2xl:h-[20px] 2xl:w-[146px]">
+                    <span className="whitespace-nowrap lg:inline-flex lg:h-[18px] lg:w-[126px] lg:items-center lg:justify-center lg:text-center">
                       {primaryCta.label}
                     </span>
                   </Link>
 
                   <Link
                     href={secondaryCta.href}
-                    className="inline-flex min-h-[44px] min-w-0 flex-1 items-center justify-center rounded-[12px] bg-[#c79872] px-4 py-2.5 text-[14px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_32px_rgba(35,18,10,0.18)] transition-colors hover:bg-[#c79872] hover:text-white sm:h-[50px] sm:w-[214px] sm:flex-none sm:px-5 sm:py-2.5 sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(35,18,10,0.1)] 2xl:h-[38px] 2xl:w-[182px] 2xl:text-[13.5px]"
+                    className="inline-flex min-h-[44px] min-w-0 flex-1 items-center justify-center rounded-[12px] bg-[#c79872] px-4 py-2.5 text-[14px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_32px_rgba(35,18,10,0.18)] pv-interactive-button transition-[transform,box-shadow,background-color,filter] duration-300 hover:bg-[#c79872] hover:text-white sm:h-[50px] sm:w-[214px] sm:flex-none sm:px-5 sm:py-2.5 sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(35,18,10,0.1)]"
                     style={{ color: "#ffffff" }}
                   >
-                    <span className="whitespace-nowrap lg:inline-flex lg:h-[18px] lg:w-[126px] lg:items-center lg:justify-center lg:text-center 2xl:h-[20px] 2xl:w-[146px]" style={{ color: "#ffffff" }}>
+                    <span className="whitespace-nowrap lg:inline-flex lg:h-[18px] lg:w-[126px] lg:items-center lg:justify-center lg:text-center" style={{ color: "#ffffff" }}>
                       {secondaryCta.label}
                     </span>
                   </Link>
@@ -667,19 +667,19 @@ export default async function Home() {
       </section>
 
       <section className="bg-white py-[54px] sm:py-[72px] lg:py-[56px]">
-        <div className="mx-auto w-full max-w-[1905px] px-4 sm:px-6 lg:px-[135px] 2xl:px-[180px]">
-          <div className="grid gap-y-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)] lg:items-center lg:gap-x-[64px] lg:gap-y-12 2xl:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)] 2xl:gap-x-[84px] 2xl:gap-y-14">
-            <div className="min-w-0 lg:max-w-[720px] lg:pt-[2px] 2xl:max-w-[780px]">
-            <h2 className="pv-text-balance max-w-none whitespace-normal text-[clamp(18px,5.5vw,22px)] font-bold leading-[1.02] tracking-[-0.05em] text-[#16203b] sm:text-[48px] lg:text-[42px] lg:leading-[54px] lg:tracking-[-0.045em] lg:text-[#0f172a] 2xl:text-[48px] 2xl:leading-[58px]">
+        <div className="mx-auto w-full max-w-[1905px] px-4 sm:px-6 lg:px-[135px] min-[1400px]:px-[180px]">
+          <div className="grid gap-y-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)] lg:items-center lg:gap-x-[64px] lg:gap-y-12 min-[1400px]:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)] min-[1400px]:gap-x-[84px] min-[1400px]:gap-y-14">
+            <div className="min-w-0 lg:max-w-[720px] lg:pt-[2px] min-[1400px]:max-w-[780px]">
+            <h2 className="pv-text-balance max-w-none whitespace-normal text-[clamp(18px,5.5vw,22px)] font-bold leading-[1.02] tracking-[-0.05em] text-[#16203b] sm:text-[48px] lg:text-[42px] lg:leading-[54px] lg:tracking-[-0.045em] lg:text-[#0f172a] min-[1400px]:text-[48px] min-[1400px]:leading-[58px]">
               {aboutSection.title}
             </h2>
 
-            <div className="mt-[18px] min-w-0 lg:mt-[21px] lg:max-w-[655px] 2xl:max-w-[720px]">
+            <div className="mt-[18px] min-w-0 lg:mt-[21px] lg:max-w-[655px] min-[1400px]:max-w-[720px]">
               {aboutSection.paragraphs.map((paragraph, index) => (
                 <div key={`${paragraph}-${index}`}>
                   {index ? <div aria-hidden="true" className="h-[18px] lg:h-[12px]" /> : null}
                   <p
-                    className="pv-text-pretty max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[655px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48] 2xl:max-w-[720px] 2xl:text-[18px] 2xl:leading-[27px]"
+                    className="pv-text-pretty max-w-[742px] text-[15.5px] font-normal leading-[1.72] tracking-[-0.012em] text-[#3b3f47] sm:text-[18px] lg:max-w-[655px] lg:text-[17px] lg:leading-[25px] lg:tracking-[0] lg:text-[#373d48] min-[1400px]:max-w-[720px] min-[1400px]:text-[18px] min-[1400px]:leading-[27px]"
                     style={{ wordSpacing: "0.03em" }}
                   >
                     {paragraph}
@@ -691,7 +691,7 @@ export default async function Home() {
             <div className="mt-[30px] flex flex-row flex-wrap items-center gap-x-4 gap-y-3 sm:items-end sm:gap-x-[30px] sm:gap-y-5 lg:mt-[42px] lg:flex-nowrap lg:items-center lg:gap-x-[26px]">
               {aboutSection.primaryCtaLabel && aboutSection.primaryCtaHref ? (
                 <Link
-                  className="inline-flex min-h-[48px] w-auto justify-self-start items-center justify-center rounded-full border border-[#95989f] bg-white px-4 py-3 text-center text-[13px] font-semibold tracking-[-0.02em] text-[#131927] transition hover:bg-[#fafafa] sm:min-h-[54px] sm:min-w-[238px] sm:w-auto sm:flex-none sm:px-[32px] sm:text-[16px] lg:h-[54px] lg:w-[216px] lg:min-w-[216px] lg:rounded-[27px] lg:border-[1.5px] lg:px-0 lg:py-0 lg:text-[17px] lg:font-semibold lg:leading-none lg:tracking-[0]"
+                  className="inline-flex min-h-[48px] w-auto justify-self-start items-center justify-center rounded-full border border-[#95989f] bg-white px-4 py-3 text-center text-[13px] font-semibold tracking-[-0.02em] text-[#131927] pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 hover:bg-[#fafafa] sm:min-h-[54px] sm:min-w-[238px] sm:w-auto sm:flex-none sm:px-[32px] sm:text-[16px] lg:h-[54px] lg:w-[216px] lg:min-w-[216px] lg:rounded-[27px] lg:border-[1.5px] lg:px-0 lg:py-0 lg:text-[17px] lg:font-semibold lg:leading-none lg:tracking-[0]"
                   href={aboutSection.primaryCtaHref}
                 >
                   <span className="whitespace-nowrap">{aboutSection.primaryCtaLabel}</span>
@@ -712,7 +712,7 @@ export default async function Home() {
           </div>
 
             <div
-              className="pv-media-frame relative mx-auto w-full max-w-[420px] aspect-[520/356] overflow-hidden rounded-[28px] shadow-[0_18px_40px_rgba(15,23,42,0.08)] lg:mx-0 lg:h-[356px] lg:w-full lg:max-w-[520px] lg:justify-self-end lg:rounded-[14px] lg:shadow-none 2xl:h-[396px] 2xl:max-w-[580px]"
+              className="pv-media-frame relative mx-auto w-full max-w-[420px] aspect-[520/356] overflow-hidden rounded-[28px] shadow-[0_18px_40px_rgba(15,23,42,0.08)] lg:mx-0 lg:h-[356px] lg:w-full lg:max-w-[520px] lg:justify-self-end lg:rounded-[14px] lg:shadow-none min-[1400px]:h-[396px] min-[1400px]:max-w-[580px]"
             >
               <img
                 alt={aboutSection.imageAlt}
@@ -814,13 +814,12 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      <section
+ <section
         className="pb-[84px] pt-[22px] sm:pb-[90px] sm:pt-[28px] lg:pb-[104px] lg:pt-[44px]"
         style={{ background: "rgba(17, 40, 62, 1)", fontFamily: "var(--font-poppins), sans-serif" }}
       >
-        <div className="mx-auto w-full max-w-[1120px] px-6 text-center sm:px-10 lg:px-0 2xl:max-w-[1320px]">
-          <div className="mx-auto text-center lg:max-w-[760px] 2xl:max-w-[860px]">
+        <div className="mx-auto w-full max-w-[1905px] px-4 text-center sm:px-6 lg:px-[180px] 2xl:px-[220px]">
+          <div className="mx-auto text-center lg:max-w-[858px] 2xl:max-w-[1020px]">
               <h2
                 className={`text-center text-white ${homeSectionTitleClassName}`}
                 style={{ color: "#ffffff", fontFamily: "var(--font-poppins), sans-serif", fontWeight: 700 }}
@@ -837,13 +836,11 @@ export default async function Home() {
               </div>
             </div>
 
-          <div className="mx-auto mt-[38px] grid justify-center gap-[18px] sm:grid-cols-2 sm:gap-[22px] lg:mt-[34px] lg:grid-cols-4 lg:gap-[16px] 2xl:gap-[24px]">
+          <div className="mt-[38px] grid gap-[18px] sm:grid-cols-2 lg:grid-cols-4 lg:gap-[16px] 2xl:gap-[24px]">
             {investmentOpportunityShowcaseCards.map((card, index) => (
               <div className="flex w-full justify-center" key={`${card.title}-${index}`}>
                 <ShowcaseActionCard
                   body={card.body}
-                  bodyClassName="mt-[8px] max-w-full px-3 text-[12.5px] leading-[1.45] sm:text-[13px]"
-                  buttonWrapClassName="pt-[18px]"
                   cardClassName="bg-white shadow-[0_8px_18px_rgba(8,18,38,0.06)]"
                   ctaLabel={card.ctaLabel}
                   href={card.ctaHref}
@@ -851,21 +848,20 @@ export default async function Home() {
                   iconAlt={card.title}
                   iconClassName={card.iconClassName}
                   imageSizes="120px"
-                  panelClassName={`h-[106px] w-[120px] rounded-[13px] border-transparent ${card.iconShellClassName}`}
+                  panelClassName={`border-transparent ${card.iconShellClassName}`}
                   title={card.title}
-                  titleClassName="mt-[12px] whitespace-nowrap px-2 text-[18px] font-semibold leading-[1.2]"
                 />
               </div>
             ))}
 
-            <div className="flex w-full justify-center sm:col-span-2 lg:col-span-1">
-              <ShowcasePanelCard className="!items-stretch !p-0 overflow-hidden bg-white shadow-[0_8px_18px_rgba(8,18,38,0.06)]">
+            <div className="flex w-full justify-center">
+              <ShowcasePanelCard className="border border-[rgba(203,203,203,0.92)] !items-stretch !p-0 overflow-hidden bg-white shadow-[0_8px_18px_rgba(8,18,38,0.06)]">
                 <div className="relative h-full w-full flex-1">
                   <Image
                     alt="Portfolio growth chart"
                     fill
                     className="object-fill object-center"
-                    sizes="(min-width: 640px) 260px, calc(100vw - 48px)"
+                    sizes="(min-width: 1536px) 348px, (min-width: 640px) 320px, calc(100vw - 48px)"
                     src={portfolioGrowthChartImage}
                   />
                   <div className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.08)_20%,rgba(15,23,42,0.88)_100%)] px-[18px] pb-[18px] pt-[44px] text-left">
@@ -882,6 +878,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
 
       <section
         className="relative overflow-hidden bg-white pb-[60px] pt-[50px] sm:pb-[66px] sm:pt-[56px] lg:pb-[59px] lg:pt-[56px]"
@@ -974,11 +971,11 @@ export default async function Home() {
       </section>
 
       <section
-        className="bg-[rgba(17,40,62,1)] px-4 pb-[56px] pt-[44px] sm:px-6 sm:pb-[64px] sm:pt-[48px] lg:px-[145px] lg:pb-[68px] lg:pt-[52px] 2xl:px-[180px] 2xl:pb-[80px] 2xl:pt-[60px]"
+        className="bg-[rgba(17,40,62,1)] px-4 pb-[56px] pt-[44px] sm:px-6 sm:pb-[64px] sm:pt-[48px] lg:px-[145px] lg:pb-[68px] lg:pt-[52px]"
         style={{ fontFamily: "var(--font-poppins), sans-serif" }}
       >
         <div className="mx-auto w-full">
-          <div className="mx-auto flex max-w-[760px] flex-col items-center text-center lg:max-w-[860px] 2xl:max-w-[980px]">
+          <div className="mx-auto flex max-w-[760px] flex-col items-center text-center lg:max-w-[860px]">
             <h2
               className={`text-center text-white ${homeSectionTitleClassName}`}
               style={{ color: "#ffffff" }}
@@ -986,7 +983,7 @@ export default async function Home() {
               {featuredPropertiesShowcase.eyebrowTitle}
             </h2>
             <p
-              className={`mt-[6px] max-w-[720px] text-center text-white/88 ${homeSectionSubtitleClassName} lg:max-w-[760px] 2xl:max-w-[880px]`}
+              className={`mt-[6px] max-w-[720px] text-center text-white/88 ${homeSectionSubtitleClassName} lg:max-w-[760px]`}
               style={{ color: "rgba(255,255,255,0.88)" }}
             >
               {featuredPropertiesShowcase.eyebrowSubtitle}
@@ -997,9 +994,9 @@ export default async function Home() {
             <FeaturedShowcaseCarousel items={featuredShowcaseCards} />
           </div>
 
-          <div className="mx-auto mt-[34px] hidden max-w-[1088px] gap-[24px] sm:grid lg:mt-[38px] lg:grid-cols-[430px_630px] lg:items-start lg:gap-[28px] 2xl:max-w-[1280px] 2xl:grid-cols-[500px_740px] 2xl:gap-[40px]">
-            <article className="flex h-full flex-col rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] lg:min-h-[458px] 2xl:min-h-[520px] 2xl:p-[28px]">
-              <div className="relative mx-auto h-auto w-full max-w-[386px] overflow-hidden rounded-[12px] lg:h-[224px] lg:w-[386px] lg:max-w-none 2xl:h-[286px] 2xl:w-[444px]" style={{ aspectRatio: "386 / 224" }}>
+          <div className="mx-auto mt-[34px] hidden max-w-[1088px] gap-[24px] sm:grid lg:mt-[38px] lg:grid-cols-[430px_630px] lg:items-start lg:gap-[28px]">
+            <article className="group flex h-full flex-col rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_20px_42px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7] lg:min-h-[458px]">
+              <div className="relative mx-auto h-auto w-full max-w-[386px] overflow-hidden rounded-[12px] lg:h-[224px] lg:w-[386px] lg:max-w-none" style={{ aspectRatio: "386 / 224" }}>
                 <Image
                   alt={featuredPropertiesShowcase.main.title}
                   className="object-cover"
@@ -1036,7 +1033,7 @@ export default async function Home() {
 
               <div className="mt-auto px-[1px] pt-[16px]">
                 <Link
-                  className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white transition hover:bg-[#102236]"
+                  className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
                   href={featuredPropertiesShowcase.main.href}
                   style={{ color: "#ffffff" }}
                 >
@@ -1045,9 +1042,9 @@ export default async function Home() {
               </div>
             </article>
 
-             <div className="grid gap-[20px] lg:gap-[28px] 2xl:gap-[34px]">
-              <article className="grid rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] md:grid-cols-[196px_1fr] md:items-center md:gap-[24px] lg:h-[228px] 2xl:h-[244px] 2xl:grid-cols-[220px_1fr] 2xl:gap-[28px] 2xl:p-[26px]">
-                <div className="relative mx-auto h-auto w-full max-w-[196px] overflow-hidden rounded-[12px] lg:h-[184px] lg:w-[196px] lg:max-w-none 2xl:h-[192px] 2xl:w-[220px]" style={{ aspectRatio: "196 / 184" }}>
+             <div className="grid gap-[20px] lg:gap-[28px]">
+              <article className="group grid rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_18px_36px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7] md:grid-cols-[196px_1fr] md:items-center md:gap-[24px] lg:h-[228px]">
+                <div className="relative mx-auto h-auto w-full max-w-[196px] overflow-hidden rounded-[12px] lg:h-[184px] lg:w-[196px] lg:max-w-none" style={{ aspectRatio: "196 / 184" }}>
                   <Image
                     alt={featuredPropertiesShowcase.sideTop.title}
                     className="object-cover"
@@ -1059,7 +1056,7 @@ export default async function Home() {
 
                 <div className="flex h-full flex-col justify-center pt-[12px] md:pt-0">
                   <h3
-                    className="text-[20px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:max-w-[320px] lg:text-[18.5px] lg:leading-[26px] lg:tracking-[0] 2xl:max-w-[400px] 2xl:text-[22px]"
+                    className="text-[20px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:max-w-[320px] lg:text-[18.5px] lg:leading-[26px] lg:tracking-[0]"
                     style={{
                       WebkitBoxOrient: "vertical",
                       WebkitLineClamp: 2,
@@ -1070,7 +1067,7 @@ export default async function Home() {
                     {featuredPropertiesShowcase.sideTop.title}
                   </h3>
                   <p
-                    className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:max-w-[320px] lg:text-[14px] lg:leading-[20px] lg:tracking-[0] 2xl:max-w-[400px] 2xl:text-[15px] 2xl:leading-[22px]"
+                    className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:max-w-[320px] lg:text-[14px] lg:leading-[20px] lg:tracking-[0]"
                     style={{
                       WebkitBoxOrient: "vertical",
                       WebkitLineClamp: 2,
@@ -1082,7 +1079,7 @@ export default async function Home() {
                   </p>
                   <div className="mt-[14px]">
                     <Link
-                      className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white transition hover:bg-[#102236]"
+                      className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
                       href={featuredPropertiesShowcase.sideTop.href}
                       style={{ color: "#ffffff" }}
                     >
@@ -1092,8 +1089,8 @@ export default async function Home() {
                 </div>
               </article>
 
-              <article className="grid rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] md:grid-cols-[196px_1fr] md:items-center md:gap-[24px] lg:h-[228px] 2xl:h-[244px] 2xl:grid-cols-[220px_1fr] 2xl:gap-[28px] 2xl:p-[26px]">
-                <div className="relative mx-auto h-auto w-full max-w-[196px] overflow-hidden rounded-[12px] lg:h-[184px] lg:w-[196px] lg:max-w-none 2xl:h-[192px] 2xl:w-[220px]" style={{ aspectRatio: "196 / 184" }}>
+              <article className="group grid rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_18px_36px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7] md:grid-cols-[196px_1fr] md:items-center md:gap-[24px] lg:h-[228px]">
+                <div className="relative mx-auto h-auto w-full max-w-[196px] overflow-hidden rounded-[12px] lg:h-[184px] lg:w-[196px] lg:max-w-none" style={{ aspectRatio: "196 / 184" }}>
                   <Image
                     alt={featuredPropertiesShowcase.sideBottom.title}
                     className="object-cover"
@@ -1105,7 +1102,7 @@ export default async function Home() {
 
                 <div className="flex h-full flex-col justify-center pt-[12px] md:pt-0">
                   <h3
-                    className="text-[20px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:max-w-[320px] lg:text-[18.5px] lg:leading-[26px] lg:tracking-[0] 2xl:max-w-[400px] 2xl:text-[22px]"
+                    className="text-[20px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:max-w-[320px] lg:text-[18.5px] lg:leading-[26px] lg:tracking-[0]"
                     style={{
                       WebkitBoxOrient: "vertical",
                       WebkitLineClamp: 2,
@@ -1116,7 +1113,7 @@ export default async function Home() {
                     {featuredPropertiesShowcase.sideBottom.title}
                   </h3>
                   <p
-                    className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:max-w-[320px] lg:text-[14px] lg:leading-[20px] lg:tracking-[0] 2xl:max-w-[400px] 2xl:text-[15px] 2xl:leading-[22px]"
+                    className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:max-w-[320px] lg:text-[14px] lg:leading-[20px] lg:tracking-[0]"
                     style={{
                       WebkitBoxOrient: "vertical",
                       WebkitLineClamp: 2,
@@ -1128,7 +1125,7 @@ export default async function Home() {
                   </p>
                   <div className="mt-[14px]">
                     <Link
-                      className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white transition hover:bg-[#102236]"
+                      className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
                       href={featuredPropertiesShowcase.sideBottom.href}
                       style={{ color: "#ffffff" }}
                     >

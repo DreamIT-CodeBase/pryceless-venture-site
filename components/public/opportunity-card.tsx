@@ -79,7 +79,7 @@ export function OpportunityCard({
   return (
     <StandardCollectionCardLink href={href}>
       <div className="px-[13px] pt-[13px]">
-        <div className="relative h-[196px] overflow-hidden rounded-[14px] 2xl:h-[248px]">
+        <div className="relative h-[196px] overflow-hidden rounded-[14px] min-[1400px]:h-[248px]">
           <Image
             alt={imageAlt}
             className="object-cover"
@@ -92,7 +92,7 @@ export function OpportunityCard({
 
       <div className="flex flex-1 flex-col px-[13px] pb-[16px] pt-[14px]">
         <h3
-          className="min-h-[42px] text-[19px] font-bold leading-[1.12] tracking-[-0.02em] text-[#131d36] 2xl:min-h-[52px] 2xl:text-[22px]"
+          className="min-h-[42px] text-[19px] font-bold leading-[1.12] tracking-[-0.02em] text-[#131d36] min-[1400px]:min-h-[52px] min-[1400px]:text-[22px]"
           style={{
             WebkitBoxOrient: "vertical",
             WebkitLineClamp: 2,
@@ -104,7 +104,7 @@ export function OpportunityCard({
         </h3>
 
         {metaText ? (
-          <div className="mt-[7px] flex min-h-[16px] items-start gap-[6px] text-[12px] leading-[16px] text-[#6b7280] 2xl:min-h-[18px] 2xl:text-[13px]">
+          <div className="mt-[7px] flex min-h-[16px] items-start gap-[6px] text-[12px] leading-[16px] text-[#6b7280] min-[1400px]:min-h-[18px] min-[1400px]:text-[13px]">
             <OpportunityMetaIcon kind={metaIcon} />
             <p className="truncate">{metaText}</p>
           </div>
@@ -112,7 +112,7 @@ export function OpportunityCard({
 
         {summary ? (
           <p
-            className="mt-[9px] min-h-[35px] text-[12px] leading-[1.45] tracking-[0] text-[#6b7280] 2xl:min-h-[39px] 2xl:text-[13px] 2xl:leading-[1.5]"
+            className="mt-[9px] min-h-[35px] text-[12px] leading-[1.45] tracking-[0] text-[#6b7280] min-[1400px]:min-h-[39px] min-[1400px]:text-[13px] min-[1400px]:leading-[1.5]"
             style={{
               WebkitBoxOrient: "vertical",
               WebkitLineClamp: 2,
@@ -125,7 +125,7 @@ export function OpportunityCard({
         ) : null}
 
         {visibleBullets.length ? (
-          <div className="mt-[10px] min-h-[42px] space-y-[8px] text-[11.5px] leading-[1.4] text-[#646b75] 2xl:min-h-[46px] 2xl:text-[12px]">
+          <div className="mt-[10px] min-h-[42px] space-y-[8px] text-[11.5px] leading-[1.4] text-[#646b75] min-[1400px]:min-h-[46px] min-[1400px]:text-[12px]">
             {visibleBullets.map((item, index) => (
               <div className="flex items-start gap-[6px]" key={`${title}-bullet-${index}`}>
                 <span className="mt-[2px] text-[12px] font-semibold leading-none text-[#16213e]">
@@ -158,11 +158,11 @@ export function OpportunityCard({
                   }`}
                   key={`${title}-stat-${item.label}`}
                 >
-                  <p className="text-[11px] leading-[16px] text-[#6b7280] 2xl:text-[11.5px]">
+                  <p className="text-[11px] leading-[16px] text-[#6b7280] min-[1400px]:text-[11.5px]">
                     {item.label}
                   </p>
                   <p
-                    className="mt-[2px] text-[13px] font-semibold leading-[18px] text-[#30343b] 2xl:text-[14px]"
+                    className="mt-[2px] text-[13px] font-semibold leading-[18px] text-[#30343b] min-[1400px]:text-[14px]"
                     style={{
                       WebkitBoxOrient: "vertical",
                       WebkitLineClamp: 2,
@@ -178,13 +178,13 @@ export function OpportunityCard({
           ) : null}
 
           {footer ? (
-            <div className="mt-[10px] min-h-[16px] text-left text-[11px] leading-[16px] text-[#6b7280] 2xl:min-h-[18px] 2xl:text-[11.5px]">
+            <div className="mt-[10px] min-h-[16px] text-left text-[11px] leading-[16px] text-[#6b7280] min-[1400px]:min-h-[18px] min-[1400px]:text-[11.5px]">
               <span className="font-medium text-[#30343b]">{footer.label}:</span> {footer.value}
             </div>
           ) : null}
 
           <div className="pt-[16px]">
-            <span className={`${standardCollectionButtonClassName} max-w-[188px] px-[20px] 2xl:max-w-[210px] 2xl:text-[13px]`}>
+            <span className={`${standardCollectionButtonClassName} max-w-[188px] px-[20px] min-[1400px]:max-w-[210px] min-[1400px]:text-[13px]`}>
               {ctaLabel}
             </span>
           </div>

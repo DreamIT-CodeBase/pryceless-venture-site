@@ -19,3 +19,4 @@ tsconfig.tsbuildinfo
 .codex_tmp/
 _doc_extracts/
 package-lock.backup.json
+data/runtime/

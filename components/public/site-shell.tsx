@@ -115,7 +115,7 @@ export async function SiteShell({
     },
   ];
   const footerHeadingClassName =
-    "!text-white text-[24px] font-semibold leading-[26px] tracking-[0]";
+    "!text-white text-[24px] font-bold leading-[26px] tracking-[0]";
   const footerRuleClassName = "mt-[15px] h-px w-full bg-[#19a7df]";
   const footerListLinkClassName =
     "block border-b border-white/18 text-[14px] leading-[30px] tracking-[0] !text-white transition hover:text-[var(--pv-sand)] sm:leading-[32px]";
@@ -160,7 +160,7 @@ export async function SiteShell({
               <GetStartedModalTrigger form={getStartedForm} variant="desktop" />
             ) : contextualHeaderCta ? (
               <Link
-                className="inline-flex h-[50px] w-[196px] items-center justify-center gap-[9px] rounded-[6px] bg-[#18357a] px-[14px] text-[15px] leading-none font-medium text-white transition-none hover:bg-[#18357a] hover:text-white"
+                className="inline-flex h-[50px] w-[196px] items-center justify-center gap-[9px] rounded-[6px] bg-[#18357a] px-[14px] text-[15px] leading-none font-medium text-white pv-interactive-button transition-[transform,box-shadow,filter] duration-300 hover:bg-[#18357a] hover:text-white hover:brightness-[1.03]"
                 href={contextualHeaderCta.href}
               >
                 <span

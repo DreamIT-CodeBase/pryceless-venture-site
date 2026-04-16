@@ -66,7 +66,7 @@ export function PropertyStageFilter({
               className={`group flex min-h-[88px] flex-col justify-between rounded-[24px] border bg-white px-5 py-3 text-left transition duration-300 sm:min-h-[96px] sm:px-6 sm:py-4 ${
                 isActive
                   ? "border-[rgba(191,147,117,0.92)] text-[#18314b] shadow-[0_0_0_1px_rgba(191,147,117,0.85),0_14px_34px_rgba(191,147,117,0.12)]"
-                  : "border-[rgba(191,147,117,0.28)] text-[#18314b] shadow-[0_12px_32px_rgba(15,23,42,0.06)] hover:-translate-y-[1px] hover:border-[rgba(191,147,117,0.62)] hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]"
+                  : "border-[rgba(191,147,117,0.28)] text-[#18314b] shadow-[0_12px_32px_rgba(15,23,42,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_16px_36px_rgba(15,23,42,0.08)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[rgba(191,147,117,0.62)]"
               }`}
               key={section.stage}
               onClick={() => setActiveStage(section.stage)}

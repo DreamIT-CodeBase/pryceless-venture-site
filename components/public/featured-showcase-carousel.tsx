@@ -91,7 +91,7 @@ export function FeaturedShowcaseCarousel({
       >
         {safeItems.map((item, index) => (
           <article
-            className="flex min-w-full snap-start flex-col rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)]"
+            className="group flex min-w-full snap-start flex-col rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7]"
             data-featured-showcase-slide="true"
             key={`${item.title}-${index}`}
           >
@@ -135,7 +135,7 @@ export function FeaturedShowcaseCarousel({
 
             <div className="mt-auto px-[1px] pt-[16px]">
               <Link
-                className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white transition hover:bg-[#102236]"
+                className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
                 href={item.href}
                 style={{ color: "#ffffff" }}
               >

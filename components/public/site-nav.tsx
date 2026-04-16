@@ -133,7 +133,7 @@ export function SiteNav({
             />
           ) : mobileCta ? (
             <Link
-              className="mt-4 inline-flex h-[50px] w-full items-center justify-center rounded-[10px] bg-[#18357a] px-5 text-[15px] font-medium leading-none !text-white transition hover:bg-[#18357a] hover:!text-white visited:!text-white"
+              className="mt-4 inline-flex h-[50px] w-full items-center justify-center rounded-[10px] bg-[#18357a] px-5 text-[15px] font-medium leading-none !text-white pv-interactive-button transition-[transform,box-shadow,filter] duration-300 hover:bg-[#18357a] hover:!text-white hover:brightness-[1.03] visited:!text-white"
               href={mobileCta.href}
               onClick={() => setMobileOpen(false)}
               style={{ color: "#ffffff" }}

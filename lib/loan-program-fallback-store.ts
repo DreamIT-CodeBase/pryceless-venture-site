@@ -5,11 +5,10 @@ import { formDefinitionsSeed, loanProgramSeed } from "@/lib/content-blueprint";
 import { slugify } from "@/lib/utils";
 
 const seedFallbackTimestamp = new Date("2026-01-01T00:00:00.000Z");
-const fallbackStorePath = path.join(
-  process.cwd(),
-  ".codex_tmp",
-  "loan-program-overrides.json",
-);
+const runtimeDataDirectory =
+  process.env.PV_RUNTIME_DATA_DIR?.trim() ||
+  path.join(process.cwd(), "data", "runtime");
+const fallbackStorePath = path.join(runtimeDataDirectory, "loan-program-overrides.json");
 
 type BaseLoanProgram = (typeof loanProgramSeed)[number];
 

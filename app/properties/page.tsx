@@ -249,18 +249,18 @@ export default async function PropertiesPage() {
       <div className="pb-[92px]">
         <PageSectionHero currentLabel={heroTitle} intro={heroIntro} title={heroTitle} />
 
-        <section className="bg-white px-4 pt-[48px] sm:px-6 lg:px-0 lg:pt-[64px] 2xl:pt-[76px]">
-          <div className="mx-auto w-full 2xl:max-w-[1760px] 2xl:px-[164px]">
-            <div className="mx-auto mt-[12px] w-full 2xl:mt-[18px]">
+        <section className="bg-white px-4 pt-[48px] sm:px-6 lg:px-0 lg:pt-[64px] min-[1400px]:pt-[76px]">
+          <div className="mx-auto w-full min-[1400px]:max-w-[1760px] min-[1400px]:px-[164px]">
+            <div className="mx-auto mt-[12px] w-full min-[1400px]:mt-[18px]">
               <PropertyStageFilter sections={portfolioSections} />
             </div>
 
             {page?.disclaimer ? (
-              <div className="mx-auto mt-[30px] w-full max-w-[1080px] 2xl:max-w-[1432px]">
+              <div className="mx-auto mt-[30px] w-full max-w-[1080px] min-[1400px]:max-w-[1432px]">
                 <p className="text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#555555]">
                   Disclaimer:
                 </p>
-                <p className="mt-[7px] text-[14px] leading-[1.5] tracking-[-0.01em] text-[#6d6d6d] 2xl:max-w-[1120px]">
+                <p className="mt-[7px] text-[14px] leading-[1.5] tracking-[-0.01em] text-[#6d6d6d] min-[1400px]:max-w-[1120px]">
                   {page.disclaimer}
                 </p>
               </div>

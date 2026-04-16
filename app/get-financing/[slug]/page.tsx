@@ -465,7 +465,7 @@ export default async function LoanProgramDetailPage({
 
                 <div className="mt-7 flex flex-wrap gap-3 sm:mt-8">
                   <Link
-                    className="inline-flex min-h-[44px] min-w-[168px] items-center justify-center rounded-[12px] bg-white px-5 py-3 text-[14px] font-semibold tracking-[-0.02em] text-black shadow-[0_14px_32px_rgba(0,0,0,0.16)] transition-colors hover:bg-white sm:min-h-[48px] sm:min-w-[196px] sm:text-[16px] lg:min-h-[50px] lg:min-w-[204px] lg:px-6 lg:text-[16px]"
+                    className="inline-flex min-h-[44px] min-w-[168px] items-center justify-center rounded-[12px] bg-white px-5 py-3 text-[14px] font-semibold tracking-[-0.02em] text-black shadow-[0_14px_32px_rgba(0,0,0,0.16)] pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 hover:bg-white sm:min-h-[48px] sm:min-w-[196px] sm:text-[16px] lg:min-h-[50px] lg:min-w-[204px] lg:px-6 lg:text-[16px]"
                     href="#apply-now"
                     style={{ color: "#111111" }}
                   >
