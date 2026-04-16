@@ -40,6 +40,12 @@ const formatDisplayValue = (value: string | null | undefined) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
     .join(" ");
 
+const normalizeMetricKey = (value: string | null | undefined) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+
 const getPropertyTypeBadgeLabel = (value: string | null | undefined) => {
   switch (normalizeMetricKey(value)) {
     case "singlefamily":
@@ -68,12 +74,6 @@ const splitParagraphs = (value: string | null | undefined) =>
     .split(/\n+/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
-
-const normalizeMetricKey = (value: string | null | undefined) =>
-  String(value ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "");
 
 const getMetricValue = (
   lookup: Map<string, string>,
@@ -438,6 +438,7 @@ export default async function PropertyDetailPage({
   const metricLookup = new Map(
     highlightContent.metrics.map((item) => [normalizeMetricKey(item.label), item.value]),
   );
+
   const performanceCards = [
     {
       icon: <ArrowTrendIcon className="h-6 w-6" />,
@@ -477,6 +478,7 @@ export default async function PropertyDetailPage({
     toneClassName: string;
     value: string;
   }>;
+
   const snapshotCards = [
     {
       icon: <HomeIcon className="h-6 w-6" />,
@@ -512,16 +514,20 @@ export default async function PropertyDetailPage({
     toneClassName: string;
     value: string;
   }>;
+
   const investmentOverviewParagraphs = splitParagraphs(
     property.buyerFit || page?.intro || property.summary,
   );
+
   const overviewFeatureStats = snapshotCards
     .slice(0, 3)
     .map((item) => ({ label: item.label, value: item.value }));
+
   const overviewSupportItems =
     investmentOverviewParagraphs.length > 1
       ? investmentOverviewParagraphs.slice(1, 3)
       : highlightContent.bullets.slice(0, 2);
+
   const standoutItems =
     detailContent.standoutItems.length > 0
       ? detailContent.standoutItems
@@ -529,6 +535,7 @@ export default async function PropertyDetailPage({
           description: item,
           title: ["Deal Highlight", "Execution Angle", "Market Context", "Investor Upside"][index],
         }));
+
   const investorProfile =
     detailContent.investorProfile.length > 0
       ? detailContent.investorProfile
@@ -537,6 +544,7 @@ export default async function PropertyDetailPage({
           formatDisplayValue(property.propertyType),
           stage === "FOR_SALE" ? "Active Inventory" : null,
         ].filter(Boolean);
+
   const locationBenefits = detailContent.locationBenefits;
   const mapSearchFallback = [property.title, locationLabel].filter(Boolean).join(", ");
   const mapEmbedUrl = getPropertyGoogleMapsEmbedUrl(
@@ -547,9 +555,11 @@ export default async function PropertyDetailPage({
     detailContent.googleMapsUrl,
     mapSearchFallback,
   );
-  const showInquiryForm = stage === "FOR_SALE" && Boolean(property.inquiryForm);
-  const ctaLabel =
-    page?.ctaLabel || property.inquiryForm?.formName || "Get Full Deal Access";
+
+  const inquiryForm = property.inquiryForm ?? null;
+  const showInquiryForm = stage === "FOR_SALE" && Boolean(inquiryForm);
+  const ctaLabel = page?.ctaLabel || inquiryForm?.formName || "Get Full Deal Access";
+
   const heroCards =
     performanceCards.length > 0
       ? performanceCards
@@ -579,6 +589,7 @@ export default async function PropertyDetailPage({
             value: statusLabel,
           },
         ];
+
   const heroBadges = [
     heroCards.some((item) => item.label === "ROI")
       ? {
@@ -598,6 +609,7 @@ export default async function PropertyDetailPage({
       toneClassName: "bg-[#e8f0ff] text-[#2962eb]",
     },
   ];
+
   return (
     <SiteShell cta={{ href: "/properties", label: "Back to Properties" }}>
       <DetailPageCanvas>
@@ -694,207 +706,229 @@ export default async function PropertyDetailPage({
           </DetailSection>
 
           <DetailSection className="pb-20 lg:pb-24">
-            <div
-              className={`grid gap-8 xl:gap-12 ${
-                showInquiryForm && property.inquiryForm
-                  ? "xl:grid-cols-[minmax(0,6fr)_minmax(0,4fr)]"
-                  : ""
-              }`}
-            >
-              <div className="order-2 grid gap-10 xl:order-1">
-                {galleryCarouselItems.length ? (
-                  <section>
-                    <PropertySectionHeading title="Property Gallery" />
-                    <DetailMediaCarousel
-                      autoPlayMs={4800}
-                      className="mt-8"
-                      imageSizes="(max-width: 1279px) 100vw, 60vw"
-                      items={galleryCarouselItems}
-                      priorityFirst
-                    />
-                  </section>
-                ) : null}
-
-                {investmentOverviewParagraphs.length ? (
-                  <section>
-                    <PropertySectionHeading title="Investment Overview" />
-                    <div className="mt-8 rounded-[30px] border border-[#eadfcf] bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] sm:p-6">
-                      <div className="rounded-[24px] border border-[#ecdcc6] bg-[#fffdf9] px-5 py-5 shadow-[0_10px_28px_rgba(15,23,42,0.04)] sm:px-6 sm:py-6">
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-[#bf9375]">
-                          Overview
-                        </p>
-                        <p className="mt-3 max-w-[820px] text-[20px] font-semibold leading-[1.45] tracking-[-0.03em] text-[#14213c] sm:text-[24px]">
-                          {investmentOverviewParagraphs[0]}
-                        </p>
-
-                        {overviewFeatureStats.length ? (
-                          <div className="mt-5 flex flex-wrap gap-3">
-                            {overviewFeatureStats.map((item) => (
-                              <div
-                                className="rounded-full border border-[#ecdcc6] bg-white px-4 py-3"
-                                key={`${item.label}-${item.value}`}
-                              >
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#bf9375]">
-                                  {item.label}
-                                </p>
-                                <p className="mt-1 text-[16px] font-semibold leading-none text-[#14213c]">
-                                  {item.value}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        ) : null}
+            <div className="space-y-20">
+              {galleryCarouselItems.length || showInquiryForm ? (
+                <section>
+                  {galleryCarouselItems.length && showInquiryForm && inquiryForm ? (
+                    <div className="grid gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(360px,4fr)] xl:items-start">
+                      <div>
+                        <PropertySectionHeading title="Property Gallery" />
+                        <DetailMediaCarousel
+                          autoPlayMs={4800}
+                          className="mt-8"
+                          imageSizes="(max-width: 1279px) 100vw, 60vw"
+                          items={galleryCarouselItems}
+                          priorityFirst
+                        />
                       </div>
 
-                      {overviewSupportItems.length ? (
-                        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                          {overviewSupportItems.map((item, index) => (
+                      <div className="pv-property-inquiry-rail xl:sticky xl:top-24">
+                        <div className="pv-property-inquiry-frame" id="property-inquiry">
+                          <PropertyInquiryForm
+                            className="w-full"
+                            description="Submit your details and our team will respond with the next steps."
+                            eyebrow="Form"
+                            form={inquiryForm}
+                            sourcePath={`/properties/${property.slug}`}
+                            submitLabel={ctaLabel}
+                            title="Unlock This Investment"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : galleryCarouselItems.length ? (
+                    <div>
+                      <PropertySectionHeading title="Property Gallery" />
+                      <DetailMediaCarousel
+                        autoPlayMs={4800}
+                        className="mt-8"
+                        imageSizes="(max-width: 1279px) 100vw, 60vw"
+                        items={galleryCarouselItems}
+                        priorityFirst
+                      />
+                    </div>
+                  ) : showInquiryForm && inquiryForm ? (
+                    <div className="pv-property-inquiry-rail max-w-[560px]">
+                      <div className="pv-property-inquiry-frame" id="property-inquiry">
+                        <PropertyInquiryForm
+                          className="w-full"
+                          description="Submit your details and our team will respond with the next steps."
+                          eyebrow="Form"
+                          form={inquiryForm}
+                          sourcePath={`/properties/${property.slug}`}
+                          submitLabel={ctaLabel}
+                          title="Unlock This Investment"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                </section>
+              ) : null}
+
+              {investmentOverviewParagraphs.length ? (
+                <section>
+                  <PropertySectionHeading title="Investment Overview" />
+                  <div className="mt-8 rounded-[30px] border border-[#eadfcf] bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] sm:p-6">
+                    <div className="rounded-[24px] border border-[#ecdcc6] bg-[#fffdf9] px-5 py-5 shadow-[0_10px_28px_rgba(15,23,42,0.04)] sm:px-6 sm:py-6">
+                      <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-[#bf9375]">
+                        Overview
+                      </p>
+                      <p className="mt-3 max-w-[820px] text-[20px] font-semibold leading-[1.45] tracking-[-0.03em] text-[#14213c] sm:text-[24px]">
+                        {investmentOverviewParagraphs[0]}
+                      </p>
+
+                      {overviewFeatureStats.length ? (
+                        <div className="mt-5 flex flex-wrap gap-3">
+                          {overviewFeatureStats.map((item) => (
                             <div
-                              className="rounded-[22px] border border-[#e7edf4] bg-[#fcfdff] px-5 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
-                              key={`${item}-${index}`}
+                              className="rounded-full border border-[#ecdcc6] bg-white px-4 py-3"
+                              key={`${item.label}-${item.value}`}
                             >
-                              <p className="text-[15px] leading-[1.75] text-slate-600 sm:text-[16px]">
-                                {item}
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#bf9375]">
+                                {item.label}
+                              </p>
+                              <p className="mt-1 text-[16px] font-semibold leading-none text-[#14213c]">
+                                {item.value}
                               </p>
                             </div>
                           ))}
                         </div>
                       ) : null}
                     </div>
-                  </section>
-                ) : null}
 
-                {standoutItems.length ? (
-                  <section>
-                    <PropertySectionHeading title="Why This Deal Stands Out" />
-                    <div className="mt-8 grid gap-5 xl:grid-cols-2">
-                      {standoutItems.map((item, index) => {
-                        const icon = [
-                          <ArrowTrendIcon className="h-7 w-7" key="growth" />,
-                          <MedalIcon className="h-7 w-7" key="medal" />,
-                          <CommunityIcon className="h-7 w-7" key="community" />,
-                          <SparkIcon className="h-7 w-7" key="spark" />,
-                        ][index % 4];
+                    {overviewSupportItems.length ? (
+                      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                        {overviewSupportItems.map((item, index) => (
+                          <div
+                            className="rounded-[22px] border border-[#e7edf4] bg-[#fcfdff] px-5 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
+                            key={`${item}-${index}`}
+                          >
+                            <p className="text-[15px] leading-[1.75] text-slate-600 sm:text-[16px]">
+                              {item}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
 
-                        return (
-                          <StandoutCard
-                            description={item.description}
-                            icon={icon}
-                            key={`${item.title}-${index}`}
-                            title={item.title}
+              {standoutItems.length ? (
+                <section>
+                  <PropertySectionHeading title="Why This Deal Stands Out" />
+                  <div className="mt-8 grid gap-5 xl:grid-cols-2">
+                    {standoutItems.map((item, index) => {
+                      const icon = [
+                        <ArrowTrendIcon className="h-7 w-7" key="growth" />,
+                        <MedalIcon className="h-7 w-7" key="medal" />,
+                        <CommunityIcon className="h-7 w-7" key="community" />,
+                        <SparkIcon className="h-7 w-7" key="spark" />,
+                      ][index % 4];
+
+                      return (
+                        <StandoutCard
+                          description={item.description}
+                          icon={icon}
+                          key={`${item.title}-${index}`}
+                          title={item.title}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
+
+              {investorProfile.length ? (
+                <section>
+                  <PropertySectionHeading title="Ideal Investor Profile" />
+                  <div className="mt-8 flex flex-wrap gap-4">
+                    {investorProfile.map((item) => (
+                      <span
+                        className="rounded-full bg-[#1c2d4e] px-6 py-4 text-[18px] font-semibold tracking-[-0.02em] text-white shadow-[0_16px_28px_rgba(28,45,78,0.18)]"
+                        key={item}
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
+              {locationBenefits.length || mapEmbedUrl || mapOpenUrl ? (
+                <section>
+                  <div className="grid gap-8 xl:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.9fr)] xl:items-start">
+                    <div>
+                      <PropertySectionHeading title="Prime Location Benefits" />
+                      {locationBenefits.length ? (
+                        <ul className="mt-8 space-y-6">
+                          {locationBenefits.map((item, index) => {
+                            const icon = [
+                              <PinIcon className="h-7 w-7" key="pin" />,
+                              <BuildingIcon className="h-7 w-7" key="building" />,
+                              <CommunityIcon className="h-7 w-7" key="community" />,
+                              <HomeIcon className="h-7 w-7" key="home" />,
+                            ][index % 4];
+
+                            return (
+                              <LocationBenefitItem
+                                icon={icon}
+                                key={`${item}-${index}`}
+                                text={item}
+                              />
+                            );
+                          })}
+                        </ul>
+                      ) : (
+                        <p className="mt-6 max-w-[560px] text-[16px] leading-[1.8] text-slate-600">
+                          Use the interactive map to explore the surrounding streets, commute routes,
+                          and neighborhood context for this property.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="rounded-[32px] border border-[#dce7f5] bg-[#eef5ff] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
+                      <div className="overflow-hidden rounded-[28px] bg-white shadow-[inset_0_0_0_1px_rgba(220,231,245,0.95)]">
+                        {mapEmbedUrl ? (
+                          <iframe
+                            className="h-[420px] w-full"
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={mapEmbedUrl}
+                            title={`${property.title} map`}
                           />
-                        );
-                      })}
-                    </div>
-                  </section>
-                ) : null}
-
-                {investorProfile.length ? (
-                  <section>
-                    <PropertySectionHeading title="Ideal Investor Profile" />
-                    <div className="mt-8 flex flex-wrap gap-4">
-                      {investorProfile.map((item) => (
-                        <span
-                          className="rounded-full bg-[#1c2d4e] px-6 py-4 text-[18px] font-semibold tracking-[-0.02em] text-white shadow-[0_16px_28px_rgba(28,45,78,0.18)]"
-                          key={item}
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </section>
-                ) : null}
-
-                {locationBenefits.length || mapEmbedUrl || mapOpenUrl ? (
-                  <section>
-                    <div className="grid gap-8 xl:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.9fr)] xl:items-start">
-                      <div>
-                        <PropertySectionHeading title="Prime Location Benefits" />
-                        {locationBenefits.length ? (
-                          <ul className="mt-8 space-y-6">
-                            {locationBenefits.map((item, index) => {
-                              const icon = [
-                                <PinIcon className="h-7 w-7" key="pin" />,
-                                <BuildingIcon className="h-7 w-7" key="building" />,
-                                <CommunityIcon className="h-7 w-7" key="community" />,
-                                <HomeIcon className="h-7 w-7" key="home" />,
-                              ][index % 4];
-
-                              return (
-                                <LocationBenefitItem
-                                  icon={icon}
-                                  key={`${item}-${index}`}
-                                  text={item}
-                                />
-                              );
-                            })}
-                          </ul>
                         ) : (
-                          <p className="mt-6 max-w-[560px] text-[16px] leading-[1.8] text-slate-600">
-                            Use the interactive map to explore the surrounding streets, commute routes,
-                            and neighborhood context for this property.
-                          </p>
+                          <div className="grid h-[420px] place-items-center bg-[linear-gradient(180deg,#eff6ff_0%,#f8fbff_100%)] text-center">
+                            <div className="flex flex-col items-center">
+                              <PinIcon className="h-16 w-16 text-[#cca24f]" />
+                              <p className="mt-4 text-[24px] font-medium tracking-[-0.02em] text-[#5374a7]">
+                                Interactive Map
+                              </p>
+                              <p className="mt-2 max-w-[260px] text-[14px] leading-[1.7] text-slate-500">
+                                Add a Google Maps link in the property CMS record to display the live
+                                location here.
+                              </p>
+                            </div>
+                          </div>
                         )}
                       </div>
 
-                      <div className="rounded-[32px] border border-[#dce7f5] bg-[#eef5ff] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
-                        <div className="overflow-hidden rounded-[28px] bg-white shadow-[inset_0_0_0_1px_rgba(220,231,245,0.95)]">
-                          {mapEmbedUrl ? (
-                            <iframe
-                              className="h-[420px] w-full"
-                              loading="lazy"
-                              referrerPolicy="no-referrer-when-downgrade"
-                              src={mapEmbedUrl}
-                              title={`${property.title} map`}
-                            />
-                          ) : (
-                            <div className="grid h-[420px] place-items-center bg-[linear-gradient(180deg,#eff6ff_0%,#f8fbff_100%)] text-center">
-                              <div className="flex flex-col items-center">
-                                <PinIcon className="h-16 w-16 text-[#cca24f]" />
-                                <p className="mt-4 text-[24px] font-medium tracking-[-0.02em] text-[#5374a7]">
-                                  Interactive Map
-                                </p>
-                                <p className="mt-2 max-w-[260px] text-[14px] leading-[1.7] text-slate-500">
-                                  Add a Google Maps link in the property CMS record to display the live location here.
-                                </p>
-                              </div>
-                            </div>
-                          )}
+                      {mapOpenUrl ? (
+                        <div className="mt-4 flex justify-end">
+                          <a
+                            className="inline-flex items-center justify-center rounded-full bg-[#1c2d4e] px-5 py-3 text-sm font-semibold !text-white transition hover:bg-[#243b67] hover:!text-white"
+                            href={mapOpenUrl}
+                            rel="noreferrer"
+                            style={{ color: "#ffffff" }}
+                            target="_blank"
+                          >
+                            Open in Google Maps
+                          </a>
                         </div>
-
-                        {mapOpenUrl ? (
-                          <div className="mt-4 flex justify-end">
-                            <a
-                              className="inline-flex items-center justify-center rounded-full bg-[#1c2d4e] px-5 py-3 text-sm font-semibold !text-white transition hover:bg-[#243b67] hover:!text-white"
-                              href={mapOpenUrl}
-                              rel="noreferrer"
-                              style={{ color: "#ffffff" }}
-                              target="_blank"
-                            >
-                              Open in Google Maps
-                            </a>
-                          </div>
-                        ) : null}
-                      </div>
+                      ) : null}
                     </div>
-                  </section>
-                ) : null}
-              </div>
-
-              {showInquiryForm && property.inquiryForm ? (
-                <div className="order-1 xl:order-2 xl:sticky xl:top-[112px] xl:self-start">
-                  <div id="property-inquiry">
-                    <PropertyInquiryForm
-                      className="xl:w-full"
-                      description="Submit your details and our team will respond with the next steps."
-                      eyebrow="Form"
-                      form={property.inquiryForm}
-                      sourcePath={`/properties/${property.slug}`}
-                      submitLabel={ctaLabel}
-                      title="Unlock This Investment"
-                    />
                   </div>
-                </div>
+                </section>
               ) : null}
             </div>
           </DetailSection>

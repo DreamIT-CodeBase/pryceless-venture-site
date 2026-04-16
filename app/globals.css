@@ -258,6 +258,31 @@ select {
   .pv-home-hero::after {
     width: min(34vw, 560px);
   }
+
+  .pv-property-inquiry-rail {
+    position: sticky;
+    top: 0;
+    align-self: start;
+  }
+
+  .pv-property-inquiry-frame {
+    display: flex;
+    min-height: 100dvh;
+    align-items: center;
+    padding-block: 2rem;
+  }
+}
+
+@media (min-width: 1280px) and (max-height: 940px) {
+  .pv-property-inquiry-rail {
+    position: static;
+  }
+
+  .pv-property-inquiry-frame {
+    display: block;
+    min-height: 0;
+    padding-block: 0;
+  }
 }
 
 .pv-range {
