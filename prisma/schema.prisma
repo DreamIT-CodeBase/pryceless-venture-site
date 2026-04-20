@@ -362,6 +362,10 @@ model LoanProgram {
   title            String
   slug             String           @unique
   lifecycleStatus  String           @default("DRAFT")
+  titleTail        String?
+  heroBadgeOne     String?
+  heroBadgeTwo     String?
+  heroBadgeThree   String?
   shortDescription String           @db.NVarChar(Max)
   fullDescription  String           @db.NVarChar(Max)
   interestRate     String?
@@ -371,16 +375,46 @@ model LoanProgram {
   minAmount        String?
   maxAmount        String?
   keyHighlights    String?          @db.NVarChar(Max)
+  highlightSubheadline String?      @db.NVarChar(Max)
+  insightTitle     String?
+  insightBody      String?          @db.NVarChar(Max)
   crmTag           String?
   imageUrl         String?          @db.NVarChar(2000)
   imageAlt         String?          @db.NVarChar(1000)
+  highlightImageUrl String?         @db.NVarChar(2000)
+  highlightImageAlt String?         @db.NVarChar(1000)
   isActive         Boolean          @default(true)
   sortOrder        Int              @default(0)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   forms            FormDefinition[] @relation("LoanProgramFormLink")
+  highlights       LoanProgramHighlight[]
+  overviewItems    LoanProgramOverviewItem[]
 
   @@index([lifecycleStatus, isActive, sortOrder, updatedAt])
+}
+
+model LoanProgramHighlight {
+  id            String      @id @default(cuid())
+  loanProgramId String
+  highlight     String      @db.NVarChar(Max)
+  sortOrder     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  loanProgram   LoanProgram @relation(fields: [loanProgramId], references: [id], onDelete: Cascade)
+
+  @@index([loanProgramId, sortOrder])
+}
+
+model LoanProgramOverviewItem {
+  id            String      @id @default(cuid())
+  loanProgramId String
+  title         String
+  body          String?     @db.NVarChar(Max)
+  sortOrder     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  loanProgram   LoanProgram @relation(fields: [loanProgramId], references: [id], onDelete: Cascade)
+
+  @@index([loanProgramId, sortOrder])
 }
 
 model FormDefinition {

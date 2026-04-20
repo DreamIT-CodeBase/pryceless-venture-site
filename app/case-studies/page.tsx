@@ -114,25 +114,16 @@ export default async function CaseStudiesPage() {
 
         <section className="bg-white px-4 pt-[56px] sm:px-6 lg:px-0 lg:pt-[76px] 2xl:pt-[84px]">
           <div className="mx-auto w-full 2xl:max-w-[1760px] 2xl:px-[164px]">
-            <div className="mx-auto flex max-w-[760px] flex-col items-center text-center 2xl:mx-0 2xl:max-w-[760px] 2xl:items-start 2xl:text-left">
-              <p className="text-[13px] font-normal leading-[21px] tracking-[0] text-[var(--pv-sand)] lg:text-[14px] lg:leading-[22px]">
-                Case Studies
-              </p>
-              <h2 className="mt-[8px] text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0] 2xl:max-w-[720px] 2xl:text-[42px] 2xl:leading-[1.08] 2xl:tracking-[-0.04em]">
-                {page?.pageTitle ?? "Case Studies"}
-              </h2>
-            </div>
-
-            <div className="mx-auto mt-[44px] w-full max-w-[1088px] space-y-[38px] 2xl:mt-[50px] 2xl:max-w-[1432px] 2xl:space-y-[44px]">
+            <div className="mx-auto w-full max-w-[1088px] space-y-[38px] 2xl:max-w-[1432px] 2xl:space-y-[44px]">
               {orderedCategories.length ? (
                 orderedCategories.map((categoryLabel) => {
                   const stories = storiesByCategory.get(categoryLabel) ?? [];
 
                   return (
                     <section key={categoryLabel}>
-                      <div className="mb-[18px] flex items-center gap-[12px] 2xl:justify-start">
+                      <div className="pv-case-study-category-row mb-[18px] flex items-center gap-[12px] 2xl:justify-start">
                         <span className="h-px flex-1 bg-[#d8d8d4] 2xl:max-w-[300px] 2xl:flex-none" />
-                        <h3 className="shrink-0 text-[18px] font-semibold leading-[1.2] tracking-[-0.02em] text-[#182544] sm:text-[21px] 2xl:text-[24px]">
+                        <h3 className="pv-case-study-category-title shrink-0 text-[18px] font-semibold leading-[1.2] tracking-[-0.02em] text-[#182544] sm:text-[21px] 2xl:text-[24px]">
                           {categoryLabel}
                         </h3>
                         <span className="h-px flex-1 bg-[#d8d8d4]" />

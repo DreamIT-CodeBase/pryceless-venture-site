@@ -3,11 +3,11 @@ import { unstable_cache } from "next/cache";
 
 import { blogPostSeed, formDefinitionsSeed, loanProgramSeed } from "@/lib/content-blueprint";
 import {
-  getFallbackLoanProgram,
   getFallbackLoanPrograms,
 } from "@/lib/loan-program-fallback-store";
 import { prisma } from "@/lib/prisma";
 import { mergeSingletonPageWithSeed } from "@/lib/singleton-page-utils";
+import { slugify } from "@/lib/utils";
 
 const PUBLIC_REVALIDATE_SECONDS = 300;
 const warnedFallbackLabels = new Set<string>();
@@ -683,6 +683,15 @@ const loanProgramDetailSelect = {
   fullDescription: true,
   imageAlt: true,
   imageUrl: true,
+  highlightImageUrl: true,
+  highlightImageAlt: true,
+  titleTail: true,
+  heroBadgeOne: true,
+  heroBadgeTwo: true,
+  heroBadgeThree: true,
+  highlightSubheadline: true,
+  insightTitle: true,
+  insightBody: true,
   interestRate: true,
   keyHighlights: true,
   loanTerm: true,
@@ -692,6 +701,14 @@ const loanProgramDetailSelect = {
   shortDescription: true,
   slug: true,
   title: true,
+  highlights: {
+    orderBy: { sortOrder: "asc" as const },
+    select: { highlight: true },
+  },
+  overviewItems: {
+    orderBy: { sortOrder: "asc" as const },
+    select: { title: true, body: true },
+  },
   forms: {
     where: {
       isActive: true,
@@ -715,6 +732,15 @@ const loanProgramDetailLegacyFormSelect = {
   fullDescription: true,
   imageAlt: true,
   imageUrl: true,
+  highlightImageUrl: true,
+  highlightImageAlt: true,
+  titleTail: true,
+  heroBadgeOne: true,
+  heroBadgeTwo: true,
+  heroBadgeThree: true,
+  highlightSubheadline: true,
+  insightTitle: true,
+  insightBody: true,
   interestRate: true,
   keyHighlights: true,
   loanTerm: true,
@@ -724,6 +750,14 @@ const loanProgramDetailLegacyFormSelect = {
   shortDescription: true,
   slug: true,
   title: true,
+  highlights: {
+    orderBy: { sortOrder: "asc" as const },
+    select: { highlight: true },
+  },
+  overviewItems: {
+    orderBy: { sortOrder: "asc" as const },
+    select: { title: true, body: true },
+  },
   forms: {
     where: {
       isActive: true,
@@ -844,6 +878,30 @@ const getSeedActiveForm = (slug: string) => {
   };
 };
 
+const getLoanProgramSlugCandidates = (slug: string) => {
+  const normalizedSlug = slugify(slug);
+  const candidates = new Set<string>();
+  const queue = [normalizedSlug];
+  const legacyMarketingSuffixPattern = /-for-(?:[a-z0-9]+-)*investors?$/;
+
+  while (queue.length) {
+    const current = queue.shift();
+
+    if (!current || candidates.has(current)) {
+      continue;
+    }
+
+    candidates.add(current);
+
+    const canonicalCandidate = current.replace(legacyMarketingSuffixPattern, "");
+    if (canonicalCandidate && canonicalCandidate !== current) {
+      queue.push(canonicalCandidate);
+    }
+  }
+
+  return Array.from(candidates);
+};
+
 type SeedBackedLoanProgramListItem = {
   crmTag: string | null;
   id: string;
@@ -878,6 +936,22 @@ type SeedBackedLoanProgramDetailItem = SeedBackedLoanProgramListItem & {
   }>;
   fullDescription: string | null;
   keyHighlights: string | null;
+  heroBadgeOne?: string | null;
+  heroBadgeTwo?: string | null;
+  heroBadgeThree?: string | null;
+  highlightImageAlt?: string | null;
+  highlightImageUrl?: string | null;
+  highlightSubheadline?: string | null;
+  highlights: Array<{
+    highlight: string;
+  }>;
+  insightBody?: string | null;
+  insightTitle?: string | null;
+  overviewItems: Array<{
+    body: string | null;
+    title: string;
+  }>;
+  titleTail?: string | null;
 };
 
 type SeedBackedBlogPostListItem = {
@@ -973,7 +1047,20 @@ const getSeedLoanProgramList = async (): Promise<SeedBackedLoanProgramListItem[]
 const getSeedLoanProgramDetail = async (
   slug: string,
 ): Promise<SeedBackedLoanProgramDetailItem | null> => {
-  const program = await getFallbackLoanProgram(slug);
+  const slugCandidates = getLoanProgramSlugCandidates(slug);
+  const programs = await getFallbackLoanPrograms();
+  const program =
+    slugCandidates
+      .map(
+        (candidateSlug) =>
+          programs.find(
+            (entry) =>
+              entry.slug === candidateSlug ||
+              entry.baseSlug === candidateSlug ||
+              `seed-${entry.baseSlug}` === candidateSlug,
+          ) ?? null,
+      )
+      .find(Boolean) ?? null;
 
   if (!program || !program.isActive || program.lifecycleStatus !== "PUBLISHED") {
     return null;
@@ -1009,17 +1096,28 @@ const getSeedLoanProgramDetail = async (
       };
     }),
     fullDescription: program.fullDescription ?? null,
+    heroBadgeOne: program.heroBadgeOne ?? null,
+    heroBadgeTwo: program.heroBadgeTwo ?? null,
+    heroBadgeThree: program.heroBadgeThree ?? null,
     imageAlt: program.imageAlt ?? null,
     imageUrl: program.imageUrl ?? null,
+    highlightImageAlt: program.highlightImageAlt ?? null,
+    highlightImageUrl: program.highlightImageUrl ?? null,
+    highlightSubheadline: program.highlightSubheadline ?? null,
+    highlights: program.highlights,
+    insightBody: program.insightBody ?? null,
+    insightTitle: program.insightTitle ?? null,
     interestRate: program.interestRate ?? null,
     keyHighlights: program.keyHighlights ?? null,
     loanTerm: program.loanTerm ?? null,
     ltv: program.ltv ?? null,
     maxAmount: program.maxAmount ?? null,
     minAmount: program.minAmount ?? null,
+    overviewItems: program.overviewItems,
     shortDescription: program.shortDescription ?? null,
     slug: program.slug,
     title: program.title,
+    titleTail: program.titleTail ?? null,
   };
 };
 
@@ -1448,6 +1546,7 @@ export const getPublishedLoanProgram = async (slug: string) =>
     unstable_cache(
       async () => {
         const fallback = await getSeedLoanProgramDetail(slug);
+        const slugCandidates = getLoanProgramSlugCandidates(slug);
         const loanProgramDelegate = getLoanProgramDelegate();
 
         if (!loanProgramDelegate) {
@@ -1461,10 +1560,13 @@ export const getPublishedLoanProgram = async (slug: string) =>
         try {
           return (await loanProgramDelegate.findFirst({
             where: {
-              slug,
+              slug: {
+                in: slugCandidates,
+              },
               isActive: true,
               lifecycleStatus: "PUBLISHED",
             },
+            orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
             select: loanProgramDetailSelect,
           })) as SeedBackedLoanProgramDetailItem | null;
         } catch (error) {
@@ -1488,10 +1590,13 @@ export const getPublishedLoanProgram = async (slug: string) =>
           try {
             const program = (await loanProgramDelegate.findFirst({
               where: {
-                slug,
+                slug: {
+                  in: slugCandidates,
+                },
                 isActive: true,
                 lifecycleStatus: "PUBLISHED",
               },
+              orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
               select: loanProgramDetailLegacyFormSelect,
             })) as SeedBackedLoanProgramDetailItem | null;
 
@@ -1514,7 +1619,7 @@ export const getPublishedLoanProgram = async (slug: string) =>
           }
         }
       },
-      ["public-published-loan-program", slug],
+      ["public-published-loan-program", "alias-v2", slug],
       {
         revalidate: PUBLIC_REVALIDATE_SECONDS,
         tags: ["loan-programs", `loan-program:${slug}`],

@@ -57,16 +57,7 @@ export async function SiteShell({
       ),
     },
     {
-      href: "https://x.com",
-      label: "X",
-      icon: (
-        <svg aria-hidden="true" className="h-[18px] w-[18px] fill-[#1f2430]" viewBox="0 0 24 24">
-          <path d="M18.9 3H21l-4.58 5.24L21.8 21h-5.48l-4.29-5.64L7.1 21H5l4.9-5.6L2.8 3h5.62l3.88 5.11L18.9 3Zm-1.92 16.36h1.16L7.77 4.56H6.52l10.46 14.8Z" />
-        </svg>
-      ),
-    },
-    {
-      href: "https://instagram.com",
+      href: "https://www.instagram.com/pryceless.ventures?igsh=NHdpcXBtYThhcHY5",
       label: "Instagram",
       icon: (
         <svg aria-hidden="true" className="h-[19px] w-[19px] stroke-[#1f2430]" fill="none" strokeWidth="1.8" viewBox="0 0 24 24">
@@ -77,7 +68,7 @@ export async function SiteShell({
       ),
     },
     {
-      href: "https://www.linkedin.com/company/pryceless-ventures-llc/",
+      href: "https://www.linkedin.com/company/unavailable/",
       label: "LinkedIn",
       icon: (
         <svg aria-hidden="true" className="h-[19px] w-[19px] fill-[#1f2430]" viewBox="0 0 24 24">
@@ -115,18 +106,18 @@ export async function SiteShell({
     },
   ];
   const footerHeadingClassName =
-    "!text-white text-[24px] font-bold leading-[26px] tracking-[0]";
-  const footerRuleClassName = "mt-[15px] h-px w-full bg-[#19a7df]";
+    "pv-site-footer-heading !text-white text-[24px] font-bold leading-[26px] tracking-[0]";
+  const footerRuleClassName = "pv-site-footer-rule mt-[15px] h-px w-full bg-[#19a7df]";
   const footerListLinkClassName =
-    "block border-b border-white/18 text-[14px] leading-[30px] tracking-[0] !text-white transition hover:text-[var(--pv-sand)] sm:leading-[32px]";
+    "pv-site-footer-list-link block border-b border-white/18 text-[14px] leading-[30px] tracking-[0] !text-white transition hover:text-[var(--pv-sand)] sm:leading-[32px]";
   const footerIntroTextClassName =
-    "text-[13px] font-normal leading-[22px] tracking-[0] !text-white";
+    "pv-site-footer-intro text-[13px] font-normal leading-[22px] tracking-[0] !text-white";
   const footerSmallTextClassName =
-    "text-[14px] font-normal leading-[24px] tracking-[0] !text-white";
+    "pv-site-footer-small text-[14px] font-normal leading-[24px] tracking-[0] !text-white";
   const footerContactLinkClassName =
-    "text-[14px] font-normal leading-[24px] tracking-[0] !text-white transition hover:text-[var(--pv-sand)]";
+    "pv-site-footer-contact text-[14px] font-normal leading-[24px] tracking-[0] !text-white transition hover:text-[var(--pv-sand)]";
   const footerBottomTextClassName =
-    "text-[14px] leading-[24px] tracking-[0] !text-white";
+    "pv-site-footer-bottom text-[14px] leading-[24px] tracking-[0] !text-white";
   const footerIntroLines = [
     "Pryceless Ventures builds wealth",
     "through curated real estate",
@@ -181,12 +172,12 @@ export async function SiteShell({
         className="mt-0 text-white"
         style={{ background: "rgba(0, 27, 40, 1)", color: "#ffffff" }}
       >
-        <div className="mx-auto w-full max-w-[1320px] px-4 pb-[24px] pt-[34px] sm:px-6 sm:pb-[28px] sm:pt-[38px] min-[1025px]:px-8 min-[1025px]:pb-[30px] min-[1025px]:pt-[44px] 2xl:max-w-[1560px] 2xl:px-[42px]">
-          <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[minmax(0,214px)_minmax(0,286px)_minmax(0,314px)_minmax(0,252px)] xl:items-start xl:justify-between 2xl:grid-cols-[minmax(0,244px)_minmax(0,330px)_minmax(0,372px)_minmax(0,292px)] 2xl:gap-x-[52px]">
+        <div className="pv-site-footer-shell mx-auto w-full max-w-[1320px] px-4 pb-[24px] pt-[34px] sm:px-6 sm:pb-[28px] sm:pt-[38px] min-[1025px]:px-8 min-[1025px]:pb-[30px] min-[1025px]:pt-[44px] 2xl:max-w-[1560px] 2xl:px-[42px]">
+          <div className="pv-site-footer-grid grid gap-10 md:grid-cols-2 xl:grid-cols-[minmax(0,214px)_minmax(0,286px)_minmax(0,314px)_minmax(0,252px)] xl:items-start xl:justify-between 2xl:grid-cols-[minmax(0,244px)_minmax(0,330px)_minmax(0,372px)_minmax(0,292px)] 2xl:gap-x-[52px]">
             <div className="max-w-[320px] self-start">
               <Image
                 alt="Pryceless Ventures"
-                className="-ml-[8px] -mt-[14px] mb-[14px] h-auto w-[228px] max-w-full object-contain"
+                className="pv-site-footer-logo -ml-[8px] -mt-[14px] mb-[14px] h-auto w-[228px] max-w-full object-contain"
                 sizes="228px"
                 src={footerLogo}
               />
@@ -201,7 +192,7 @@ export async function SiteShell({
                 {socialLinks.map((item) => (
                   <Link
                     aria-label={item.label}
-                    className="grid h-[33px] w-[33px] place-items-center rounded-full bg-white transition hover:-translate-y-0.5"
+                    className="pv-site-footer-social grid h-[33px] w-[33px] place-items-center rounded-full bg-white transition hover:-translate-y-0.5"
                     href={item.href}
                     key={item.label}
                   >

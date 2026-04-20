@@ -15,7 +15,7 @@ const calculatorDescriptionClassName =
 const calculatorButtonTextClassName =
   "max-w-none text-[13.5px] sm:text-[14px]";
 const calculatorTitleOffsetClassName = "mt-[26px] sm:mt-[30px]";
-const calculatorDescriptionOffsetClassName = "mt-[12px] sm:mt-[14px]";
+const calculatorDescriptionOffsetClassName = "mt-[16px] sm:mt-[18px]";
 
 const fallbackPageIntro =
   "Evaluate real estate investments using professional-grade financial models.";
@@ -50,8 +50,8 @@ export default async function CalculatorsPage() {
       title: pageItem?.title?.trim() || calculator.title,
       titleClassName:
         index >= 2
-          ? `${calculatorTitleClassName} ${calculatorTitleOffsetClassName} text-[16px] sm:text-[17px]`
-          : `${calculatorTitleClassName} ${calculatorTitleOffsetClassName}`,
+          ? `${calculatorTitleClassName} ${calculatorTitleOffsetClassName} max-w-none whitespace-nowrap text-[15px] sm:text-[16.5px]`
+          : `${calculatorTitleClassName} ${calculatorTitleOffsetClassName} max-w-none whitespace-nowrap`,
     };
   });
 

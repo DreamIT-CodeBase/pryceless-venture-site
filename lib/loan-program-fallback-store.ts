@@ -11,6 +11,12 @@ const runtimeDataDirectory =
 const fallbackStorePath = path.join(runtimeDataDirectory, "loan-program-overrides.json");
 
 type BaseLoanProgram = (typeof loanProgramSeed)[number];
+type StoredLoanProgramHighlight = string;
+type StoredLoanProgramOverviewItem = {
+  body?: string | null;
+  title: string;
+};
+const seedLoanProgramSlugs = new Set<string>(loanProgramSeed.map((program) => program.slug));
 
 type StoredLoanProgramOverride = {
   id: string;
@@ -18,6 +24,10 @@ type StoredLoanProgramOverride = {
   slug: string;
   title: string;
   lifecycleStatus: string;
+  titleTail?: string | null;
+  heroBadgeOne?: string | null;
+  heroBadgeTwo?: string | null;
+  heroBadgeThree?: string | null;
   shortDescription: string;
   fullDescription: string;
   interestRate?: string | null;
@@ -27,9 +37,16 @@ type StoredLoanProgramOverride = {
   minAmount?: string | null;
   maxAmount?: string | null;
   keyHighlights?: string | null;
+  highlightSubheadline?: string | null;
+  insightTitle?: string | null;
+  insightBody?: string | null;
   crmTag?: string | null;
   imageUrl?: string | null;
   imageAlt?: string | null;
+  highlightImageUrl?: string | null;
+  highlightImageAlt?: string | null;
+  highlights?: StoredLoanProgramHighlight[] | null;
+  overviewItems?: StoredLoanProgramOverviewItem[] | null;
   isActive: boolean;
   sortOrder: number;
   deleted?: boolean;
@@ -43,6 +60,10 @@ export type FallbackLoanProgramRecord = {
   title: string;
   slug: string;
   lifecycleStatus: string;
+  titleTail?: string | null;
+  heroBadgeOne?: string | null;
+  heroBadgeTwo?: string | null;
+  heroBadgeThree?: string | null;
   shortDescription: string;
   fullDescription: string;
   interestRate?: string | null;
@@ -52,13 +73,25 @@ export type FallbackLoanProgramRecord = {
   minAmount?: string | null;
   maxAmount?: string | null;
   keyHighlights?: string | null;
+  highlightSubheadline?: string | null;
+  insightTitle?: string | null;
+  insightBody?: string | null;
   crmTag?: string | null;
   imageUrl?: string | null;
   imageAlt?: string | null;
+  highlightImageUrl?: string | null;
+  highlightImageAlt?: string | null;
   isActive: boolean;
   sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
+  highlights: Array<{
+    highlight: string;
+  }>;
+  overviewItems: Array<{
+    body: string | null;
+    title: string;
+  }>;
   forms: Array<{
     id: string;
     formName: string;
@@ -70,9 +103,14 @@ export type FallbackLoanProgramRecord = {
 
 type UpsertFallbackLoanProgramInput = {
   id?: string;
+  baseSlug?: string | null;
   title: string;
   slug: string;
   lifecycleStatus: string;
+  titleTail?: string | null;
+  heroBadgeOne?: string | null;
+  heroBadgeTwo?: string | null;
+  heroBadgeThree?: string | null;
   shortDescription: string;
   fullDescription: string;
   interestRate?: string | null;
@@ -82,9 +120,16 @@ type UpsertFallbackLoanProgramInput = {
   minAmount?: string | null;
   maxAmount?: string | null;
   keyHighlights?: string | null;
+  highlightSubheadline?: string | null;
+  insightTitle?: string | null;
+  insightBody?: string | null;
   crmTag?: string | null;
   imageUrl?: string | null;
   imageAlt?: string | null;
+  highlightImageUrl?: string | null;
+  highlightImageAlt?: string | null;
+  highlights?: StoredLoanProgramHighlight[] | null;
+  overviewItems?: StoredLoanProgramOverviewItem[] | null;
   isActive: boolean;
   sortOrder: number;
 };
@@ -95,6 +140,37 @@ const createLocalFallbackId = () =>
   `${localIdPrefix}${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 const toStoredValue = (value?: string | null) => value ?? null;
+const normalizeStoredHighlights = (
+  value?: StoredLoanProgramHighlight[] | null,
+) => value?.map((highlight) => highlight.trim()).filter(Boolean) ?? [];
+const normalizeStoredOverviewItems = (
+  value?: StoredLoanProgramOverviewItem[] | null,
+) =>
+  value
+    ?.map((item) => ({
+      body: item.body?.trim() || null,
+      title: item.title.trim(),
+    }))
+    .filter((item) => item.title) ?? [];
+const resolveBaseSlug = ({
+  baseSlug,
+  id,
+  slug,
+}: {
+  baseSlug?: string | null;
+  id: string;
+  slug: string;
+}) => {
+  if (baseSlug) {
+    return baseSlug;
+  }
+
+  if (id.startsWith("seed-") && !id.startsWith(localIdPrefix)) {
+    return id.replace(/^seed-/, "");
+  }
+
+  return seedLoanProgramSlugs.has(slug) ? slug : null;
+};
 
 const toStoredRecord = (
   input: UpsertFallbackLoanProgramInput,
@@ -102,10 +178,11 @@ const toStoredRecord = (
 ): StoredLoanProgramOverride => {
   const nowIso = new Date().toISOString();
   const id = existing?.id ?? input.id ?? createLocalFallbackId();
-  const isExistingSeedRecord = id.startsWith("seed-") && !id.startsWith(localIdPrefix);
-  const baseSlug =
-    existing?.baseSlug ??
-    (isExistingSeedRecord ? id.replace(/^seed-/, "") : null);
+  const baseSlug = resolveBaseSlug({
+    baseSlug: existing?.baseSlug ?? input.baseSlug,
+    id,
+    slug: input.slug || existing?.slug || "",
+  });
 
   return {
     id,
@@ -113,6 +190,10 @@ const toStoredRecord = (
     slug: input.slug,
     title: input.title,
     lifecycleStatus: input.lifecycleStatus,
+    titleTail: toStoredValue(input.titleTail),
+    heroBadgeOne: toStoredValue(input.heroBadgeOne),
+    heroBadgeTwo: toStoredValue(input.heroBadgeTwo),
+    heroBadgeThree: toStoredValue(input.heroBadgeThree),
     shortDescription: input.shortDescription,
     fullDescription: input.fullDescription,
     interestRate: toStoredValue(input.interestRate),
@@ -122,9 +203,16 @@ const toStoredRecord = (
     minAmount: toStoredValue(input.minAmount),
     maxAmount: toStoredValue(input.maxAmount),
     keyHighlights: toStoredValue(input.keyHighlights),
+    highlightSubheadline: toStoredValue(input.highlightSubheadline),
+    insightTitle: toStoredValue(input.insightTitle),
+    insightBody: toStoredValue(input.insightBody),
     crmTag: toStoredValue(input.crmTag),
     imageUrl: toStoredValue(input.imageUrl),
     imageAlt: toStoredValue(input.imageAlt),
+    highlightImageUrl: toStoredValue(input.highlightImageUrl),
+    highlightImageAlt: toStoredValue(input.highlightImageAlt),
+    highlights: normalizeStoredHighlights(input.highlights),
+    overviewItems: normalizeStoredOverviewItems(input.overviewItems),
     isActive: input.isActive,
     sortOrder: input.sortOrder,
     deleted: false,
@@ -156,10 +244,14 @@ const toFallbackRecord = (
   },
 ): FallbackLoanProgramRecord => ({
   id: record.id,
-  baseSlug: record.baseSlug,
+  baseSlug: resolveBaseSlug(record),
   title: record.title,
   slug: record.slug,
   lifecycleStatus: record.lifecycleStatus,
+  titleTail: record.titleTail ?? null,
+  heroBadgeOne: record.heroBadgeOne ?? null,
+  heroBadgeTwo: record.heroBadgeTwo ?? null,
+  heroBadgeThree: record.heroBadgeThree ?? null,
   shortDescription: record.shortDescription,
   fullDescription: record.fullDescription,
   interestRate: record.interestRate ?? null,
@@ -169,16 +261,28 @@ const toFallbackRecord = (
   minAmount: record.minAmount ?? null,
   maxAmount: record.maxAmount ?? null,
   keyHighlights: record.keyHighlights ?? null,
+  highlightSubheadline: record.highlightSubheadline ?? null,
+  insightTitle: record.insightTitle ?? null,
+  insightBody: record.insightBody ?? null,
   crmTag: record.crmTag ?? null,
   imageUrl: record.imageUrl ?? null,
   imageAlt: record.imageAlt ?? null,
+  highlightImageUrl: record.highlightImageUrl ?? null,
+  highlightImageAlt: record.highlightImageAlt ?? null,
   isActive: record.isActive,
   sortOrder: record.sortOrder,
   createdAt:
     record.createdAt instanceof Date ? record.createdAt : new Date(record.createdAt),
   updatedAt:
     record.updatedAt instanceof Date ? record.updatedAt : new Date(record.updatedAt),
-  forms: buildFormsForLoanProgram(record.baseSlug),
+  highlights: normalizeStoredHighlights(record.highlights).map((highlight) => ({
+    highlight,
+  })),
+  overviewItems: normalizeStoredOverviewItems(record.overviewItems).map((item) => ({
+    body: item.body ?? null,
+    title: item.title,
+  })),
+  forms: buildFormsForLoanProgram(resolveBaseSlug(record)),
   isSeedFallback: true,
 });
 
@@ -189,6 +293,10 @@ const createSeedFallbackRecord = (program: BaseLoanProgram): FallbackLoanProgram
     title: program.title,
     slug: program.slug,
     lifecycleStatus: program.lifecycleStatus,
+    titleTail: null,
+    heroBadgeOne: null,
+    heroBadgeTwo: null,
+    heroBadgeThree: null,
     shortDescription: program.shortDescription,
     fullDescription: program.fullDescription,
     interestRate: program.interestRate ?? null,
@@ -198,9 +306,20 @@ const createSeedFallbackRecord = (program: BaseLoanProgram): FallbackLoanProgram
     minAmount: program.minAmount ?? null,
     maxAmount: program.maxAmount ?? null,
     keyHighlights: program.keyHighlights ?? null,
+    highlightSubheadline: null,
+    insightTitle: null,
+    insightBody: null,
     crmTag: program.crmTag ?? null,
     imageUrl: program.imageUrl ?? null,
     imageAlt: program.imageAlt ?? null,
+    highlightImageUrl: null,
+    highlightImageAlt: null,
+    highlights:
+      program.keyHighlights
+        ?.split(/\r?\n/)
+        .map((highlight) => highlight.trim())
+        .filter(Boolean) ?? [],
+    overviewItems: [],
     isActive: program.isActive,
     sortOrder: program.sortOrder,
     createdAt: seedFallbackTimestamp,
@@ -244,27 +363,43 @@ const sortFallbackLoanPrograms = (programs: FallbackLoanProgramRecord[]) =>
 
 export const getFallbackLoanPrograms = async (): Promise<FallbackLoanProgramRecord[]> => {
   const overrides = await readFallbackStore();
-  const overrideMap = new Map(overrides.map((record) => [record.id, record]));
+  const remainingOverrides = [...overrides].sort(
+    (left, right) =>
+      new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
+  );
   const mergedPrograms: FallbackLoanProgramRecord[] = [];
 
   for (const program of loanProgramSeed) {
-    const id = `seed-${program.slug}`;
-    const override = overrideMap.get(id);
+    const override = remainingOverrides.find((record) => {
+      const recordBaseSlug = resolveBaseSlug(record);
+      return (
+        record.id === `seed-${program.slug}` ||
+        recordBaseSlug === program.slug ||
+        record.slug === program.slug
+      );
+    });
 
     if (override?.deleted) {
+      const overrideIndex = remainingOverrides.findIndex((record) => record.id === override.id);
+      if (overrideIndex >= 0) {
+        remainingOverrides.splice(overrideIndex, 1);
+      }
       continue;
     }
 
     if (override) {
       mergedPrograms.push(toFallbackRecord(override));
-      overrideMap.delete(id);
+      const overrideIndex = remainingOverrides.findIndex((record) => record.id === override.id);
+      if (overrideIndex >= 0) {
+        remainingOverrides.splice(overrideIndex, 1);
+      }
       continue;
     }
 
     mergedPrograms.push(createSeedFallbackRecord(program));
   }
 
-  for (const override of overrideMap.values()) {
+  for (const override of remainingOverrides) {
     if (override.deleted) {
       continue;
     }
@@ -283,6 +418,7 @@ export const getFallbackLoanProgram = async (idOrSlug: string) => {
       (program) =>
         program.id === idOrSlug ||
         program.slug === idOrSlug ||
+        program.baseSlug === idOrSlug ||
         (program.baseSlug ? `seed-${program.baseSlug}` === idOrSlug : false),
     ) ?? null
   );
@@ -370,6 +506,10 @@ export const deleteFallbackLoanProgram = async (id: string) => {
       slug: existing.slug,
       title: existing.title,
       lifecycleStatus: existing.lifecycleStatus,
+      titleTail: existing.titleTail ?? null,
+      heroBadgeOne: existing.heroBadgeOne ?? null,
+      heroBadgeTwo: existing.heroBadgeTwo ?? null,
+      heroBadgeThree: existing.heroBadgeThree ?? null,
       shortDescription: existing.shortDescription,
       fullDescription: existing.fullDescription,
       interestRate: existing.interestRate ?? null,
@@ -379,9 +519,16 @@ export const deleteFallbackLoanProgram = async (id: string) => {
       minAmount: existing.minAmount ?? null,
       maxAmount: existing.maxAmount ?? null,
       keyHighlights: existing.keyHighlights ?? null,
+      highlightSubheadline: existing.highlightSubheadline ?? null,
+      insightTitle: existing.insightTitle ?? null,
+      insightBody: existing.insightBody ?? null,
       crmTag: existing.crmTag ?? null,
       imageUrl: existing.imageUrl ?? null,
       imageAlt: existing.imageAlt ?? null,
+      highlightImageUrl: existing.highlightImageUrl ?? null,
+      highlightImageAlt: existing.highlightImageAlt ?? null,
+      highlights: existing.highlights.map((item) => item.highlight),
+      overviewItems: existing.overviewItems,
       isActive: existing.isActive,
       sortOrder: existing.sortOrder,
       deleted: true,

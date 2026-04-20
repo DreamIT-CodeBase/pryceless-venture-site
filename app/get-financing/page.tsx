@@ -40,6 +40,21 @@ const splitHighlights = (value: string | null | undefined) =>
     .map((item) => item.trim())
     .filter(Boolean);
 
+const splitTrailingWord = (value: string, trailingWord: string) => {
+  const trimmedValue = value.trim();
+  const trailingPattern = new RegExp(`^(.*)\\s+(${trailingWord})$`, "i");
+  const match = trimmedValue.match(trailingPattern);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    leading: match[1],
+    trailing: match[2],
+  };
+};
+
 const getPageGroupItems = (
   page: Awaited<ReturnType<typeof getSingletonPage>>,
   groupKey: string,
@@ -50,6 +65,8 @@ const getPageGroupItem = (
   groupKey: string,
   index = 0,
 ) => getPageGroupItems(page, groupKey)[index] ?? null;
+const lenderRedirectFormUrl =
+  "https://media.prycelessventures.com/widget/form/ZiMxWHPiHAmTZtx8dNCC";
 
 export default async function GetFinancingPage() {
   const [page, loanPrograms] = await Promise.all([
@@ -67,11 +84,18 @@ export default async function GetFinancingPage() {
     getDefaultLoanProgramImage(featuredLoanProgram?.slug) ||
     defaultLoanProgramImages[0];
   const cardCtaLabel = page?.ctaLabel ?? "View Details";
+  const overviewSectionTitle =
+    getPageGroupItem(page, "overview_section_title")?.title ?? "Loan Program Overview";
   const snapshotCard = getPageGroupItem(page, "snapshot_card");
   const snapshotCountLabels = getPageGroupItems(page, "snapshot_count_labels")
     .map((item) => item.title)
     .filter(Boolean);
   const programsSectionContent = getPageGroupItem(page, "programs_section_content");
+  const programsSectionTitle = programsSectionContent?.title ?? pageTitle;
+  const programsSectionTitleSplit = splitTrailingWord(programsSectionTitle, "Strategy");
+  const lenderSectionEyebrow =
+    getPageGroupItem(page, "lender_section_eyebrow")?.title ?? "For Lenders";
+  const lenderSectionContent = getPageGroupItem(page, "lender_section_content");
   const cardStatLabels = getPageGroupItems(page, "card_stat_labels")
     .map((item) => item.title)
     .filter(Boolean);
@@ -87,17 +111,18 @@ export default async function GetFinancingPage() {
         <PageSectionHero
           currentLabel={pageTitle}
           intro={page?.intro ?? ""}
+          titleClassName="pv-get-financing-hero-title min-[1025px]:text-[28px] min-[1025px]:leading-[38px] 2xl:max-w-[980px] 2xl:text-[44px] 2xl:leading-[1.05]"
           title={pageTitle}
         />
 
         <section className="bg-white px-4 pb-[34px] pt-[48px] sm:px-6 lg:px-[126px] lg:pb-[42px] lg:pt-[56px] 2xl:px-0 2xl:pb-[54px] 2xl:pt-[72px]">
           <div className="mx-auto w-full 2xl:max-w-[1760px] 2xl:px-[164px]">
-            <div className="mx-auto flex w-full flex-col items-center text-center 2xl:mx-0 2xl:max-w-[760px] 2xl:items-start 2xl:text-left">
-              <p className="text-center text-[15px] font-normal leading-[22px] tracking-[0] text-[var(--pv-sand)] lg:text-[16px] lg:leading-[24px] 2xl:text-left">
+            <div className="mx-auto flex w-full max-w-[760px] flex-col items-center text-center lg:max-w-[1080px] 2xl:max-w-[1320px]">
+              <p className="text-center text-[15px] font-normal leading-[22px] tracking-[0] text-[var(--pv-sand)] lg:text-[16px] lg:leading-[24px]">
                 {getPageGroupItem(page, "overview_eyebrow")?.title ?? "Opportunity Overview"}
               </p>
-              <h2 className="mt-[8px] max-w-[551px] text-center text-[32px] font-bold leading-[1.08] tracking-[-0.045em] text-[#0f172a] sm:text-[42px] lg:w-[551px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0] 2xl:w-auto 2xl:max-w-[720px] 2xl:text-left 2xl:text-[42px] 2xl:leading-[1.08] 2xl:tracking-[-0.04em]">
-                {pageTitle}
+              <h2 className="pv-get-financing-overview-title mt-[8px] w-full max-w-[720px] text-center text-[32px] font-bold leading-[1.08] tracking-[-0.045em] text-[#0f172a] sm:text-[40px] lg:max-w-none lg:whitespace-nowrap lg:text-[29px] lg:leading-[38px] lg:tracking-[0] 2xl:max-w-none 2xl:text-[38px] 2xl:leading-[1.08] 2xl:tracking-[-0.04em]">
+                {overviewSectionTitle}
               </h2>
             </div>
 
@@ -144,14 +169,21 @@ export default async function GetFinancingPage() {
                   {getPageGroupItem(page, "programs_section_eyebrow")?.title ?? "Loan Programs"}
                 </p>
                 <h2
-                  className="mt-[8px] max-w-[489px] text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0] 2xl:max-w-[720px] 2xl:text-[42px] 2xl:leading-[1.08] 2xl:tracking-[-0.04em]"
+                  className="pv-get-financing-programs-title mt-[8px] max-w-[489px] text-[32px] font-bold leading-[1.08] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] lg:max-w-none lg:text-[31.5px] lg:leading-[42px] lg:tracking-[0] 2xl:max-w-none 2xl:text-[42px] 2xl:leading-[1.08] 2xl:tracking-[-0.04em]"
                   id="loan-programs"
                 >
-                  {programsSectionContent?.title ?? pageTitle}
+                  {programsSectionTitleSplit ? (
+                    <>
+                      <span className="block lg:whitespace-nowrap">{programsSectionTitleSplit.leading}</span>
+                      <span className="block">{programsSectionTitleSplit.trailing}</span>
+                    </>
+                  ) : (
+                    programsSectionTitle
+                  )}
                 </h2>
               </div>
               {programsSectionContent?.body ? (
-                <p className="mt-4 max-w-[760px] text-[16px] leading-[1.85] text-slate-600">
+                <p className="pv-get-financing-programs-copy mt-4 max-w-[760px] text-[16px] leading-[1.85] text-slate-600">
                   {programsSectionContent.body}
                 </p>
               ) : null}
@@ -172,6 +204,7 @@ export default async function GetFinancingPage() {
                       <OpportunityCard
                         bulletItems={splitHighlights(program.keyHighlights)}
                         ctaLabel={cardCtaLabel}
+                        compactDetails
                         footer={amountRange ? { label: cardStatLabels[2] ?? "Loan Size", value: amountRange } : null}
                         href={`/get-financing/${program.slug}`}
                         image={program.imageUrl || getDefaultLoanProgramImage(program.slug) || defaultLoanProgramImages[0]}
@@ -200,6 +233,8 @@ export default async function GetFinancingPage() {
             </div>
           </div>
         </section>
+
+        
       </div>
     </SiteShell>
   );

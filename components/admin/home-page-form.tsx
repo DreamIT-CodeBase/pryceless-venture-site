@@ -4,6 +4,7 @@ import { autosaveHomePageDraft, saveHomePage } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import { HomeTestimonialsEditor } from "@/components/admin/home-testimonials-editor";
 import { ImageUrlField } from "@/components/admin/image-url-field";
+import { SubmitButton } from "@/components/admin/submit-button";
 
 export function HomePageForm({ homePage }: { homePage: any }) {
   const aboutSectionDefaults = {
@@ -90,7 +91,7 @@ export function HomePageForm({ homePage }: { homePage: any }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit">Save Home Page</button>
+        <SubmitButton className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" >Save Home Page</SubmitButton>
         <Link className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700" href="/admin/pages">Back to Pages</Link>
       </div>
     </AdminAutosaveForm>

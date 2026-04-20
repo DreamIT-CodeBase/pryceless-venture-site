@@ -10,6 +10,7 @@ import {
   parsePropertyDetailContent,
 } from "@/lib/property-detail-content";
 import { getPropertyEditorStatus, propertyStatusOptions } from "@/lib/property-portfolio";
+import { SubmitButton } from "@/components/admin/submit-button";
 
 type PropertyFormProps = {
   property?: any;
@@ -337,15 +338,15 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
         />
 
         <div className="flex flex-wrap items-center gap-3">
-          <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="draft">
+          <SubmitButton className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent"  value="draft">
             Save Draft
-          </button>
-          <button className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="publish">
+          </SubmitButton>
+          <SubmitButton className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white" name="intent"  value="publish">
             Publish
-          </button>
-          <button className="rounded-full border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800" name="intent" type="submit" value="archive">
+          </SubmitButton>
+          <SubmitButton className="rounded-full border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800" name="intent"  value="archive">
             Archive
-          </button>
+          </SubmitButton>
           <Link className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700" href="/admin/properties">
             Back to List
           </Link>
@@ -355,9 +356,9 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
       {property?.id ? (
         <form action={deleteProperty}>
           <input name="recordId" type="hidden" value={property.id} />
-          <button className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700" type="submit">
+          <SubmitButton className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700" >
             Delete Property
-          </button>
+          </SubmitButton>
         </form>
       ) : null}
     </div>

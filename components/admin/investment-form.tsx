@@ -3,6 +3,7 @@ import Link from "next/link";
 import { autosaveInvestmentDraft, deleteInvestment, saveInvestment } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import { ImageManager } from "@/components/admin/image-manager";
+import { SubmitButton } from "@/components/admin/submit-button";
 import {
   investmentAssetTypeOptions,
   investmentStatusOptions,
@@ -105,9 +106,9 @@ export function InvestmentForm({ investment, forms, errorMessage }: InvestmentFo
         />
 
         <div className="flex flex-wrap items-center gap-3">
-          <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="draft">Save Draft</button>
-          <button className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="publish">Publish</button>
-          <button className="rounded-full border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800" name="intent" type="submit" value="archive">Archive</button>
+          <SubmitButton className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent"  value="draft">Save Draft</SubmitButton>
+          <SubmitButton className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white" name="intent"  value="publish">Publish</SubmitButton>
+          <SubmitButton className="rounded-full border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800" name="intent"  value="archive">Archive</SubmitButton>
           <Link className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700" href="/admin/investments">Back to List</Link>
         </div>
       </AdminAutosaveForm>
@@ -115,9 +116,9 @@ export function InvestmentForm({ investment, forms, errorMessage }: InvestmentFo
       {investment?.id ? (
         <form action={deleteInvestment}>
           <input name="recordId" type="hidden" value={investment.id} />
-          <button className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700" type="submit">
+          <SubmitButton className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700" >
             Delete Investment
-          </button>
+          </SubmitButton>
         </form>
       ) : null}
     </div>

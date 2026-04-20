@@ -7,6 +7,7 @@ import {
 } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import { ImageUrlField } from "@/components/admin/image-url-field";
+import { SubmitButton } from "@/components/admin/submit-button";
 
 const formatDateInputValue = (value: Date | string | null | undefined) => {
   if (!value) {
@@ -143,15 +144,15 @@ export function BlogPostForm({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="draft">
+          <SubmitButton className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent"  value="draft">
             Save Draft
-          </button>
-          <button className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="publish">
+          </SubmitButton>
+          <SubmitButton className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white" name="intent"  value="publish">
             Publish
-          </button>
-          <button className="rounded-full border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800" name="intent" type="submit" value="archive">
+          </SubmitButton>
+          <SubmitButton className="rounded-full border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800" name="intent"  value="archive">
             Archive
-          </button>
+          </SubmitButton>
           <Link className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700" href="/admin/blogs">
             Back to List
           </Link>
@@ -161,9 +162,9 @@ export function BlogPostForm({
       {blogPost?.id ? (
         <form action={deleteBlogPost}>
           <input name="recordId" type="hidden" value={blogPost.id} />
-          <button className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700" type="submit">
+          <SubmitButton className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700" >
             Delete Blog Post
-          </button>
+          </SubmitButton>
         </form>
       ) : null}
     </div>

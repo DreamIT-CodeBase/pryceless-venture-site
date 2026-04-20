@@ -1,7 +1,9 @@
 import Link from "next/link";
 
+import { deleteFormDefinition } from "@/app/admin/actions";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminStatusPill } from "@/components/admin/status-pill";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { requireAdminSession } from "@/lib/authz";
 import { getFormsAdmin } from "@/lib/data/admin";
 import { titleCase } from "@/lib/utils";
@@ -34,6 +36,7 @@ export default async function AdminFormsPage() {
               <th className="px-6 py-4 font-medium">Destination</th>
               <th className="px-6 py-4 font-medium">Active</th>
               <th className="px-6 py-4 font-medium">Submissions</th>
+              <th className="px-6 py-4 text-right font-medium">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100/80">
@@ -44,6 +47,22 @@ export default async function AdminFormsPage() {
                 <td className="px-6 py-4"><AdminStatusPill value={titleCase(form.destination)} /></td>
                 <td className="px-6 py-4"><AdminStatusPill value={form.isActive ? "Active" : "Inactive"} /></td>
                 <td className="px-6 py-4 text-slate-600">{form._count.submissions}</td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-end gap-2">
+                    <Link
+                      className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
+                      href={`/admin/forms/${form.id}`}
+                    >
+                      Edit
+                    </Link>
+                    <form action={deleteFormDefinition}>
+                      <input name="recordId" type="hidden" value={form.id} />
+                      <SubmitButton className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-100">
+                        Delete
+                      </SubmitButton>
+                    </form>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

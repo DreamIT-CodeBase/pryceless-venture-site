@@ -18,7 +18,7 @@ export default async function AdminPagesPage() {
           <p className="mt-2 text-sm text-slate-600">Hero, metrics, segments, platform cards, portfolio, case highlights, and testimonials.</p>
         </Link>
         {pages.map((page) => (
-          <Link className="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-lg shadow-slate-200/50" href={`/admin/pages/${page.key}`} key={page.id}>
+          <Link className="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-lg shadow-slate-200/50" href={`/admin/pages/${page.key}`} key={page.key}>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">{page.routePath}</p>
             <h2 className="mt-3 text-2xl font-semibold text-slate-950">{singletonPageLabels[page.key]}</h2>
             <p className="mt-2 text-sm text-slate-600">{page.pageTitle}</p>

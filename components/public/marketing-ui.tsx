@@ -394,7 +394,7 @@ export function TestimonialCard({
     .join("");
 
   return (
-    <article className="group relative flex min-h-[264px] w-full max-w-[380px] flex-col rounded-[22px] border border-[#d9e5f0] bg-white/92 px-[20px] pb-[20px] pt-[18px] shadow-[0_18px_38px_rgba(15,23,42,0.08)] pv-glass-surface pv-interactive-card [--pv-hover-card-shadow:0_24px_48px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color,background-color] duration-300 hover:border-[#a9d1f2] lg:h-[236px] lg:w-[292px] lg:max-w-none lg:rounded-[15px] lg:border-[#cfcfcf] lg:bg-white lg:px-[18px] lg:pb-[17px] lg:pt-[14px] lg:shadow-none 2xl:h-[258px] 2xl:w-[360px] 2xl:px-[24px] 2xl:pb-[20px] 2xl:pt-[18px]">
+    <article className="group relative flex h-full w-full max-w-[380px] flex-col rounded-[22px] border border-[#d9e5f0] bg-white/92 px-[20px] pb-[32px] pt-[18px] shadow-[0_18px_38px_rgba(15,23,42,0.08)] pv-glass-surface pv-interactive-card [--pv-hover-card-shadow:0_24px_48px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color,background-color] duration-300 hover:border-[#a9d1f2] lg:w-[292px] lg:max-w-none lg:rounded-[15px] lg:border-[#cfcfcf] lg:bg-white lg:px-[18px] lg:pb-[28px] lg:pt-[14px] lg:shadow-none 2xl:w-[360px] 2xl:px-[24px] 2xl:pb-[32px] 2xl:pt-[18px]">
       <span
         aria-hidden="true"
         className="absolute right-[18px] top-[14px] text-[42px] font-bold leading-none tracking-[-0.16em] text-[#2496f0] lg:right-[17px] lg:top-[11px] lg:text-[36px]"
@@ -421,7 +421,7 @@ export function TestimonialCard({
           )}
         </div>
 
-        <div className="pt-[14px] lg:pt-[13px]">
+        <div className="pt-[14px] text-center lg:pt-[13px]">
           <h3 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[#252525] lg:text-[15px]">
             - {name}
           </h3>
@@ -431,7 +431,7 @@ export function TestimonialCard({
         </div>
       </div>
 
-      <p className="mt-[30px] max-w-none text-[14px] font-normal leading-[1.7] tracking-[0] text-[#5b6472] lg:mt-[30px] lg:max-w-[246px] lg:text-[12px] lg:leading-[1.58] lg:text-[#676767]">
+      <p className="mx-auto mt-[30px] max-w-none text-center text-[14px] font-normal leading-[1.7] tracking-[0] text-[#5b6472] lg:mt-[30px] lg:max-w-[246px] lg:text-[12px] lg:leading-[1.58] lg:text-[#676767]">
         &ldquo;{normalizedQuote}&rdquo;
       </p>
     </article>

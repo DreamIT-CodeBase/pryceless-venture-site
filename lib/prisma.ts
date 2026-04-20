@@ -23,10 +23,10 @@ const getPrismaClient = (property?: PropertyKey) => {
     !property.startsWith("$") &&
     !Reflect.has(client as unknown as object, property)
   ) {
-    const refreshedClient = replacePrismaClient();
-    if (Reflect.has(refreshedClient as unknown as object, property)) {
-      return refreshedClient;
-    }
+    // Always return the refreshed client — with driver adapters (e.g. MSSQL),
+    // model delegates may not be visible via Reflect.has on the prototype chain,
+    // so we skip the secondary Reflect.has check and always prefer the newer client.
+    return replacePrismaClient();
   }
 
   return client;

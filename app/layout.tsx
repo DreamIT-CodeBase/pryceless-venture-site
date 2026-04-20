@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import Script from "next/script";
 import type { ReactNode } from "react";
 
 import "./globals.css";
@@ -27,8 +28,24 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html data-scroll-behavior="smooth" lang="en">
-      <body className={`${poppins.variable} antialiased`}>{children}</body>
+    <html className={poppins.variable} data-scroll-behavior="smooth" lang="en">
+      <body className="antialiased">
+        <Script id="pv-browser-flag" strategy="beforeInteractive">
+          {`
+            (function () {
+              var ua = navigator.userAgent || "";
+              var isEdge = /Edg\\//.test(ua);
+              var isChrome = !isEdge && /Chrome\\//.test(ua) && !/OPR\\//.test(ua);
+              if (isChrome) {
+                document.documentElement.setAttribute("data-browser", "chrome");
+              } else if (isEdge) {
+                document.documentElement.setAttribute("data-browser", "edge");
+              }
+            })();
+          `}
+        </Script>
+        {children}
+      </body>
     </html>
   );
 }

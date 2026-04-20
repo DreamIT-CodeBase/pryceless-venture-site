@@ -8,6 +8,7 @@ import {
 type OpportunityCardProps = {
   bulletItems?: string[];
   ctaLabel: string;
+  compactDetails?: boolean;
   footer?: { label: string; value: string } | null;
   href: string;
   image: StaticImageData | string;
@@ -63,6 +64,7 @@ function OpportunityMetaIcon({ kind }: { kind: NonNullable<OpportunityCardProps[
 export function OpportunityCard({
   bulletItems = [],
   ctaLabel,
+  compactDetails = false,
   footer,
   href,
   image,
@@ -148,21 +150,37 @@ export function OpportunityCard({
 
         <div className="mt-auto">
           {visibleStats.length ? (
-            <div className="mt-[12px] grid border-y border-[#d7d7d7] text-left sm:grid-cols-2 sm:min-h-[88px]">
+            <div
+              className={`mt-[12px] grid border-y border-[#d7d7d7] text-left sm:grid-cols-2 ${
+                compactDetails ? "sm:min-h-[70px]" : "sm:min-h-[88px]"
+              }`}
+            >
               {visibleStats.map((item, index) => (
                 <div
-                  className={`flex min-h-[74px] flex-col justify-start px-[13px] py-[9px] sm:min-h-[88px] ${
+                  className={`flex flex-col justify-start px-[13px] ${
+                    compactDetails ? "min-h-[58px] py-[7px] sm:min-h-[70px]" : "min-h-[74px] py-[9px] sm:min-h-[88px]"
+                  } ${
                     index === 0 && visibleStats.length > 1
                       ? "border-b border-[#d7d7d7] sm:border-b-0 sm:border-r"
                       : ""
                   }`}
                   key={`${title}-stat-${item.label}`}
                 >
-                  <p className="text-[11px] leading-[16px] text-[#6b7280] min-[1400px]:text-[11.5px]">
+                  <p
+                    className={`text-[#6b7280] ${
+                      compactDetails
+                        ? "text-[10px] leading-[14px] min-[1400px]:text-[10.5px]"
+                        : "text-[11px] leading-[16px] min-[1400px]:text-[11.5px]"
+                    }`}
+                  >
                     {item.label}
                   </p>
                   <p
-                    className="mt-[2px] text-[13px] font-semibold leading-[18px] text-[#30343b] min-[1400px]:text-[14px]"
+                    className={`font-semibold text-[#30343b] ${
+                      compactDetails
+                        ? "mt-[1px] text-[12px] leading-[16px] min-[1400px]:text-[13px]"
+                        : "mt-[2px] text-[13px] leading-[18px] min-[1400px]:text-[14px]"
+                    }`}
                     style={{
                       WebkitBoxOrient: "vertical",
                       WebkitLineClamp: 2,
@@ -178,7 +196,13 @@ export function OpportunityCard({
           ) : null}
 
           {footer ? (
-            <div className="mt-[10px] min-h-[16px] text-left text-[11px] leading-[16px] text-[#6b7280] min-[1400px]:min-h-[18px] min-[1400px]:text-[11.5px]">
+            <div
+              className={`text-left text-[#6b7280] ${
+                compactDetails
+                  ? "mt-[8px] min-h-[14px] text-[10px] leading-[14px] min-[1400px]:min-h-[16px] min-[1400px]:text-[10.5px]"
+                  : "mt-[10px] min-h-[16px] text-[11px] leading-[16px] min-[1400px]:min-h-[18px] min-[1400px]:text-[11.5px]"
+              }`}
+            >
               <span className="font-medium text-[#30343b]">{footer.label}:</span> {footer.value}
             </div>
           ) : null}

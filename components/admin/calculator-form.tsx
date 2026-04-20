@@ -3,6 +3,7 @@ import Link from "next/link";
 import { autosaveCalculatorDraft, deleteCalculator, saveCalculator } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import { calculatorTypeOptions } from "@/lib/content-blueprint";
+import { SubmitButton } from "@/components/admin/submit-button";
 
 export function CalculatorForm({
   calculator,
@@ -41,9 +42,9 @@ export function CalculatorForm({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="draft">Save Draft</button>
-          <button className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="publish">Publish</button>
-          <button className="rounded-full border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800" name="intent" type="submit" value="archive">Archive</button>
+          <SubmitButton className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent"  value="draft">Save Draft</SubmitButton>
+          <SubmitButton className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white" name="intent"  value="publish">Publish</SubmitButton>
+          <SubmitButton className="rounded-full border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800" name="intent"  value="archive">Archive</SubmitButton>
           <Link className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700" href="/admin/calculators">Back to List</Link>
         </div>
       </AdminAutosaveForm>
@@ -51,7 +52,7 @@ export function CalculatorForm({
       {calculator?.id ? (
         <form action={deleteCalculator}>
           <input name="recordId" type="hidden" value={calculator.id} />
-          <button className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700" type="submit">Delete Calculator</button>
+          <SubmitButton className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700" >Delete Calculator</SubmitButton>
         </form>
       ) : null}
     </div>

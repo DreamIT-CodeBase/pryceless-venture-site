@@ -6,6 +6,7 @@ import { AdminStatusPill } from "@/components/admin/status-pill";
 import { requireAdminSession } from "@/lib/authz";
 import { getLoanProgramsAdmin } from "@/lib/data/admin";
 import { formatDateTime } from "@/lib/utils";
+import { SubmitButton } from "@/components/admin/submit-button";
 
 export default async function AdminLoanProgramsPage() {
   await requireAdminSession();
@@ -69,12 +70,12 @@ export default async function AdminLoanProgramsPage() {
                         </Link>
                         <form action={deleteLoanProgram}>
                           <input name="recordId" type="hidden" value={program.id} />
-                          <button
+                          <SubmitButton
                             className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-100"
-                            type="submit"
+                            
                           >
                             Delete
-                          </button>
+                          </SubmitButton>
                         </form>
                     </div>
                   </td>

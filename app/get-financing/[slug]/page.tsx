@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { PublicForm } from "@/components/forms/public-form";
 import {
@@ -28,23 +28,6 @@ const splitParagraphs = (value: string | null | undefined) =>
 
 const normalizeContentLine = (value: string | null | undefined) =>
   String(value ?? "").replace(/\s+/g, " ").trim();
-
-const getUniqueContentLines = (values: Array<string | null | undefined>) => {
-  const seen = new Set<string>();
-
-  return values.reduce<string[]>((items, value) => {
-    const normalized = normalizeContentLine(value);
-    const dedupeKey = normalized.toLowerCase();
-
-    if (!normalized || seen.has(dedupeKey)) {
-      return items;
-    }
-
-    seen.add(dedupeKey);
-    items.push(normalized);
-    return items;
-  }, []);
-};
 
 const splitLeadLine = (value: string) => {
   const normalized = normalizeContentLine(value);
@@ -83,191 +66,15 @@ const splitLeadLine = (value: string) => {
   };
 };
 
-const formatAmountRange = (minAmount: string | null | undefined, maxAmount: string | null | undefined) => {
-  if (minAmount && maxAmount) {
-    return `${minAmount} - ${maxAmount}`;
-  }
-
-  return minAmount || maxAmount || null;
-};
-
 const replaceProgramToken = (value: string | null | undefined, programTitle: string) =>
   String(value ?? "").replace(/\{program\}/gi, programTitle);
 
-const matchesNormalized = (value: string | null | undefined, target: string) =>
-  normalizeContentLine(value).toLowerCase() === normalizeContentLine(target).toLowerCase();
-
-const isFixFlipLoanProgram = (slug: string, title: string) =>
-  slug === "fix-flip" || /fix\s*&\s*flip/i.test(title);
-
-const resolveHeroHeadingTail = (value: string | null | undefined, isFixFlip: boolean) => {
+const getCmsText = (value: string | null | undefined) => {
   const normalized = normalizeContentLine(value);
-
-  if (!normalized || matchesNormalized(normalized, "Built for Real Estate Operators")) {
-    return isFixFlip ? "for Active Investors" : "for Real Estate Investors";
-  }
-
-  return normalized;
+  return normalized || null;
 };
 
-const resolveHeroDescription = (value: string | null | undefined, isFixFlip: boolean) => {
-  const normalized = normalizeContentLine(value);
-
-  if (
-    isFixFlip &&
-    (!normalized ||
-      matchesNormalized(
-        normalized,
-        "Fast-turn capital to acquire, renovate, and reposition value-add residential deals with confidence.",
-      ))
-  ) {
-    return "Fast capital for residential acquisition, rehab, and resale.";
-  }
-
-  return normalized;
-};
-
-const resolveHeroFeatureCardText = (value: string | null | undefined) => {
-  const normalized = normalizeContentLine(value);
-
-  if (!normalized) {
-    return "";
-  }
-
-  if (matchesNormalized(normalized, "Quick draws with photo inspection")) {
-    return "Fast draw requests";
-  }
-
-  if (matchesNormalized(normalized, "Close and fund with speed and clarity")) {
-    return "Quick closings";
-  }
-
-  if (matchesNormalized(normalized, "Leverage matched to deal execution")) {
-    return "Rehab-ready leverage";
-  }
-
-  return normalized;
-};
-
-const resolveHighlightSectionTitle = (
-  value: string | null | undefined,
-  programTitle: string,
-  isFixFlip: boolean,
-) => {
-  const normalized = normalizeContentLine(replaceProgramToken(value, programTitle));
-
-  if (!normalized || matchesNormalized(normalized, `Why borrowers choose ${programTitle}`)) {
-    return isFixFlip ? `Why investors choose ${programTitle}` : `Why borrowers choose ${programTitle}`;
-  }
-
-  return normalized;
-};
-
-const resolveHighlightSectionBody = (
-  value: string | null | undefined,
-  fallback: string | null | undefined,
-  isFixFlip: boolean,
-) => {
-  const normalized = normalizeContentLine(value);
-
-  if (
-    !normalized ||
-    matchesNormalized(
-      normalized,
-      "Use this section to understand the structure, speed, and underwriting advantages that make this program a strong fit for real estate execution.",
-    )
-  ) {
-    if (isFixFlip) {
-      return "Built for quick purchases, rehab draws, and exit timelines that reward decisive execution.";
-    }
-
-    return normalizeContentLine(fallback) || "Review the structure, speed, and underwriting fit before you apply.";
-  }
-
-  return normalized;
-};
-
-const resolveTermsSectionTitle = (value: string | null | undefined) => {
-  const normalized = normalizeContentLine(value);
-
-  if (!normalized || matchesNormalized(normalized, "Core underwriting details")) {
-    return "Core underwriting snapshot";
-  }
-
-  return normalized;
-};
-
-const resolveTermsSectionBody = (value: string | null | undefined) => {
-  const normalized = normalizeContentLine(value);
-
-  if (
-    !normalized ||
-    matchesNormalized(normalized, "Review the high-level structure before moving into the application flow.")
-  ) {
-    return "Key pricing, leverage, and loan size details to review before you apply.";
-  }
-
-  return normalized;
-};
-
-const buildProgramHighlights = ({
-  amountRange,
-  fees,
-  highlights,
-  isFixFlip,
-  loanTerm,
-  ltv,
-}: {
-  amountRange: string | null;
-  fees: string | null | undefined;
-  highlights: string[];
-  isFixFlip: boolean;
-  loanTerm: string | null | undefined;
-  ltv: string | null | undefined;
-}) =>
-  getUniqueContentLines([
-    ...(isFixFlip
-      ? [
-          "One structure can cover acquisition and rehab under a single execution plan.",
-          "Draw-based disbursements help match capital to renovation progress.",
-          "Built for investors targeting a clean sale or refinance exit.",
-        ]
-      : []),
-    ...highlights,
-    ltv ? `${ltv} available for purchase and rehab execution.` : null,
-    loanTerm ? `${loanTerm} terms built for resale or refinance timing.` : null,
-    amountRange ? `${amountRange} loan sizes for both first projects and repeat operators.` : null,
-    fees ? `${fees} with clear upfront pricing.` : null,
-  ]).slice(0, 6);
-
-const getUnderwritingInsight = ({
-  amountRange,
-  isFixFlip,
-  loanTerm,
-  ltv,
-}: {
-  amountRange: string | null;
-  isFixFlip: boolean;
-  loanTerm: string | null | undefined;
-  ltv: string | null | undefined;
-}) => {
-  if (isFixFlip) {
-    return {
-      body:
-        "Best for investors who need a quick close, staged rehab draws, and enough runway to sell or refinance after the work is complete.",
-      eyebrow: "Execution Fit",
-      title: "Built for purchase + rehab execution",
-    };
-  }
-
-  return {
-    body: `Use ${ltv ?? "available leverage"}, ${loanTerm ?? "the posted term"}, and ${amountRange ?? "the loan size range"} together to confirm the structure matches your deal plan.`,
-    eyebrow: "How to Use This",
-    title: "Review fit before you apply",
-  };
-};
-
-const FIX_FLIP_HERO_IMAGE_CLIP_PATH =
+const LOAN_PROGRAM_HERO_IMAGE_CLIP_PATH =
   "polygon(0 42%, 0 100%, 74% 100%, 74% 66%, 100% 66%, 100% 0, 18% 0, 18% 42%)";
 
 function LoanHeroFeatureIcon({
@@ -348,16 +155,23 @@ export default async function LoanProgramDetailPage({
     notFound();
   }
 
+  if (loanProgram.slug !== slug) {
+    redirect(`/get-financing/${loanProgram.slug}`);
+  }
+
   const paragraphs = splitParagraphs(loanProgram.fullDescription);
-  const highlights = splitParagraphs(loanProgram.keyHighlights);
+  const highlights = loanProgram.highlights
+    .map((item) => normalizeContentLine(item.highlight))
+    .filter(Boolean);
   const form = loanProgram.forms[0] ?? null;
-  const isFixFlip = isFixFlipLoanProgram(loanProgram.slug, loanProgram.title);
   const heroMetricLabels = getPageGroupItems(page, "hero_metric_labels").map((item) => item.title);
   const termDetailLabels = getPageGroupItems(page, "term_detail_labels").map((item) => item.title);
   const highlightSectionContent = getPageGroupItem(page, "highlights_section_content");
   const termsSectionContent = getPageGroupItem(page, "terms_section_content");
   const applicationFallbackAction = getPageGroupItem(page, "application_fallback_action");
   const applicationFallbackContent = getPageGroupItem(page, "application_fallback_content");
+  const pageCtaLabel = getCmsText(page?.ctaLabel) ?? "Apply Now";
+  const pageCtaHref = getCmsText(page?.ctaHref) ?? "#apply-now";
   const heroStats = [
     { label: heroMetricLabels[0] ?? "Interest Rate", value: loanProgram.interestRate, kind: "rate" as const },
     { label: heroMetricLabels[1] ?? "LTV / LTC", value: loanProgram.ltv, kind: "leverage" as const },
@@ -371,80 +185,63 @@ export default async function LoanProgramDetailPage({
     { label: termDetailLabels[4] ?? "Minimum Amount", value: loanProgram.minAmount },
     { label: termDetailLabels[5] ?? "Maximum Amount", value: loanProgram.maxAmount },
   ].filter((item) => item.value);
-  const amountRange = formatAmountRange(loanProgram.minAmount, loanProgram.maxAmount);
   const heroImage =
     loanProgram.imageUrl ||
     getDefaultLoanProgramImage(loanProgram.slug) ||
     defaultLoanProgramImages[0];
-  const heroHeadingTail = resolveHeroHeadingTail(
-    getPageGroupItem(page, "hero_heading_tail")?.title,
-    isFixFlip,
+  const highlightImage = loanProgram.highlightImageUrl || heroImage;
+  const heroHeadingTail = getCmsText(loanProgram.titleTail);
+  const heroDescription = getCmsText(loanProgram.shortDescription);
+  const highlightSectionTitle = getCmsText(
+    replaceProgramToken(highlightSectionContent?.title, loanProgram.title),
   );
-  const heroDescription = resolveHeroDescription(loanProgram.shortDescription, isFixFlip);
-  const heroFeatureTexts = getPageGroupItems(page, "hero_feature_cards")
-    .map((item) => resolveHeroFeatureCardText(item.title))
-    .filter(Boolean);
-  const highlightSectionTitle = resolveHighlightSectionTitle(
-    highlightSectionContent?.title,
-    loanProgram.title,
-    isFixFlip,
+  const highlightSectionBody = getCmsText(
+    loanProgram.highlightSubheadline || highlightSectionContent?.body,
   );
-  const highlightSectionBody = resolveHighlightSectionBody(
-    highlightSectionContent?.body,
-    paragraphs[1] || loanProgram.shortDescription,
-    isFixFlip,
-  );
-  const termsSectionTitle = resolveTermsSectionTitle(termsSectionContent?.title);
-  const termsSectionBody = resolveTermsSectionBody(termsSectionContent?.body);
-  const offeringHighlights = buildProgramHighlights({
-    amountRange,
-    fees: loanProgram.fees,
-    highlights: highlights.length ? highlights : termItems.map((item) => `${item.label}: ${item.value}`),
-    isFixFlip,
-    loanTerm: loanProgram.loanTerm,
-    ltv: loanProgram.ltv,
-  });
-  const underwritingInsight = getUnderwritingInsight({
-    amountRange,
-    isFixFlip,
-    loanTerm: loanProgram.loanTerm,
-    ltv: loanProgram.ltv,
-  });
-  const overviewParagraphs = getUniqueContentLines([loanProgram.shortDescription, ...paragraphs]);
-  const overviewSupportParagraph =
-    [loanProgram.interestRate, loanProgram.ltv, loanProgram.loanTerm].filter(Boolean).length >= 2
-      ? `At a glance, pricing starts at ${loanProgram.interestRate ?? "custom pricing"}, leverage reaches ${loanProgram.ltv ?? "structured leverage"}, and terms run ${loanProgram.loanTerm ?? "flexible timing"}. That gives operators a faster way to judge fit before moving into full underwriting.`
-      : null;
-  const overviewIntro = overviewParagraphs[0] ?? null;
-  const overviewNarrativeBlocks = getUniqueContentLines([
-    ...overviewParagraphs.slice(1),
-    overviewSupportParagraph,
-  ]).map(splitLeadLine);
+  const termsSectionTitle = getCmsText(termsSectionContent?.title);
+  const termsSectionBody = getCmsText(termsSectionContent?.body);
+  const offeringHighlights = highlights.length ? highlights : splitParagraphs(loanProgram.keyHighlights);
+  const insightEyebrow = getCmsText(getPageGroupItem(page, "insight_section_eyebrow")?.title);
+  const insightTitle = getCmsText(loanProgram.insightTitle);
+  const insightBody = getCmsText(loanProgram.insightBody);
+  const overviewIntro = getCmsText(paragraphs[0] || loanProgram.shortDescription);
+  const overviewNarrativeBlocks = loanProgram.overviewItems.length
+    ? loanProgram.overviewItems
+        .map((item) => ({
+          body: normalizeContentLine(item.body),
+          lead: normalizeContentLine(item.title),
+        }))
+        .filter((item) => item.lead)
+    : paragraphs.slice(1).map(splitLeadLine).filter((item) => item.lead);
   const overviewStatHighlights = [
-    { label: "Interest Rate", value: loanProgram.interestRate },
-    { label: "Loan Term", value: loanProgram.loanTerm },
-    { label: "LTV / LTC", value: loanProgram.ltv },
+    { label: termDetailLabels[0] ?? "Interest Rate", value: loanProgram.interestRate },
+    { label: termDetailLabels[1] ?? "Loan Term", value: loanProgram.loanTerm },
+    { label: termDetailLabels[2] ?? "LTV / LTC", value: loanProgram.ltv },
   ].filter((item) => item.value);
+  const overviewSectionTitle =
+    getCmsText(getPageGroupItem(page, "overview_section_title")?.title) ?? "Loan Overview";
+  const applicationFormTitle =
+    getCmsText(getPageGroupItem(page, "application_form_title")?.title) ?? pageCtaLabel;
   const heroFeatureCards = [
     {
       kind: "clock" as const,
-      text: heroFeatureTexts[0],
+      text: getCmsText(loanProgram.heroBadgeOne),
       className: "-left-1 top-[30%] sm:left-0 lg:-left-5 lg:top-[26%]",
     },
     {
       kind: "calendar" as const,
-      text: heroFeatureTexts[1],
+      text: getCmsText(loanProgram.heroBadgeTwo),
       className: "-right-1 top-[16%] sm:right-0 lg:-right-3 lg:top-[22%]",
     },
     {
       kind: "leverage" as const,
-      text: heroFeatureTexts[2],
+      text: getCmsText(loanProgram.heroBadgeThree),
       className: "left-[10%] bottom-[-4%] sm:left-[15%] lg:left-[12%]",
     },
   ].filter((item) => item.text);
 
   return (
-    <SiteShell cta={{ href: "/get-financing", label: "Apply Now" }}>
+    <SiteShell cta={{ href: pageCtaHref, label: pageCtaLabel }}>
       <div className="bg-white pb-20">
         <section className="overflow-hidden bg-[#11283e] text-white">
           <div className="mx-auto w-full max-w-[1480px] px-4 py-8 sm:px-6 sm:py-10 lg:px-[125px] lg:py-[44px] 2xl:max-w-[1760px] 2xl:px-[164px] 2xl:py-[56px]">
@@ -455,7 +252,11 @@ export default async function LoanProgramDetailPage({
                 </p>
                 <h1 className="mt-3 text-balance text-[26px] font-semibold leading-[1.1] tracking-[-0.04em] !text-white sm:text-[34px] lg:text-[40px] 2xl:text-[44px]">
                   {loanProgram.title}
-                  <br className="hidden sm:block" /> {heroHeadingTail}
+                  {heroHeadingTail ? (
+                    <>
+                      <br className="hidden sm:block" /> {heroHeadingTail}
+                    </>
+                  ) : null}
                 </h1>
                 {heroDescription ? (
                   <p className="mt-5 max-w-[510px] text-[14.5px] leading-[1.6] !text-white/90 sm:text-[15.5px] sm:leading-[1.68] lg:mt-6">
@@ -466,10 +267,10 @@ export default async function LoanProgramDetailPage({
                 <div className="mt-7 flex flex-wrap gap-3 sm:mt-8">
                   <Link
                     className="inline-flex min-h-[44px] min-w-[168px] items-center justify-center rounded-[12px] bg-white px-5 py-3 text-[14px] font-semibold tracking-[-0.02em] text-black shadow-[0_14px_32px_rgba(0,0,0,0.16)] pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 hover:bg-white sm:min-h-[48px] sm:min-w-[196px] sm:text-[16px] lg:min-h-[50px] lg:min-w-[204px] lg:px-6 lg:text-[16px]"
-                    href="#apply-now"
+                    href={pageCtaHref}
                     style={{ color: "#111111" }}
                   >
-                    Apply Now
+                    {pageCtaLabel}
                   </Link>
                 </div>
               </div>
@@ -478,11 +279,11 @@ export default async function LoanProgramDetailPage({
                 <div className="relative h-[270px] sm:h-[330px] lg:h-[390px] 2xl:h-[430px]">
                   <div
                     className="absolute inset-0 bg-white p-[6px] shadow-[0_24px_60px_rgba(8,13,22,0.24)]"
-                    style={{ clipPath: FIX_FLIP_HERO_IMAGE_CLIP_PATH }}
+                    style={{ clipPath: LOAN_PROGRAM_HERO_IMAGE_CLIP_PATH }}
                   >
                     <div
                       className="relative h-full w-full overflow-hidden bg-[#d4dce7]"
-                      style={{ clipPath: FIX_FLIP_HERO_IMAGE_CLIP_PATH }}
+                      style={{ clipPath: LOAN_PROGRAM_HERO_IMAGE_CLIP_PATH }}
                     >
                       <Image
                         alt={loanProgram.imageAlt || loanProgram.title}
@@ -543,18 +344,22 @@ export default async function LoanProgramDetailPage({
           <div className="grid gap-8 lg:grid-cols-[minmax(320px,480px)_minmax(0,1fr)] lg:items-center" id="loan-info">
             <div className="relative aspect-[11/8] overflow-hidden rounded-[32px] border border-[rgba(191,147,117,0.18)] bg-white shadow-[0_18px_50px_rgba(15,23,42,0.1)]">
               <Image
-                alt={loanProgram.imageAlt || loanProgram.title}
+                alt={
+                  loanProgram.highlightImageAlt ||
+                  loanProgram.imageAlt ||
+                  loanProgram.title
+                }
                 className="object-cover"
                 fill
                 sizes="(max-width: 1023px) 100vw, 480px"
-                src={heroImage}
+                src={highlightImage}
               />
             </div>
 
             <div>
               <DetailSectionHeading
                 eyebrow={getPageGroupItem(page, "highlights_section_eyebrow")?.title ?? "Program Highlights"}
-                title={highlightSectionTitle}
+                title={highlightSectionTitle ?? ""}
                 body={highlightSectionBody}
               />
               {offeringHighlights.length ? (
@@ -566,30 +371,30 @@ export default async function LoanProgramDetailPage({
           </div>
         </DetailSection>
 
-        <DetailSection className="pb-10 pt-4 lg:pt-6">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(360px,520px)] lg:items-stretch">
+        <DetailSection className="pb-8 pt-4 lg:pt-5">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,480px)] lg:items-stretch">
             <DetailGlassPanel className="flex h-full flex-col">
               <DetailSectionHeading
                 eyebrow={getPageGroupItem(page, "overview_section_eyebrow")?.title ?? "Overview"}
-                title="Loan Overview"
+                title={overviewSectionTitle}
               />
-              <div className="mt-6 flex flex-1 flex-col">
+              <div className="mt-4 flex flex-1 flex-col">
                 {overviewIntro ? (
-                  <div className="rounded-[24px] border border-[rgba(191,147,117,0.24)] bg-[linear-gradient(135deg,rgba(255,248,240,0.96)_0%,rgba(255,255,255,1)_100%)] px-5 py-5 shadow-[0_14px_34px_rgba(191,147,117,0.1)] sm:px-6">
-                    <p className="text-[20px] font-semibold leading-[1.45] tracking-[-0.03em] text-[#12284b] sm:text-[22px]">
+                  <div className="rounded-[18px] border border-[rgba(191,147,117,0.24)] bg-[linear-gradient(135deg,rgba(255,248,240,0.96)_0%,rgba(255,255,255,1)_100%)] px-4 py-4 shadow-[0_10px_24px_rgba(191,147,117,0.1)] sm:px-5">
+                    <p className="text-[19px] font-semibold leading-[1.42] tracking-[-0.03em] text-[#12284b] sm:text-[20px]">
                       {overviewIntro}
                     </p>
                     {overviewStatHighlights.length ? (
-                      <div className="mt-4 flex flex-wrap gap-2.5">
+                      <div className="mt-3 flex flex-wrap gap-2">
                         {overviewStatHighlights.map((item) => (
                           <div
-                            className="rounded-full border border-[rgba(191,147,117,0.28)] bg-white px-4 py-2"
+                            className="rounded-full border border-[rgba(191,147,117,0.28)] bg-white px-3 py-1.5"
                             key={`${item.label}-${item.value}`}
                           >
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#bf9375]">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#bf9375]">
                               {item.label}
                             </p>
-                            <p className="mt-1 text-[14px] font-semibold text-[#12284b]">
+                            <p className="mt-0.5 text-[13px] font-semibold text-[#12284b]">
                               {item.value}
                             </p>
                           </div>
@@ -599,18 +404,18 @@ export default async function LoanProgramDetailPage({
                   </div>
                 ) : null}
 
-                {overviewNarrativeBlocks.length ? (
-                  <div className="mt-5 space-y-4">
-                    {overviewNarrativeBlocks.map((item, index) => (
+                {overviewNarrativeBlocks.slice(0, 4).length ? (
+                  <div className="mt-3 space-y-2.5">
+                    {overviewNarrativeBlocks.slice(0, 4).map((item, index) => (
                       <div
-                        className="rounded-[22px] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_10px_28px_rgba(15,23,42,0.05)]"
+                        className="rounded-[16px] border border-slate-200/80 bg-white px-4 py-3.5 shadow-[0_6px_18px_rgba(15,23,42,0.05)]"
                         key={`${item.lead}-${index}`}
                       >
-                        <p className="text-[17px] font-semibold leading-[1.5] tracking-[-0.025em] text-slate-900">
+                        <p className="text-[15.5px] font-semibold leading-[1.45] tracking-[-0.02em] text-slate-900">
                           {item.lead}
                         </p>
                         {item.body ? (
-                          <p className="mt-2.5 text-[15.5px] leading-[1.82] text-slate-700">
+                          <p className="mt-1.5 text-[14px] leading-[1.7] text-slate-600">
                             {item.body}
                           </p>
                         ) : null}
@@ -627,20 +432,20 @@ export default async function LoanProgramDetailPage({
                 title={termsSectionTitle}
                 body={termsSectionBody}
               />
-              <div className="mt-6 flex flex-1 flex-col justify-between gap-6">
+              <div className="mt-4 flex flex-1 flex-col justify-between gap-4">
                 {termItems.length ? (
                   <dl className="divide-y divide-[rgba(191,147,117,0.16)]">
                     {termItems.map((item, index) => (
                       <div
-                        className={`flex flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-5 ${
+                        className={`flex flex-col gap-1.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${
                           index === 0 ? "pt-0" : ""
                         } ${index === termItems.length - 1 ? "pb-0" : ""}`}
                         key={`${item.label}-${item.value}`}
                       >
-                        <dt className="text-[12px] font-semibold uppercase tracking-[0.24em] text-[#bf9375]">
+                        <dt className="text-[11.5px] font-semibold uppercase tracking-[0.22em] text-[#bf9375]">
                           {item.label}
                         </dt>
-                        <dd className="text-left text-[17px] font-semibold leading-[1.5] tracking-[-0.02em] text-[#12284b] sm:max-w-[62%] sm:text-right sm:text-[18px]">
+                        <dd className="text-left text-[16px] font-semibold leading-[1.4] tracking-[-0.02em] text-[#12284b] sm:max-w-[60%] sm:text-right sm:text-[17px]">
                           {item.value}
                         </dd>
                       </div>
@@ -648,17 +453,25 @@ export default async function LoanProgramDetailPage({
                   </dl>
                 ) : null}
 
-                <div className="rounded-[24px] border border-[rgba(191,147,117,0.2)] bg-[linear-gradient(135deg,rgba(255,248,240,0.92)_0%,rgba(255,255,255,1)_100%)] px-5 py-5 shadow-[0_12px_32px_rgba(191,147,117,0.08)]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#bf9375]">
-                    {underwritingInsight.eyebrow}
-                  </p>
-                  <p className="mt-2 text-[18px] font-semibold tracking-[-0.03em] text-[#12284b]">
-                    {underwritingInsight.title}
-                  </p>
-                  <p className="mt-3 text-[15px] leading-[1.72] text-slate-700">
-                    {underwritingInsight.body}
-                  </p>
-                </div>
+                {insightTitle || insightBody ? (
+                  <div className="rounded-[18px] border border-[rgba(191,147,117,0.2)] bg-[linear-gradient(135deg,rgba(255,248,240,0.92)_0%,rgba(255,255,255,1)_100%)] px-4 py-4 shadow-[0_8px_24px_rgba(191,147,117,0.08)]">
+                    {insightEyebrow ? (
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#bf9375]">
+                        {insightEyebrow}
+                      </p>
+                    ) : null}
+                    {insightTitle ? (
+                      <p className="mt-1.5 text-[16px] font-semibold tracking-[-0.025em] text-[#12284b]">
+                        {insightTitle}
+                      </p>
+                    ) : null}
+                    {insightBody ? (
+                      <p className="mt-2 text-[14px] leading-[1.65] text-slate-600">
+                        {insightBody}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </DetailGlassPanel>
           </div>
@@ -671,7 +484,7 @@ export default async function LoanProgramDetailPage({
                 form={form}
                 layout="wide"
                 sourcePath={`/get-financing/${loanProgram.slug}`}
-                title="Apply Now"
+                title={applicationFormTitle}
               />
             ) : (
               <DetailGlassPanel>

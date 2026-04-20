@@ -3,6 +3,7 @@ import Link from "next/link";
 import { autosaveFormDefinitionDraft, saveFormDefinition } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import { formatFormFieldsEditorValue } from "@/lib/form-fields";
+import { SubmitButton } from "@/components/admin/submit-button";
 
 export function FormDefinitionForm({
   form,
@@ -88,7 +89,7 @@ export function FormDefinitionForm({
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit">Save Form</button>
+        <SubmitButton className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" >Save Form</SubmitButton>
         <Link className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700" href="/admin/forms">Back to Forms</Link>
       </div>
     </AdminAutosaveForm>

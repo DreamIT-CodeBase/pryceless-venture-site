@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { autosaveSingletonPageDraft, saveSingletonPage } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
+import { SubmitButton } from "@/components/admin/submit-button";
 import {
   getCalculatorCardFallbackDescription,
   singletonPageGroups,
@@ -64,7 +65,7 @@ export function SingletonPageForm({ page }: { page: any }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent" type="submit" value="publish">Save Page</button>
+        <SubmitButton className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white" name="intent"  value="publish">Save Page</SubmitButton>
         <Link className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700" href="/admin/pages">Back to Pages</Link>
       </div>
     </AdminAutosaveForm>

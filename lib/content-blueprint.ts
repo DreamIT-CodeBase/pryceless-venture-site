@@ -81,6 +81,7 @@ export const singletonPageLabels: Record<string, string> = {
   BLOG_DETAIL: "Insight Detail Template",
   INVESTMENTS_INDEX: "Investments Index",
   CASH_OFFER: "Cash Offer",
+  NOT_FOUND: "404 / Not Found",
   PROPERTIES_INDEX: "Properties Index",
   CASE_STUDIES_INDEX: "Case Studies Index",
   CALCULATORS_INDEX: "Calculators Index",
@@ -118,14 +119,36 @@ export const singletonPageGroups: Record<
 > = {
   CASH_OFFER: [
     {
+      key: "feature_image",
+      label: "Feature Image",
+      placeholder: "https://example.com/property.jpg | Cash offer feature image alt text",
+      supportsBody: true,
+    },
+    {
       key: "how_it_works",
       label: "How It Works",
-      placeholder: "Submit property details",
+      placeholder: "Submit property details | Share the address, condition, and timing so the team can review the property quickly.",
+      supportsBody: true,
     },
     {
       key: "seller_benefits",
       label: "Seller Benefits",
-      placeholder: "No listings or showings",
+      placeholder: "No listings or showings | Avoid public listing prep, repeated walkthroughs, and open-market uncertainty.",
+      supportsBody: true,
+    },
+  ],
+  NOT_FOUND: [
+    {
+      key: "support_points",
+      label: "Support Points",
+      placeholder: "The page may have moved | Links can change as opportunities, resources, and launch pages are updated.",
+      supportsBody: true,
+    },
+    {
+      key: "quick_links",
+      label: "Quick Links",
+      placeholder: "Browse Properties | /properties",
+      supportsBody: true,
     },
   ],
   GET_FINANCING_INDEX: [
@@ -133,6 +156,11 @@ export const singletonPageGroups: Record<
       key: "overview_eyebrow",
       label: "Overview Eyebrow",
       placeholder: "Opportunity Overview",
+    },
+    {
+      key: "overview_section_title",
+      label: "Overview Section Title",
+      placeholder: "Loan Program Overview",
     },
     {
       key: "snapshot_card",
@@ -159,6 +187,25 @@ export const singletonPageGroups: Record<
       supportsBody: true,
     },
     {
+      key: "lender_section_eyebrow",
+      label: "Lender Section Eyebrow",
+      placeholder: "For Lenders",
+    },
+    {
+      key: "lender_section_content",
+      label: "Lender Section Content",
+      placeholder:
+        "Private Lending Opportunities | Deploy capital into qualified borrower demand and explore potentially attractive interest-income opportunities backed by real asset underwriting and deal review.",
+      supportsBody: true,
+    },
+    {
+      key: "lender_feature_cards",
+      label: "Lender Feature Cards",
+      placeholder:
+        "Fund qualified borrower demand | Support acquisition, refinance, and construction scenarios sourced through Pryceless Ventures.",
+      supportsBody: true,
+    },
+    {
       key: "card_stat_labels",
       label: "Loan Card Stat Labels",
       placeholder: "Rate",
@@ -175,6 +222,100 @@ export const singletonPageGroups: Record<
       key: "categories",
       label: "Categories",
       placeholder: "Value-Add Multifamily",
+    },
+  ],
+  BLOG_DETAIL: [
+    {
+      key: "hero_eyebrow",
+      label: "Hero Eyebrow",
+      placeholder: "Insight Article",
+    },
+    {
+      key: "snapshot_section_title",
+      label: "Snapshot Section Title",
+      placeholder: "Article Snapshot",
+    },
+    {
+      key: "overview_section_title",
+      label: "Overview Section Title",
+      placeholder: "Insight Overview",
+    },
+    {
+      key: "standout_section_content",
+      label: "Standout Section Content",
+      placeholder:
+        "What This Article Breaks Down | The strongest themes and decision points surfaced in the published insight.",
+      supportsBody: true,
+    },
+    {
+      key: "profile_section_title",
+      label: "Profile Section Title",
+      placeholder: "Who This Insight Helps",
+    },
+    {
+      key: "action_section_content",
+      label: "Action Section Content",
+      placeholder:
+        "Key Action Points | The ideas most likely to change how a borrower or investor structures the next move.",
+      supportsBody: true,
+    },
+    {
+      key: "summary_section_title",
+      label: "Summary Section Title",
+      placeholder: "Article Summary",
+    },
+  ],
+  CASE_STUDY_DETAIL: [
+    {
+      key: "hero_eyebrow",
+      label: "Hero Eyebrow",
+      placeholder: "Case Study",
+    },
+    {
+      key: "snapshot_section_title",
+      label: "Snapshot Section Title",
+      placeholder: "Deal Snapshot",
+    },
+    {
+      key: "gallery_section_content",
+      label: "Gallery Section Content",
+      placeholder:
+        "Project Gallery | Supporting visuals from the asset, execution plan, and finished outcome.",
+      supportsBody: true,
+    },
+    {
+      key: "overview_section_title",
+      label: "Overview Section Title",
+      placeholder: "Investment Overview",
+    },
+    {
+      key: "standout_section_content",
+      label: "Standout Section Content",
+      placeholder:
+        "Why This Case Stands Out | The business plan that shaped acquisition, execution, and outcome.",
+      supportsBody: true,
+    },
+    {
+      key: "profile_section_title",
+      label: "Profile Section Title",
+      placeholder: "Investment Profile",
+    },
+    {
+      key: "execution_section_content",
+      label: "Execution Section Content",
+      placeholder:
+        "Execution Highlights | What moved the asset from plan to measurable performance.",
+      supportsBody: true,
+    },
+    {
+      key: "outcome_section_title",
+      label: "Outcome Section Title",
+      placeholder: "Outcome Summary",
+    },
+    {
+      key: "takeaways_section_title",
+      label: "Takeaways Section Title",
+      placeholder: "Key Takeaways",
     },
   ],
   CALCULATORS_INDEX: [
@@ -230,6 +371,11 @@ export const singletonPageGroups: Record<
       placeholder: "Overview",
     },
     {
+      key: "overview_section_title",
+      label: "Overview Section Title",
+      placeholder: "Loan Overview",
+    },
+    {
       key: "terms_section_eyebrow",
       label: "Terms Section Eyebrow",
       placeholder: "Rate and Terms",
@@ -247,9 +393,19 @@ export const singletonPageGroups: Record<
       placeholder: "Interest Rate",
     },
     {
+      key: "insight_section_eyebrow",
+      label: "Insight Section Eyebrow",
+      placeholder: "Underwriting Insight",
+    },
+    {
       key: "application_section_eyebrow",
       label: "Application Section Eyebrow",
       placeholder: "Application",
+    },
+    {
+      key: "application_form_title",
+      label: "Application Form Title",
+      placeholder: "Apply Now",
     },
     {
       key: "application_fallback_action",
@@ -429,6 +585,7 @@ export const singletonPageSeed = [
     ctaHref: "#loan-programs",
     items: [
       { groupKey: "overview_eyebrow", title: "Opportunity Overview" },
+      { groupKey: "overview_section_title", title: "Loan Program Overview" },
       {
         groupKey: "snapshot_card",
         title: "Opportunity Snapshot",
@@ -441,6 +598,27 @@ export const singletonPageSeed = [
         groupKey: "programs_section_content",
         title: "Financing Options Managed From The CMS",
         body: "Rates, terms, and visibility are controlled from the admin portal so your team can launch new programs quickly and keep underwriting details current.",
+      },
+      { groupKey: "lender_section_eyebrow", title: "For Lenders" },
+      {
+        groupKey: "lender_section_content",
+        title: "Private Lending Opportunities",
+        body: "Deploy capital into qualified borrower demand and explore potentially attractive interest-income opportunities backed by real asset underwriting and deal review.",
+      },
+      {
+        groupKey: "lender_feature_cards",
+        title: "Fund qualified borrower demand",
+        body: "Support acquisition, refinance, and construction scenarios sourced through Pryceless Ventures.",
+      },
+      {
+        groupKey: "lender_feature_cards",
+        title: "Seek compelling fixed-income potential",
+        body: "Review lending opportunities designed for investors looking for stronger yield potential than traditional cash alternatives.",
+      },
+      {
+        groupKey: "lender_feature_cards",
+        title: "Built around collateral and underwriting",
+        body: "Each opportunity is framed around borrower profile, deal structure, and real-estate-backed risk review.",
       },
       { groupKey: "card_stat_labels", title: "Rate" },
       { groupKey: "card_stat_labels", title: "Max LTV / LTC" },
@@ -478,6 +656,7 @@ export const singletonPageSeed = [
         body: "Built for quick purchases, rehab draws, and exit timelines that reward decisive execution.",
       },
       { groupKey: "overview_section_eyebrow", title: "Overview" },
+      { groupKey: "overview_section_title", title: "Loan Overview" },
       { groupKey: "terms_section_eyebrow", title: "Rate and Terms" },
       {
         groupKey: "terms_section_content",
@@ -490,7 +669,9 @@ export const singletonPageSeed = [
       { groupKey: "term_detail_labels", title: "Fees" },
       { groupKey: "term_detail_labels", title: "Minimum Amount" },
       { groupKey: "term_detail_labels", title: "Maximum Amount" },
+      { groupKey: "insight_section_eyebrow", title: "Underwriting Insight" },
       { groupKey: "application_section_eyebrow", title: "Application" },
+      { groupKey: "application_form_title", title: "Apply Now" },
       {
         groupKey: "application_fallback_action",
         title: "Contact Pryceless Ventures",
@@ -537,12 +718,74 @@ export const singletonPageSeed = [
     ctaLabel: null,
     ctaHref: null,
     items: [
-      { groupKey: "how_it_works", title: "Submit property details" },
-      { groupKey: "how_it_works", title: "We review and analyze the asset" },
-      { groupKey: "how_it_works", title: "Receive a no-obligation cash offer" },
-      { groupKey: "seller_benefits", title: "No listings or showings" },
-      { groupKey: "seller_benefits", title: "Flexible timelines" },
-      { groupKey: "seller_benefits", title: "Straightforward process" },
+      {
+        groupKey: "feature_image",
+        title:
+          "https://images.pexels.com/photos/7578861/pexels-photo-7578861.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        body: "House with a for-sale sign",
+      },
+      {
+        groupKey: "how_it_works",
+        title: "Submit property details",
+        body: "Share the address, condition, and timing so the team can review the property quickly.",
+      },
+      {
+        groupKey: "how_it_works",
+        title: "We review and analyze the asset",
+        body: "Our team looks at the property profile, seller goals, and next-step fit before following up.",
+      },
+      {
+        groupKey: "how_it_works",
+        title: "Receive a no-obligation cash offer",
+        body: "If the property is a fit, we come back with a clear next conversation and offer path.",
+      },
+      {
+        groupKey: "seller_benefits",
+        title: "No listings or showings",
+        body: "Avoid public-market prep, repeated walkthroughs, and the uncertainty of a traditional listing cycle.",
+      },
+      {
+        groupKey: "seller_benefits",
+        title: "Flexible timelines",
+        body: "Discuss a timeline that works for your move instead of forcing the transaction into a rigid schedule.",
+      },
+      {
+        groupKey: "seller_benefits",
+        title: "Straightforward process",
+        body: "Get practical communication, direct review, and a simpler path from submission to next steps.",
+      },
+    ],
+  },
+  {
+    key: "NOT_FOUND",
+    routePath: "/404",
+    pageTitle: "Page Not Found",
+    intro:
+      "The page you were trying to reach is unavailable, but the rest of Pryceless Ventures is still within easy reach.",
+    disclaimer:
+      "If you followed an outdated link or were looking for a specific opportunity, our team can still help point you in the right direction.",
+    ctaLabel: "Return Home",
+    ctaHref: "/",
+    items: [
+      {
+        groupKey: "support_points",
+        title: "The page may have moved",
+        body: "Links can change as opportunities, resources, and launch pages are updated across the site.",
+      },
+      {
+        groupKey: "support_points",
+        title: "You can jump back in quickly",
+        body: "Use the links below to head straight to the most active sections of the Pryceless Ventures website.",
+      },
+      {
+        groupKey: "support_points",
+        title: "Need a hand from the team?",
+        body: "If you were trying to reach a specific page, contact us and we will help you find the right route.",
+      },
+      { groupKey: "quick_links", title: "Loan Offers", body: "/get-financing" },
+      { groupKey: "quick_links", title: "Properties", body: "/properties" },
+      { groupKey: "quick_links", title: "Case Studies", body: "/case-studies" },
+      { groupKey: "quick_links", title: "Insights", body: "/blogs" },
     ],
   },
   {
@@ -586,7 +829,23 @@ export const singletonPageSeed = [
     disclaimer: null,
     ctaLabel: "Back to Insights",
     ctaHref: "/blogs",
-    items: [],
+    items: [
+      { groupKey: "hero_eyebrow", title: "Insight Article" },
+      { groupKey: "snapshot_section_title", title: "Article Snapshot" },
+      { groupKey: "overview_section_title", title: "Insight Overview" },
+      {
+        groupKey: "standout_section_content",
+        title: "What This Article Breaks Down",
+        body: "The strongest themes and decision points surfaced in the published insight.",
+      },
+      { groupKey: "profile_section_title", title: "Who This Insight Helps" },
+      {
+        groupKey: "action_section_content",
+        title: "Key Action Points",
+        body: "The ideas most likely to change how a borrower or investor structures the next move.",
+      },
+      { groupKey: "summary_section_title", title: "Article Summary" },
+    ],
   },
   {
     key: "CASE_STUDIES_INDEX",
@@ -609,9 +868,31 @@ export const singletonPageSeed = [
     pageTitle: "Case Study",
     intro: null,
     disclaimer: null,
-    ctaLabel: null,
-    ctaHref: null,
-    items: [],
+    ctaLabel: "Back to Case Studies",
+    ctaHref: "/case-studies",
+    items: [
+      { groupKey: "hero_eyebrow", title: "Case Study" },
+      { groupKey: "snapshot_section_title", title: "Deal Snapshot" },
+      {
+        groupKey: "gallery_section_content",
+        title: "Project Gallery",
+        body: "Supporting visuals from the asset, execution plan, and finished outcome.",
+      },
+      { groupKey: "overview_section_title", title: "Investment Overview" },
+      {
+        groupKey: "standout_section_content",
+        title: "Why This Case Stands Out",
+        body: "The business plan that shaped acquisition, execution, and outcome.",
+      },
+      { groupKey: "profile_section_title", title: "Investment Profile" },
+      {
+        groupKey: "execution_section_content",
+        title: "Execution Highlights",
+        body: "What moved the asset from plan to measurable performance.",
+      },
+      { groupKey: "outcome_section_title", title: "Outcome Summary" },
+      { groupKey: "takeaways_section_title", title: "Key Takeaways" },
+    ],
   },
   {
     key: "CALCULATORS_INDEX",

@@ -7,6 +7,7 @@ import {
 } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import { ImageUrlField } from "@/components/admin/image-url-field";
+import { SubmitButton } from "@/components/admin/submit-button";
 
 type LoanProgramFormProps = {
   errorMessage?: string;
@@ -37,167 +38,288 @@ export function LoanProgramForm({ errorMessage, loanProgram }: LoanProgramFormPr
           </div>
         ) : null}
 
-        <div className="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-lg shadow-slate-200/50">
-          <div className="grid gap-5 md:grid-cols-2">
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Title</span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.title ?? ""}
-                minLength={2}
-                name="title"
-                required
-              />
-            </label>
+        <div className="space-y-6">
+          <div className="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-lg shadow-slate-200/50">
+            <h3 className="mb-6 text-lg font-semibold text-slate-950">Basic Information</h3>
+            <div className="grid gap-5 md:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Title</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.title ?? ""}
+                  minLength={2}
+                  name="title"
+                  required
+                />
+              </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Display Order</span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.sortOrder ?? 0}
-                min={0}
-                name="sortOrder"
-                step={1}
-                type="number"
-              />
-            </label>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Display Order</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.sortOrder ?? 0}
+                  min={0}
+                  name="sortOrder"
+                  step={1}
+                  type="number"
+                />
+              </label>
 
-            <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700">
-              <input
-                defaultChecked={loanProgram?.isActive ?? true}
-                name="isActive"
-                type="checkbox"
-              />
-              Visible on public financing pages
-            </label>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">CRM Tag</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.crmTag ?? ""}
+                  name="crmTag"
+                  placeholder="fix-flip"
+                />
+              </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">CRM Tag</span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.crmTag ?? ""}
-                name="crmTag"
-                placeholder="fix-flip"
-              />
-            </label>
+              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700">
+                <input
+                  defaultChecked={loanProgram?.isActive ?? true}
+                  name="isActive"
+                  type="checkbox"
+                />
+                Visible on public financing pages
+              </label>
+            </div>
+          </div>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">
-                Starting Interest Rate
-              </span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.interestRate ?? ""}
-                name="interestRate"
-                placeholder="Starting at 9.75%"
-              />
-            </label>
+          <div className="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-lg shadow-slate-200/50">
+            <h3 className="mb-6 text-lg font-semibold text-slate-950">Hero Section</h3>
+            <div className="grid gap-5 md:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Title Tail (e.g. For Active Investors)</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.titleTail ?? ""}
+                  name="titleTail"
+                />
+              </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Max LTV / LTC</span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.ltv ?? ""}
-                name="ltv"
-                placeholder="Up to 85% LTC / 70% ARV"
-              />
-            </label>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Image Alt Text</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.imageAlt ?? ""}
+                  name="imageAlt"
+                />
+              </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Loan Term</span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.loanTerm ?? ""}
-                name="loanTerm"
-                placeholder="12-18 months"
-              />
-            </label>
+              <label className="block md:col-span-2">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Hero Subheadline</span>
+                <textarea
+                  className="min-h-24 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.shortDescription ?? ""}
+                  minLength={10}
+                  name="shortDescription"
+                  required
+                />
+              </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Fees</span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.fees ?? ""}
-                name="fees"
-                placeholder="Origination from 1.5 points"
-              />
-            </label>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Hero Badge 1 (Clock Icon)</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.heroBadgeOne ?? ""}
+                  name="heroBadgeOne"
+                  placeholder="Fast draw requests"
+                />
+              </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Minimum Amount</span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.minAmount ?? ""}
-                name="minAmount"
-                placeholder="$75,000"
-              />
-            </label>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Hero Badge 2 (Calendar Icon)</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.heroBadgeTwo ?? ""}
+                  name="heroBadgeTwo"
+                  placeholder="Quick closings"
+                />
+              </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Maximum Amount</span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.maxAmount ?? ""}
-                name="maxAmount"
-                placeholder="$3,000,000"
-              />
-            </label>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Hero Badge 3 (Leverage Icon)</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.heroBadgeThree ?? ""}
+                  name="heroBadgeThree"
+                  placeholder="Rehab-ready leverage"
+                />
+              </label>
 
-            <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">
-                Short Description
-              </span>
-              <textarea
-                className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.shortDescription ?? ""}
-                minLength={10}
-                name="shortDescription"
-                required
-              />
-            </label>
+              <div className="md:col-span-2">
+                <ImageUrlField
+                  allowManualUrl
+                  description="Upload the hero image used on the Get Financing page and loan detail page."
+                  folder="loan-programs"
+                  initialValue={loanProgram?.imageUrl ?? ""}
+                  label="Hero Image"
+                  name="imageUrl"
+                  previewAlt={loanProgram?.imageAlt ?? loanProgram?.title ?? "Hero image"}
+                />
+              </div>
+            </div>
+          </div>
 
-            <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">
-                Full Description
-              </span>
-              <textarea
-                className="min-h-40 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.fullDescription ?? ""}
-                minLength={10}
-                name="fullDescription"
-                required
-              />
-            </label>
+          <div className="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-lg shadow-slate-200/50">
+            <h3 className="mb-6 text-lg font-semibold text-slate-950">Core Underwriting Terms</h3>
+            <div className="grid gap-5 md:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Interest Rate</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.interestRate ?? ""}
+                  name="interestRate"
+                  placeholder="Starting at 9.75%"
+                />
+              </label>
 
-            <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Key Highlights</span>
-              <textarea
-                className="min-h-32 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.keyHighlights ?? ""}
-                name="keyHighlights"
-                placeholder="One highlight per line"
-              />
-            </label>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Max LTV / LTC</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.ltv ?? ""}
+                  name="ltv"
+                  placeholder="Up to 85% LTC / 70% ARV"
+                />
+              </label>
 
-            <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Image Alt Text</span>
-              <input
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={loanProgram?.imageAlt ?? ""}
-                name="imageAlt"
-                placeholder="Fix and flip loan program"
-              />
-            </label>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Loan Term</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.loanTerm ?? ""}
+                  name="loanTerm"
+                  placeholder="12-18 months"
+                />
+              </label>
 
-            <ImageUrlField
-              allowManualUrl
-              description="Upload the hero or card image used on the Get Financing page and loan detail page."
-              folder="loan-programs"
-              initialValue={loanProgram?.imageUrl ?? ""}
-              label="Program Image"
-              name="imageUrl"
-              previewAlt={loanProgram?.imageAlt ?? loanProgram?.title ?? "Loan program image"}
-            />
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Fees</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.fees ?? ""}
+                  name="fees"
+                  placeholder="Origination from 1.5 points"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Minimum Amount</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.minAmount ?? ""}
+                  name="minAmount"
+                  placeholder="$75,000"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Maximum Amount</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.maxAmount ?? ""}
+                  name="maxAmount"
+                  placeholder="$3,000,000"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-lg shadow-slate-200/50">
+            <h3 className="mb-6 text-lg font-semibold text-slate-950">Highlights Section</h3>
+            <div className="grid gap-5 md:grid-cols-2">
+              <label className="block md:col-span-2">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Highlight Subheadline</span>
+                <textarea
+                  className="min-h-24 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.highlightSubheadline ?? ""}
+                  name="highlightSubheadline"
+                />
+              </label>
+
+              <label className="block md:col-span-2">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Bullet Points (One per line)</span>
+                <textarea
+                  className="min-h-32 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.highlights?.map((h: any) => h.highlight).join("\n") ?? ""}
+                  name="highlightsText"
+                  placeholder="One highlight per line"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Highlights Image Alt Text</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.highlightImageAlt ?? ""}
+                  name="highlightImageAlt"
+                />
+              </label>
+
+              <div className="md:col-span-2">
+                <ImageUrlField
+                  allowManualUrl
+                  description="Upload the secondary image used in the Program Highlights section."
+                  folder="loan-programs"
+                  initialValue={loanProgram?.highlightImageUrl ?? ""}
+                  label="Highlights Image"
+                  name="highlightImageUrl"
+                  previewAlt={loanProgram?.highlightImageAlt ?? loanProgram?.title ?? "Highlights image"}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-lg shadow-slate-200/50">
+            <h3 className="mb-6 text-lg font-semibold text-slate-950">Loan Overview</h3>
+            <div className="grid gap-5 md:grid-cols-2">
+              <label className="block md:col-span-2">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Overview Intro (Replaces old 'Full Description')</span>
+                <textarea
+                  className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.fullDescription ?? ""}
+                  minLength={10}
+                  name="fullDescription"
+                  required
+                />
+              </label>
+
+              <label className="block md:col-span-2">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Narrative Cards (Lead | Body format, one per line)</span>
+                <textarea
+                  className="min-h-40 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.overviewItems?.map((i: any) => `${i.title} | ${i.body ?? ""}`).join("\n") ?? ""}
+                  name="overviewItemsText"
+                  placeholder="Lead sentence | Body text goes here..."
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-lg shadow-slate-200/50">
+            <h3 className="mb-6 text-lg font-semibold text-slate-950">Underwriting Insight (Sidebar)</h3>
+            <div className="grid gap-5 md:grid-cols-2">
+              <label className="block md:col-span-2">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Insight Title</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.insightTitle ?? ""}
+                  name="insightTitle"
+                  placeholder="Built for purchase + rehab execution"
+                />
+              </label>
+
+              <label className="block md:col-span-2">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Insight Body</span>
+                <textarea
+                  className="min-h-24 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.insightBody ?? ""}
+                  name="insightBody"
+                />
+              </label>
+            </div>
           </div>
         </div>
 
@@ -236,30 +358,30 @@ export function LoanProgramForm({ errorMessage, loanProgram }: LoanProgramFormPr
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button
+          <SubmitButton
             className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white"
             name="intent"
-            type="submit"
+            
             value="draft"
           >
             Save Draft
-          </button>
-          <button
+          </SubmitButton>
+          <SubmitButton
             className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white"
             name="intent"
-            type="submit"
+            
             value="publish"
           >
             Publish
-          </button>
-          <button
+          </SubmitButton>
+          <SubmitButton
             className="rounded-full border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800"
             name="intent"
-            type="submit"
+            
             value="archive"
           >
             Archive
-          </button>
+          </SubmitButton>
           <Link
             className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700"
             href="/admin/loan-programs"
@@ -272,12 +394,12 @@ export function LoanProgramForm({ errorMessage, loanProgram }: LoanProgramFormPr
       {loanProgram?.id ? (
         <form action={deleteLoanProgram}>
           <input name="recordId" type="hidden" value={loanProgram.id} />
-          <button
+          <SubmitButton
             className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700"
-            type="submit"
+            
           >
             Delete Loan Program
-          </button>
+          </SubmitButton>
         </form>
       ) : null}
     </div>

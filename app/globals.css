@@ -19,7 +19,9 @@
 }
 
 html {
+  font-size: 16px;
   -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
@@ -32,7 +34,9 @@ body {
   min-height: 100vh;
   background: #ffffff;
   color: var(--pv-ink);
-  font-family: var(--font-poppins), sans-serif;
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -74,7 +78,9 @@ button,
 input,
 textarea,
 select {
-  font: inherit;
+  font-family: inherit;
+  font-size: 100%;
+  line-height: inherit;
 }
 
 .pv-container {
@@ -207,6 +213,128 @@ select {
   display: none;
 }
 
+@media (max-width: 639px) {
+  .pv-financing-hero {
+    min-height: clamp(560px, 80svh, 680px);
+    background-color: #09152d;
+  }
+
+  .pv-financing-hero::before,
+  .pv-financing-hero::after {
+    position: absolute;
+    inset: auto;
+    content: "";
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .pv-financing-hero::before {
+    top: 4.5%;
+    right: -14%;
+    width: 72%;
+    height: 34%;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(214, 154, 104, 0.34) 0%, rgba(214, 154, 104, 0.14) 38%, rgba(214, 154, 104, 0) 72%);
+    filter: blur(8px);
+    opacity: 0.95;
+  }
+
+  .pv-financing-hero::after {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 50%;
+    background:
+      linear-gradient(180deg, rgba(6, 16, 35, 0) 0%, rgba(6, 16, 35, 0.14) 18%, rgba(6, 16, 35, 0.48) 38%, rgba(6, 16, 35, 0.94) 100%),
+      linear-gradient(90deg, rgba(8, 18, 38, 0.12) 0%, rgba(8, 18, 38, 0) 100%);
+  }
+
+  .pv-financing-hero-mobile-image {
+    object-position: 58% 22% !important;
+    transform: scale(1.045);
+    transform-origin: center center;
+  }
+
+  .pv-financing-hero-mobile-overlay-primary {
+    background: linear-gradient(
+      180deg,
+      rgba(7, 18, 39, 0.06) 0%,
+      rgba(7, 18, 39, 0.02) 24%,
+      rgba(7, 18, 39, 0.12) 48%,
+      rgba(7, 18, 39, 0.76) 76%,
+      rgba(7, 18, 39, 0.97) 100%
+    ) !important;
+  }
+
+  .pv-financing-hero-mobile-overlay-secondary {
+    background: linear-gradient(
+      180deg,
+      rgba(5, 14, 31, 0) 0%,
+      rgba(5, 14, 31, 0.08) 32%,
+      rgba(5, 14, 31, 0.32) 58%,
+      rgba(5, 14, 31, 0.86) 100%
+    ) !important;
+  }
+
+  .pv-financing-hero-mobile-overlay-glow {
+    background:
+      radial-gradient(circle at 80% 23%, rgba(199, 152, 114, 0.34) 0%, rgba(199, 152, 114, 0.18) 18%, rgba(199, 152, 114, 0) 44%),
+      radial-gradient(circle at 18% 74%, rgba(65, 121, 205, 0.14) 0%, rgba(65, 121, 205, 0) 48%) !important;
+    opacity: 0.92;
+  }
+
+  .pv-financing-hero-mobile-content {
+    min-height: inherit;
+    align-items: flex-end !important;
+    padding: clamp(12.5rem, 31svh, 16rem) 1rem calc(env(safe-area-inset-bottom) + 0.85rem) !important;
+  }
+
+  .pv-financing-hero-mobile-stack {
+    position: relative;
+    isolation: isolate;
+    max-width: 100%;
+    gap: 1.25rem !important;
+  }
+
+  .pv-financing-hero-mobile-title {
+    font-size: clamp(2.25rem, 8.8vw, 2.85rem) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.05em !important;
+    text-shadow: 0 18px 36px rgba(2, 8, 20, 0.28);
+  }
+
+  .pv-financing-hero-mobile-subtitle {
+    max-width: 31ch !important;
+    font-size: 1rem !important;
+    line-height: 1.58 !important;
+    letter-spacing: -0.01em !important;
+    text-shadow: 0 12px 28px rgba(2, 8, 20, 0.22);
+  }
+
+  .pv-financing-hero-mobile-actions {
+    max-width: none !important;
+    gap: 0.75rem !important;
+  }
+
+  .pv-financing-hero-mobile-button {
+    min-height: 3.35rem !important;
+    border-radius: 1rem !important;
+    padding: 0.8rem 1rem !important;
+    font-size: 1.08rem !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+  }
+
+  .pv-financing-hero-mobile-button-primary {
+    box-shadow: 0 18px 32px rgba(6, 16, 35, 0.24) !important;
+  }
+
+  .pv-financing-hero-mobile-button-secondary {
+    box-shadow: 0 20px 36px rgba(59, 30, 14, 0.34) !important;
+  }
+}
+
 .pv-home-hero::before {
   position: absolute;
   inset: 0;
@@ -248,6 +376,170 @@ select {
   letter-spacing: -0.015em;
   line-height: 1.12;
   font-size: clamp(2.0rem, 3.2vw, 3.5rem);
+}
+
+@media (min-width: 1025px) {
+  html[data-browser="chrome"] .pv-page-section-hero-breadcrumb {
+    font-size: 13.5px !important;
+    line-height: 21px !important;
+  }
+
+  html[data-browser="chrome"] .pv-page-section-hero-title {
+    font-size: 25px !important;
+    line-height: 34px !important;
+  }
+
+  html[data-browser="chrome"] .pv-page-section-hero-intro {
+    font-size: 11px !important;
+    line-height: 18px !important;
+  }
+
+  html[data-browser="chrome"] .pv-get-financing-overview-title {
+    font-size: 27px !important;
+    line-height: 35px !important;
+  }
+
+  html[data-browser="chrome"] .pv-get-financing-programs-title {
+    max-width: 980px !important;
+    font-size: 27px !important;
+    line-height: 35px !important;
+  }
+
+  html[data-browser="chrome"] .pv-get-financing-programs-copy {
+    max-width: 700px !important;
+    font-size: 14px !important;
+    line-height: 1.72 !important;
+  }
+
+  html[data-browser="chrome"] .pv-case-study-category-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+  }
+
+  html[data-browser="chrome"] .pv-case-study-category-row > span {
+    width: 100%;
+    max-width: none !important;
+    flex: 0 1 auto !important;
+  }
+
+  html[data-browser="chrome"] .pv-case-study-category-title {
+    text-align: center;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-shell {
+    max-width: 1480px !important;
+    padding-left: 56px !important;
+    padding-right: 56px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-grid {
+    column-gap: 40px !important;
+    grid-template-columns:
+      minmax(0, 198px)
+      minmax(0, 252px)
+      minmax(0, 290px)
+      minmax(0, 230px) !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-logo {
+    width: 212px !important;
+    margin-bottom: 12px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-heading {
+    font-size: 21px !important;
+    line-height: 24px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-rule {
+    margin-top: 12px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-intro {
+    font-size: 12px !important;
+    line-height: 20px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-list-link,
+  html[data-browser="chrome"] .pv-site-footer-small,
+  html[data-browser="chrome"] .pv-site-footer-contact,
+  html[data-browser="chrome"] .pv-site-footer-bottom {
+    font-size: 12.5px !important;
+    line-height: 23px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-social {
+    height: 30px !important;
+    width: 30px !important;
+  }
+}
+
+@media (min-width: 1536px) {
+  html[data-browser="chrome"] .pv-page-section-hero-title {
+    font-size: 38px !important;
+    line-height: 1.02 !important;
+  }
+
+  html[data-browser="chrome"] .pv-page-section-hero-intro {
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+  }
+
+  html[data-browser="chrome"] .pv-get-financing-overview-title {
+    font-size: 35px !important;
+    line-height: 1.08 !important;
+  }
+
+  html[data-browser="chrome"] .pv-get-financing-programs-title {
+    max-width: 1120px !important;
+    font-size: 35px !important;
+    line-height: 1.08 !important;
+  }
+
+  html[data-browser="chrome"] .pv-get-financing-programs-copy {
+    max-width: 760px !important;
+    font-size: 15px !important;
+    line-height: 1.76 !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-shell {
+    max-width: 1560px !important;
+    padding-left: 76px !important;
+    padding-right: 76px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-grid {
+    column-gap: 48px !important;
+    grid-template-columns:
+      minmax(0, 214px)
+      minmax(0, 286px)
+      minmax(0, 320px)
+      minmax(0, 246px) !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-logo {
+    width: 220px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-heading {
+    font-size: 22px !important;
+    line-height: 25px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-intro {
+    font-size: 12.5px !important;
+    line-height: 21px !important;
+  }
+
+  html[data-browser="chrome"] .pv-site-footer-list-link,
+  html[data-browser="chrome"] .pv-site-footer-small,
+  html[data-browser="chrome"] .pv-site-footer-contact,
+  html[data-browser="chrome"] .pv-site-footer-bottom {
+    font-size: 13px !important;
+    line-height: 24px !important;
+  }
 }
 
 @media (min-width: 1280px) {

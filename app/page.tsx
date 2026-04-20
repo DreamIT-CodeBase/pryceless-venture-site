@@ -7,6 +7,7 @@ import featuredPropertiesSectionBg from "@/app/assets/featuredpropertiessectionb
 import featuredPropertiesRightLowerImage from "@/app/assets/featuredpropoertiesrightboxlowerimage.jpg";
 import featuredPropertiesRightUpperImage from "@/app/assets/featuredpropertiesstaicrightupperboximages.jpg";
 import heroSectionImage from "@/app/assets/herosectionimage.jpg";
+import mobileHeroSectionImage from "@/app/assets/mobileherosectionimage.jpg";
 import iconBuyer from "@/app/assets/passasiveinvestor4.svg";
 import iconInvestor from "@/app/assets/passesiveinvestorlogo2.svg";
 import iconSeller from "@/app/assets/passiveinvestor3.svg";
@@ -31,7 +32,12 @@ import {
 import { MobileLogoCarousel } from "@/components/public/mobile-logo-carousel";
 import { SiteShell } from "@/components/public/site-shell";
 import { TestimonialsCarousel } from "@/components/public/testimonials-carousel";
-import { getHomePage, getPublishedProperties, getSingletonPage } from "@/lib/data/public";
+import {
+  getHomePage,
+  getPublishedCaseStudies,
+  getPublishedProperties,
+  getSingletonPage,
+} from "@/lib/data/public";
 import { resolvePrimaryImage } from "@/lib/media";
 
 export const revalidate = 300;
@@ -138,25 +144,12 @@ const fallbackPlatformCards = [
   },
 ];
 
-const fallbackCaseHighlights = [
-  {
-    title: "Value-Add Multifamily",
-    body: "Renovation-focused strategy targeting operational improvements and long-term cash flow stabilization.",
-    ctaLabel: "See Case Studies",
-    ctaHref: "/case-studies",
-  },
-  {
-    title: "Turnaround Strategy",
-    body: "Repositioning underperforming assets through disciplined execution and market-specific insights.",
-    ctaLabel: "See Case Studies",
-    ctaHref: "/case-studies",
-  },
-  {
-    title: "Fix & Flip",
-    body: "Short-duration strategies focused on acquisition discipline, renovation efficiency, and controlled exits.",
-    ctaLabel: "See Case Studies",
-    ctaHref: "/case-studies",
-  },
+const caseStudyShowcaseFallbackImages = [
+  featuredPropertiesLeftImage,
+  featuredPropertiesRightUpperImage,
+  featuredPropertiesRightLowerImage,
+  aboutSectionImage,
+  heroSectionImage,
 ];
 
 const performanceSnapshot = [
@@ -312,9 +305,10 @@ const featuredPropertyListingCards = [
 ];
 
 export default async function Home() {
-  const [homePage, publishedProperties, propertiesPage, caseStudiesPage] = await Promise.all([
+  const [homePage, publishedProperties, publishedCaseStudies, propertiesPage, caseStudiesPage] = await Promise.all([
     getHomePage(),
     getPublishedProperties(),
+    getPublishedCaseStudies(),
     getSingletonPage("PROPERTIES_INDEX"),
     getSingletonPage("CASE_STUDIES_INDEX"),
   ]);
@@ -322,14 +316,15 @@ export default async function Home() {
   const legacyHeroHeadline = "Vertically-Integrated Real Estate & PropTech Investments";
   const legacyHeroSubheadline =
     "Build wealth through institutional-grade real estate opportunities guided by data, technology, and disciplined execution.";
+  const defaultHeroHeadline = "Fast, Flexible & Reliable Financing For Real Estate Investors";
   const defaultHeroSubheadline =
-    "Access reliable financing for acquisitions, rehab execution, bridge needs, and refinance strategies with a team built for real estate operators.";
+    "Access reliable funding for acquisitions, renovations, bridge loans, and refinancing — all tailored to your investment strategy.";
   const heroHeadline =
-    homePage?.heroHeadline === legacyHeroHeadline
-      ? "Get Financing for Your Real Estate Deals"
-      : homePage?.heroHeadline ?? "Get Financing for Your Real Estate Deals";
+    homePage?.heroHeadline === legacyHeroHeadline || homePage?.heroHeadline === "Get Financing for Your Real Estate Deals"
+      ? defaultHeroHeadline
+      : homePage?.heroHeadline ?? defaultHeroHeadline;
   const heroSubheadline =
-    homePage?.heroSubheadline === legacyHeroSubheadline
+    homePage?.heroSubheadline === legacyHeroSubheadline || homePage?.heroSubheadline === "Access reliable financing for acquisitions, rehab execution, bridge needs, and refinance strategies with a team built for real estate operators."
       ? defaultHeroSubheadline
       : homePage?.heroSubheadline ?? defaultHeroSubheadline;
   const primaryCta = {
@@ -351,7 +346,6 @@ export default async function Home() {
   const homeMetrics = homePage?.metrics ?? [];
   const homeSegments = homePage?.segments ?? [];
   const homePlatformCards = homePage?.platformCards ?? [];
-  const homeCaseHighlights = homePage?.caseHighlights ?? [];
   const homeTestimonials = homePage?.testimonials ?? [];
   const portfolioValueDisplay =
     homePage?.portfolioValueDisplay ?? "$920,000 (Illustrative)";
@@ -393,13 +387,6 @@ export default async function Home() {
       ),
     }),
   );
-  const caseHighlights = (
-    homeCaseHighlights.length ? homeCaseHighlights : fallbackCaseHighlights
-  ).map((highlight) => ({
-    ...highlight,
-    ctaHref: normalizeRemovedHref(highlight.ctaHref, "/case-studies"),
-    ctaLabel: normalizeRemovedLabel(highlight.ctaHref, highlight.ctaLabel, "See Case Studies"),
-  }));
   const whoWeHelpShowcaseCards = segments.slice(0, 4).map((segment, index) => ({
     ...whoWeHelpVisuals[index % whoWeHelpVisuals.length],
     body: segment.body,
@@ -463,38 +450,28 @@ export default async function Home() {
 
     return [...mappedCards, ...fallbackCards].slice(0, 3);
   })();
-  const featuredPropertiesShowcase = {
-    eyebrowTitle: "Insights & Legal Perspectives",
-    eyebrowSubtitle:
-      caseStudiesPage?.intro ??
-      "Examples of investment strategies, execution frameworks, and lessons learned across real estate asset types.",
-    main: {
-      body: caseHighlights[0]?.body ?? fallbackCaseHighlights[0].body,
-      ctaLabel: caseHighlights[0]?.ctaLabel ?? fallbackCaseHighlights[0].ctaLabel,
-      href: caseHighlights[0]?.ctaHref ?? "/case-studies",
-      image: featuredPropertiesLeftImage,
-      title: caseHighlights[0]?.title ?? fallbackCaseHighlights[0].title,
-    },
-    sideTop: {
-      body: caseHighlights[1]?.body ?? fallbackCaseHighlights[1].body,
-      ctaLabel: caseHighlights[1]?.ctaLabel ?? fallbackCaseHighlights[1].ctaLabel,
-      href: caseHighlights[1]?.ctaHref ?? "/case-studies",
-      image: featuredPropertiesRightUpperImage,
-      title: caseHighlights[1]?.title ?? fallbackCaseHighlights[1].title,
-    },
-    sideBottom: {
-      body: caseHighlights[2]?.body ?? fallbackCaseHighlights[2].body,
-      ctaLabel: caseHighlights[2]?.ctaLabel ?? fallbackCaseHighlights[2].ctaLabel,
-      href: caseHighlights[2]?.ctaHref ?? "/case-studies",
-      image: featuredPropertiesRightLowerImage,
-      title: caseHighlights[2]?.title ?? fallbackCaseHighlights[2].title,
-    },
-  };
-  const featuredShowcaseCards = [
-    featuredPropertiesShowcase.main,
-    featuredPropertiesShowcase.sideTop,
-    featuredPropertiesShowcase.sideBottom,
-  ];
+  const featuredShowcaseHeading = "Insights & Legal Perspectives";
+  const featuredShowcaseSubtitle =
+    caseStudiesPage?.intro ??
+    "Examples of investment strategies, execution frameworks, and lessons learned across real estate asset types.";
+  const featuredShowcaseCards = publishedCaseStudies.slice(0, 3).map((caseStudy, index) => ({
+    body: caseStudy.overview,
+    ctaLabel: caseStudiesPage?.ctaLabel ?? "See Case Studies",
+    href: `/case-studies/${caseStudy.slug}`,
+    image:
+      caseStudy.primaryImage?.mediaFile.blobUrl ??
+      caseStudy.images?.[0]?.mediaFile.blobUrl ??
+      caseStudyShowcaseFallbackImages[index % caseStudyShowcaseFallbackImages.length],
+    imageAlt:
+      caseStudy.primaryImage?.altText ??
+      caseStudy.primaryImage?.mediaFile.altText ??
+      caseStudy.images?.[0]?.altText ??
+      caseStudy.images?.[0]?.mediaFile.altText ??
+      caseStudy.title,
+    title: caseStudy.title,
+  }));
+  const featuredShowcasePrimaryCard = featuredShowcaseCards[0] ?? null;
+  const featuredShowcaseSecondaryCards = featuredShowcaseCards.slice(1);
   const aboutSection = {
     title: homePage?.aboutSectionTitle ?? "Why Pryceless Ventures, LLC",
     paragraphs: [
@@ -521,7 +498,13 @@ export default async function Home() {
     imageUrl: homePage?.aboutSectionImageUrl ?? aboutSectionImage.src,
   };
   const heroHeadingLines =
-    heroHeadline === "Get Financing for Your Real Estate Deals"
+    heroHeadline === "Fast, Flexible & Reliable Financing For Real Estate Investors"
+      ? [
+          "Fast, Flexible & Reliable",
+          "Financing For Real",
+          "Estate Investors",
+        ]
+      : heroHeadline === "Get Financing for Your Real Estate Deals"
       ? [
           "Get Financing",
           "for Your",
@@ -529,10 +512,10 @@ export default async function Home() {
         ]
       : [heroHeadline];
   const heroSubheadlineLines =
-    heroSubheadline === defaultHeroSubheadline
+    heroSubheadline === "Access reliable funding for acquisitions, renovations, bridge loans, and refinancing — all tailored to your investment strategy."
       ? [
-          "Access reliable financing for acquisitions, rehab execution,",
-          "bridge needs, and refinance strategies.",
+          "Access reliable funding for acquisitions, renovations, bridge loans,",
+          "and refinancing — all tailored to your investment strategy.",
         ]
       : null;
   const homeSectionTitleClassName =
@@ -543,25 +526,33 @@ export default async function Home() {
     <SiteShell>
       <section className="w-full">
         <div
-          className="relative isolate overflow-hidden bg-[#09152d] min-h-[620px] sm:min-h-[660px] lg:min-h-0 lg:aspect-[3327/1392]"
+          className="pv-financing-hero relative isolate overflow-hidden bg-[#09152d] min-h-[720px] sm:min-h-[660px] lg:min-h-0 lg:aspect-[3327/1392]"
         >
+          <Image
+            src={mobileHeroSectionImage}
+            alt="Luxury property exterior"
+            fill
+            priority
+            className="pv-financing-hero-mobile-image block sm:hidden object-cover object-center"
+            sizes="100vw"
+          />
           <Image
             src={heroSectionImage}
             alt="Luxury property exterior"
             fill
             priority
-            className="object-cover object-[72%_22%] scale-[1.08] sm:scale-100 sm:object-center"
+            className="hidden sm:block object-cover object-[72%_22%] scale-[1.08] sm:scale-100 sm:object-center"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,18,39,0.72)_0%,rgba(7,18,39,0.5)_30%,rgba(7,18,39,0.22)_56%,rgba(7,18,39,0.78)_100%)] lg:bg-[linear-gradient(90deg,rgba(7,18,39,0.95)_0%,rgba(7,18,39,0.92)_15%,rgba(7,18,39,0.8)_27%,rgba(7,18,39,0.54)_39%,rgba(7,18,39,0.24)_52%,rgba(7,18,39,0.06)_64%,rgba(7,18,39,0)_74%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,14,31,0.14)_0%,rgba(5,14,31,0)_34%,rgba(5,14,31,0.16)_62%,rgba(5,14,31,0.5)_100%)] lg:bg-[linear-gradient(180deg,rgba(5,14,31,0.12)_0%,rgba(5,14,31,0.02)_36%,rgba(5,14,31,0.12)_100%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_36%,rgba(199,152,114,0.3)_0%,rgba(199,152,114,0.14)_18%,rgba(199,152,114,0)_42%)] lg:hidden" />
+          <div className="pv-financing-hero-mobile-overlay-primary absolute inset-0 bg-[linear-gradient(180deg,rgba(7,18,39,0)_0%,rgba(7,18,39,0.02)_35%,rgba(7,18,39,0.85)_75%,rgba(7,18,39,0.98)_100%)] lg:bg-[linear-gradient(90deg,rgba(7,18,39,0.95)_0%,rgba(7,18,39,0.92)_15%,rgba(7,18,39,0.8)_27%,rgba(7,18,39,0.54)_39%,rgba(7,18,39,0.24)_52%,rgba(7,18,39,0.06)_64%,rgba(7,18,39,0)_74%)]" />
+          <div className="pv-financing-hero-mobile-overlay-secondary absolute inset-0 bg-[linear-gradient(180deg,rgba(5,14,31,0)_0%,rgba(5,14,31,0)_30%,rgba(5,14,31,0.3)_60%,rgba(5,14,31,0.8)_100%)] lg:bg-[linear-gradient(180deg,rgba(5,14,31,0.12)_0%,rgba(5,14,31,0.02)_36%,rgba(5,14,31,0.12)_100%)]" />
+          <div className="pv-financing-hero-mobile-overlay-glow absolute inset-0 bg-[radial-gradient(circle_at_78%_36%,rgba(199,152,114,0.3)_0%,rgba(199,152,114,0.14)_18%,rgba(199,152,114,0)_42%)] lg:hidden" />
           <div className="absolute inset-y-0 left-0 hidden w-[62%] bg-[linear-gradient(90deg,rgba(9,20,42,0.56)_0%,rgba(9,20,42,0.36)_36%,rgba(9,20,42,0.12)_70%,rgba(9,20,42,0)_100%)] sm:w-[52%] lg:block lg:w-[44%]" />
 
-          <div className="relative z-10 flex h-full w-full items-start px-5 pb-[52px] pt-[292px] sm:px-10 sm:py-[64px] lg:items-start lg:pl-[135px] lg:pr-[135px] lg:pt-[128px]">
-            <div className="flex w-full max-w-[372px] flex-col gap-[16px] sm:max-w-[520px] sm:gap-[22px] lg:max-w-[650px] lg:gap-[24px]">
+          <div className="pv-financing-hero-mobile-content relative z-10 flex h-full w-full items-end px-5 pb-[12px] pt-[340px] sm:items-start sm:px-10 sm:py-[64px] lg:items-start lg:pl-[135px] lg:pr-[135px] lg:pt-[128px]">
+            <div className="pv-financing-hero-mobile-stack flex w-full max-w-[372px] flex-col gap-[16px] sm:max-w-[520px] sm:gap-[22px] lg:max-w-[650px] lg:gap-[24px]">
               <h1
-                className="font-semibold text-[29px] leading-[1.06] tracking-[-0.055em] sm:text-[35px] sm:leading-[1.08] lg:text-[46px] lg:font-normal lg:leading-[1.2] lg:tracking-[-0.016em]"
+                className="pv-financing-hero-mobile-title font-bold text-[32px] leading-[1.1] tracking-[-0.03em] sm:text-[38px] sm:leading-[1.06] lg:text-[46px] lg:font-normal lg:leading-[1.2] lg:tracking-[-0.016em]"
                 style={{ color: "#ffffff", wordSpacing: "0.02em" }}
               >
                 {heroHeadingLines.length > 1 ? (
@@ -592,7 +583,7 @@ export default async function Home() {
 
               <div className="flex flex-col gap-[16px] sm:gap-[22px] lg:gap-[24px]">
                 <p
-                  className="max-w-[340px] text-[16px] font-normal leading-[1.56] tracking-[-0.012em] text-white/95 sm:max-w-[470px] sm:text-[20px] lg:w-[560px] lg:max-w-none lg:text-[14.5px] lg:leading-[1.62] lg:tracking-[0]"
+                  className="pv-financing-hero-mobile-subtitle max-w-[340px] text-[15px] font-medium leading-[1.5] tracking-[0] text-white/95 sm:max-w-[470px] sm:text-[20px] lg:w-[560px] lg:max-w-none lg:text-[14.5px] lg:font-normal lg:leading-[1.62] lg:tracking-[0]"
                   style={{ color: "rgba(255,255,255,0.94)", wordSpacing: "0.03em" }}
                 >
                   {heroSubheadlineLines ? (
@@ -609,10 +600,10 @@ export default async function Home() {
                   )}
                 </p>
 
-                <div className="flex w-full max-w-[372px] flex-row flex-wrap items-center gap-3.5 sm:w-auto sm:max-w-none sm:flex-nowrap sm:gap-4 lg:gap-[18px]">
+                <div className="pv-financing-hero-mobile-actions flex w-full max-w-[372px] flex-row flex-wrap items-center gap-3.5 sm:w-auto sm:max-w-none sm:flex-nowrap sm:gap-4 lg:gap-[18px]">
                   <Link
                     href={primaryCta.href}
-                    className="inline-flex min-h-[44px] min-w-0 flex-1 items-center justify-center rounded-[12px] bg-white px-4 py-2.5 text-[14px] font-semibold tracking-[-0.02em] text-[#111827] shadow-[0_14px_32px_rgba(0,0,0,0.16)] pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 hover:bg-white sm:h-[50px] sm:w-[214px] sm:flex-none sm:px-5 sm:py-2.5 sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(6,18,37,0.12)]"
+                    className="pv-financing-hero-mobile-button pv-financing-hero-mobile-button-primary inline-flex min-h-[44px] min-w-0 flex-1 items-center justify-center rounded-[12px] bg-white px-4 py-2.5 text-[14px] font-semibold tracking-[-0.02em] text-[#111827] shadow-[0_14px_32px_rgba(0,0,0,0.16)] pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 hover:bg-white sm:h-[50px] sm:w-[214px] sm:flex-none sm:px-5 sm:py-2.5 sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(6,18,37,0.12)]"
                   >
                     <span className="whitespace-nowrap lg:inline-flex lg:h-[18px] lg:w-[126px] lg:items-center lg:justify-center lg:text-center">
                       {primaryCta.label}
@@ -621,7 +612,7 @@ export default async function Home() {
 
                   <Link
                     href={secondaryCta.href}
-                    className="inline-flex min-h-[44px] min-w-0 flex-1 items-center justify-center rounded-[12px] bg-[#c79872] px-4 py-2.5 text-[14px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_32px_rgba(35,18,10,0.18)] pv-interactive-button transition-[transform,box-shadow,background-color,filter] duration-300 hover:bg-[#c79872] hover:text-white sm:h-[50px] sm:w-[214px] sm:flex-none sm:px-5 sm:py-2.5 sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(35,18,10,0.1)]"
+                    className="pv-financing-hero-mobile-button pv-financing-hero-mobile-button-secondary inline-flex min-h-[44px] min-w-0 flex-1 items-center justify-center rounded-[12px] bg-[#c79872] px-4 py-2.5 text-[14px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_32px_rgba(35,18,10,0.18)] pv-interactive-button transition-[transform,box-shadow,background-color,filter] duration-300 hover:bg-[#c79872] hover:text-white sm:h-[50px] sm:w-[214px] sm:flex-none sm:px-5 sm:py-2.5 sm:text-[17px] lg:h-[31px] lg:w-[154px] lg:rounded-[4px] lg:px-0 lg:py-0 lg:text-[12.5px] lg:font-bold lg:leading-[18px] lg:tracking-[0] lg:shadow-[0_2px_5px_rgba(35,18,10,0.1)]"
                     style={{ color: "#ffffff" }}
                   >
                     <span className="whitespace-nowrap lg:inline-flex lg:h-[18px] lg:w-[126px] lg:items-center lg:justify-center lg:text-center" style={{ color: "#ffffff" }}>
@@ -970,174 +961,186 @@ export default async function Home() {
         </div>
       </section>
 
-      <section
-        className="bg-[rgba(17,40,62,1)] px-4 pb-[56px] pt-[44px] sm:px-6 sm:pb-[64px] sm:pt-[48px] lg:px-[145px] lg:pb-[68px] lg:pt-[52px]"
-        style={{ fontFamily: "var(--font-poppins), sans-serif" }}
-      >
-        <div className="mx-auto w-full">
-          <div className="mx-auto flex max-w-[760px] flex-col items-center text-center lg:max-w-[860px]">
-            <h2
-              className={`text-center text-white ${homeSectionTitleClassName}`}
-              style={{ color: "#ffffff" }}
-            >
-              {featuredPropertiesShowcase.eyebrowTitle}
-            </h2>
-            <p
-              className={`mt-[6px] max-w-[720px] text-center text-white/88 ${homeSectionSubtitleClassName} lg:max-w-[760px]`}
-              style={{ color: "rgba(255,255,255,0.88)" }}
-            >
-              {featuredPropertiesShowcase.eyebrowSubtitle}
-            </p>
-          </div>
-
-          <div className="mx-auto mt-[34px] sm:hidden">
-            <FeaturedShowcaseCarousel items={featuredShowcaseCards} />
-          </div>
-
-          <div className="mx-auto mt-[34px] hidden max-w-[1088px] gap-[24px] sm:grid lg:mt-[38px] lg:grid-cols-[430px_630px] lg:items-start lg:gap-[28px]">
-            <article className="group flex h-full flex-col rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_20px_42px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7] lg:min-h-[458px]">
-              <div className="relative mx-auto h-auto w-full max-w-[386px] overflow-hidden rounded-[12px] lg:h-[224px] lg:w-[386px] lg:max-w-none" style={{ aspectRatio: "386 / 224" }}>
-                <Image
-                  alt={featuredPropertiesShowcase.main.title}
-                  className="object-cover"
-                  fill
-                  sizes="(max-width: 1023px) 100vw, 386px"
-                  src={featuredPropertiesShowcase.main.image}
-                />
-              </div>
-
-              <div className="mt-[12px] px-[1px]">
-                <h3
-                  className="text-[19px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:text-[18.2px] lg:leading-[26px] lg:tracking-[0]"
-                  style={{
-                    WebkitBoxOrient: "vertical",
-                    WebkitLineClamp: 2,
-                    display: "-webkit-box",
-                    overflow: "hidden",
-                  }}
-                >
-                  {featuredPropertiesShowcase.main.title}
-                </h3>
-                <p
-                  className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:text-[14px] lg:leading-[20px] lg:tracking-[0]"
-                  style={{
-                    WebkitBoxOrient: "vertical",
-                    WebkitLineClamp: 5,
-                    display: "-webkit-box",
-                    overflow: "hidden",
-                  }}
-                >
-                  {featuredPropertiesShowcase.main.body}
-                </p>
-              </div>
-
-              <div className="mt-auto px-[1px] pt-[16px]">
-                <Link
-                  className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
-                  href={featuredPropertiesShowcase.main.href}
-                  style={{ color: "#ffffff" }}
-                >
-                  {featuredPropertiesShowcase.main.ctaLabel}
-                </Link>
-              </div>
-            </article>
-
-             <div className="grid gap-[20px] lg:gap-[28px]">
-              <article className="group grid rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_18px_36px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7] md:grid-cols-[196px_1fr] md:items-center md:gap-[24px] lg:h-[228px]">
-                <div className="relative mx-auto h-auto w-full max-w-[196px] overflow-hidden rounded-[12px] lg:h-[184px] lg:w-[196px] lg:max-w-none" style={{ aspectRatio: "196 / 184" }}>
-                  <Image
-                    alt={featuredPropertiesShowcase.sideTop.title}
-                    className="object-cover"
-                    fill
-                    sizes="(max-width: 767px) 196px, 196px"
-                    src={featuredPropertiesShowcase.sideTop.image}
-                  />
-                </div>
-
-                <div className="flex h-full flex-col justify-center pt-[12px] md:pt-0">
-                  <h3
-                    className="text-[20px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:max-w-[320px] lg:text-[18.5px] lg:leading-[26px] lg:tracking-[0]"
-                    style={{
-                      WebkitBoxOrient: "vertical",
-                      WebkitLineClamp: 2,
-                      display: "-webkit-box",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {featuredPropertiesShowcase.sideTop.title}
-                  </h3>
-                  <p
-                    className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:max-w-[320px] lg:text-[14px] lg:leading-[20px] lg:tracking-[0]"
-                    style={{
-                      WebkitBoxOrient: "vertical",
-                      WebkitLineClamp: 2,
-                      display: "-webkit-box",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {featuredPropertiesShowcase.sideTop.body}
-                  </p>
-                  <div className="mt-[14px]">
-                    <Link
-                      className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
-                      href={featuredPropertiesShowcase.sideTop.href}
-                      style={{ color: "#ffffff" }}
-                    >
-                      {featuredPropertiesShowcase.sideTop.ctaLabel}
-                    </Link>
-                  </div>
-                </div>
-              </article>
-
-              <article className="group grid rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_18px_36px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7] md:grid-cols-[196px_1fr] md:items-center md:gap-[24px] lg:h-[228px]">
-                <div className="relative mx-auto h-auto w-full max-w-[196px] overflow-hidden rounded-[12px] lg:h-[184px] lg:w-[196px] lg:max-w-none" style={{ aspectRatio: "196 / 184" }}>
-                  <Image
-                    alt={featuredPropertiesShowcase.sideBottom.title}
-                    className="object-cover"
-                    fill
-                    sizes="(max-width: 767px) 196px, 196px"
-                    src={featuredPropertiesShowcase.sideBottom.image}
-                  />
-                </div>
-
-                <div className="flex h-full flex-col justify-center pt-[12px] md:pt-0">
-                  <h3
-                    className="text-[20px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:max-w-[320px] lg:text-[18.5px] lg:leading-[26px] lg:tracking-[0]"
-                    style={{
-                      WebkitBoxOrient: "vertical",
-                      WebkitLineClamp: 2,
-                      display: "-webkit-box",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {featuredPropertiesShowcase.sideBottom.title}
-                  </h3>
-                  <p
-                    className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:max-w-[320px] lg:text-[14px] lg:leading-[20px] lg:tracking-[0]"
-                    style={{
-                      WebkitBoxOrient: "vertical",
-                      WebkitLineClamp: 2,
-                      display: "-webkit-box",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {featuredPropertiesShowcase.sideBottom.body}
-                  </p>
-                  <div className="mt-[14px]">
-                    <Link
-                      className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
-                      href={featuredPropertiesShowcase.sideBottom.href}
-                      style={{ color: "#ffffff" }}
-                    >
-                      {featuredPropertiesShowcase.sideBottom.ctaLabel}
-                    </Link>
-                  </div>
-                </div>
-              </article>
+      {featuredShowcasePrimaryCard ? (
+        <section
+          className="bg-[rgba(17,40,62,1)] px-4 pb-[56px] pt-[44px] sm:px-6 sm:pb-[64px] sm:pt-[48px] lg:px-[145px] lg:pb-[68px] lg:pt-[52px]"
+          style={{ fontFamily: "var(--font-poppins), sans-serif" }}
+        >
+          <div className="mx-auto w-full">
+            <div className="mx-auto flex max-w-[760px] flex-col items-center text-center lg:max-w-[860px]">
+              <h2
+                className={`text-center text-white ${homeSectionTitleClassName}`}
+                style={{ color: "#ffffff" }}
+              >
+                {featuredShowcaseHeading}
+              </h2>
+              <p
+                className={`mt-[6px] max-w-[720px] text-center text-white/88 ${homeSectionSubtitleClassName} lg:max-w-[760px]`}
+                style={{ color: "rgba(255,255,255,0.88)" }}
+              >
+                {featuredShowcaseSubtitle}
+              </p>
             </div>
+
+            <div className="mx-auto mt-[34px] sm:hidden">
+              <FeaturedShowcaseCarousel items={featuredShowcaseCards} />
+            </div>
+
+            {featuredShowcaseSecondaryCards.length ? (
+              <div className="mx-auto mt-[34px] hidden max-w-[1088px] gap-[24px] sm:grid lg:mt-[38px] lg:grid-cols-[430px_630px] lg:items-start lg:gap-[28px]">
+                <article className="group flex h-full flex-col rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_20px_42px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7] lg:min-h-[458px]">
+                  <div className="relative mx-auto h-auto w-full max-w-[386px] overflow-hidden rounded-[12px] lg:h-[224px] lg:w-[386px] lg:max-w-none" style={{ aspectRatio: "386 / 224" }}>
+                    <Image
+                      alt={featuredShowcasePrimaryCard.imageAlt}
+                      className="object-cover"
+                      fill
+                      sizes="(max-width: 1023px) 100vw, 386px"
+                      src={featuredShowcasePrimaryCard.image}
+                    />
+                  </div>
+
+                  <div className="mt-[12px] px-[1px]">
+                    <h3
+                      className="text-[19px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:text-[18.2px] lg:leading-[26px] lg:tracking-[0]"
+                      style={{
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {featuredShowcasePrimaryCard.title}
+                    </h3>
+                    <p
+                      className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:text-[14px] lg:leading-[20px] lg:tracking-[0]"
+                      style={{
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 5,
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {featuredShowcasePrimaryCard.body}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto px-[1px] pt-[16px]">
+                    <Link
+                      className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
+                      href={featuredShowcasePrimaryCard.href}
+                      style={{ color: "#ffffff" }}
+                    >
+                      {featuredShowcasePrimaryCard.ctaLabel}
+                    </Link>
+                  </div>
+                </article>
+
+                <div className="grid gap-[20px] lg:gap-[28px]">
+                  {featuredShowcaseSecondaryCards.map((card) => (
+                    <article
+                      className="group grid rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_18px_36px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7] md:grid-cols-[196px_1fr] md:items-center md:gap-[24px] lg:h-[228px]"
+                      key={card.href}
+                    >
+                      <div className="relative mx-auto h-auto w-full max-w-[196px] overflow-hidden rounded-[12px] lg:h-[184px] lg:w-[196px] lg:max-w-none" style={{ aspectRatio: "196 / 184" }}>
+                        <Image
+                          alt={card.imageAlt}
+                          className="object-cover"
+                          fill
+                          sizes="(max-width: 767px) 196px, 196px"
+                          src={card.image}
+                        />
+                      </div>
+
+                      <div className="flex h-full flex-col justify-center pt-[12px] md:pt-0">
+                        <h3
+                          className="text-[20px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:max-w-[320px] lg:text-[18.5px] lg:leading-[26px] lg:tracking-[0]"
+                          style={{
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            display: "-webkit-box",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {card.title}
+                        </h3>
+                        <p
+                          className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:max-w-[320px] lg:text-[14px] lg:leading-[20px] lg:tracking-[0]"
+                          style={{
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            display: "-webkit-box",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {card.body}
+                        </p>
+                        <div className="mt-[14px]">
+                          <Link
+                            className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
+                            href={card.href}
+                            style={{ color: "#ffffff" }}
+                          >
+                            {card.ctaLabel}
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="mx-auto mt-[34px] hidden max-w-[430px] sm:block lg:mt-[38px]">
+                <article className="group flex h-full flex-col rounded-[18px] border border-[#dde2e8] bg-white p-[22px] shadow-[0_1px_0_rgba(255,255,255,0.06)] pv-interactive-card [--pv-hover-card-shadow:0_20px_42px_rgba(15,23,42,0.12)] transition-[transform,box-shadow,border-color] duration-300 hover:border-[#d5dde7] lg:min-h-[458px]">
+                  <div className="relative mx-auto h-auto w-full max-w-[386px] overflow-hidden rounded-[12px] lg:h-[224px] lg:w-[386px] lg:max-w-none" style={{ aspectRatio: "386 / 224" }}>
+                    <Image
+                      alt={featuredShowcasePrimaryCard.imageAlt}
+                      className="object-cover"
+                      fill
+                      sizes="(max-width: 1023px) 100vw, 386px"
+                      src={featuredShowcasePrimaryCard.image}
+                    />
+                  </div>
+
+                  <div className="mt-[12px] px-[1px]">
+                    <h3
+                      className="text-[19px] font-bold leading-[1.18] tracking-[-0.02em] text-[#1f2940] lg:text-[18.2px] lg:leading-[26px] lg:tracking-[0]"
+                      style={{
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {featuredShowcasePrimaryCard.title}
+                    </h3>
+                    <p
+                      className="mt-[9px] text-[14.5px] font-normal leading-[1.58] tracking-[-0.01em] text-[#6b7280] lg:text-[14px] lg:leading-[20px] lg:tracking-[0]"
+                      style={{
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 5,
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {featuredShowcasePrimaryCard.body}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto px-[1px] pt-[16px]">
+                    <Link
+                      className="inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-[4px] bg-[#11283e] px-[20px] text-[12.5px] font-semibold leading-[16px] tracking-[0] text-white pv-interactive-button transition-[transform,box-shadow,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_12px_24px_rgba(17,40,62,0.16)] hover:bg-[#102236]"
+                      href={featuredShowcasePrimaryCard.href}
+                      style={{ color: "#ffffff" }}
+                    >
+                      {featuredShowcasePrimaryCard.ctaLabel}
+                    </Link>
+                  </div>
+                </article>
+              </div>
+            )}
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {testimonials.length ? (
         <section className="relative overflow-hidden bg-white">

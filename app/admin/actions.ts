@@ -9,7 +9,7 @@ import { z } from "zod";
 import { requireAdminSession } from "@/lib/authz";
 import type { AdminFlash } from "@/lib/admin-flash";
 import { isAzureBlobStorageUrl } from "@/lib/blob";
-import { singletonPageGroups } from "@/lib/content-blueprint";
+import { singletonPageGroups, singletonPageSeed } from "@/lib/content-blueprint";
 import { parseFormFieldsEditorValue } from "@/lib/form-fields";
 import {
   deleteFallbackLoanProgram,
@@ -106,18 +106,27 @@ const calculatorSchema = baseEntitySchema.extend({
 });
 
 const loanProgramSchema = baseEntitySchema.extend({
+  titleTail: z.string().nullish(),
+  heroBadgeOne: z.string().nullish(),
+  heroBadgeTwo: z.string().nullish(),
+  heroBadgeThree: z.string().nullish(),
   shortDescription: z.string().min(10),
   fullDescription: z.string().min(10),
-  interestRate: z.string().optional(),
-  ltv: z.string().optional(),
-  loanTerm: z.string().optional(),
-  fees: z.string().optional(),
-  minAmount: z.string().optional(),
-  maxAmount: z.string().optional(),
-  keyHighlights: z.string().optional(),
-  crmTag: z.string().optional(),
-  imageUrl: z.string().optional(),
-  imageAlt: z.string().optional(),
+  interestRate: z.string().nullish(),
+  ltv: z.string().nullish(),
+  loanTerm: z.string().nullish(),
+  fees: z.string().nullish(),
+  minAmount: z.string().nullish(),
+  maxAmount: z.string().nullish(),
+  keyHighlights: z.string().nullish(),
+  highlightSubheadline: z.string().nullish(),
+  insightTitle: z.string().nullish(),
+  insightBody: z.string().nullish(),
+  crmTag: z.string().nullish(),
+  imageUrl: z.string().nullish(),
+  imageAlt: z.string().nullish(),
+  highlightImageUrl: z.string().nullish(),
+  highlightImageAlt: z.string().nullish(),
   isActive: z.boolean(),
   sortOrder: z.number().int().min(0),
 });
@@ -141,6 +150,14 @@ const parseSimpleLines = (value: string | undefined) =>
 
 const parsePipeRows = (value: string | undefined) =>
   parseSimpleLines(value).map((line) => line.split("|").map((segment) => segment.trim()));
+const serializeSimpleLines = (values: string[]) => (values.length ? values.join("\n") : null);
+const normalizeLoanProgramOverviewItems = (rows: string[][]) =>
+  rows
+    .filter((row) => row[0])
+    .map((row) => ({
+      body: row[1] || null,
+      title: row[0],
+    }));
 
 const parsePropertyStandoutRows = (value: string | undefined) =>
   parsePipeRows(value)
@@ -196,6 +213,56 @@ const parseSingletonPageGroupRows = (
       title: row[0]?.trim() ?? "",
     }))
     .filter((row) => row.title);
+};
+
+const getSingletonPageSeedRecord = (key: string) =>
+  singletonPageSeed.find((page) => page.key === key) ?? null;
+
+const getOrCreateSingletonPageRecord = async (key: string) => {
+  const existingPage = await prisma.singletonPage.findUnique({
+    where: { key: key as never },
+    select: { id: true, routePath: true, updatedAt: true },
+  });
+
+  if (existingPage) {
+    return existingPage;
+  }
+
+  const seedPage = getSingletonPageSeedRecord(key);
+
+  if (!seedPage) {
+    return null;
+  }
+
+  const createdPage = await prisma.singletonPage.create({
+    data: {
+      key: seedPage.key,
+      routePath: seedPage.routePath,
+      pageTitle: seedPage.pageTitle,
+      intro: seedPage.intro,
+      disclaimer: seedPage.disclaimer,
+      ctaLabel: seedPage.ctaLabel,
+      ctaHref: seedPage.ctaHref,
+      lifecycleStatus: "PUBLISHED",
+    },
+    select: { id: true, routePath: true, updatedAt: true },
+  });
+
+  if (seedPage.items.length) {
+    await prisma.singletonPageItem.createMany({
+      data: seedPage.items.map((item, index) => ({
+        pageId: createdPage.id,
+        groupKey: item.groupKey,
+        title: item.title,
+        body: item.body ?? null,
+        ctaLabel: item.ctaLabel ?? null,
+        ctaHref: item.ctaHref ?? null,
+        sortOrder: index,
+      })),
+    });
+  }
+
+  return createdPage;
 };
 
 const parseImages = (formData: FormData) =>
@@ -514,6 +581,11 @@ const isFormSchemaCompatibilityError = (error: unknown) => {
 };
 
 const isLoanProgramSchemaCompatibilityError = (error: unknown) => {
+  // Never treat a plain JS TypeError as a schema compatibility error
+  if (error instanceof TypeError) {
+    return false;
+  }
+
   const message =
     error instanceof Error
       ? error.message
@@ -542,6 +614,8 @@ const getExistingLoanProgramContext = async (id: string) => {
         id: true,
         imageAlt: true,
         imageUrl: true,
+        highlightImageUrl: true,
+        highlightImageAlt: true,
         interestRate: true,
         isActive: true,
         keyHighlights: true,
@@ -554,6 +628,21 @@ const getExistingLoanProgramContext = async (id: string) => {
         slug: true,
         sortOrder: true,
         title: true,
+        titleTail: true,
+        heroBadgeOne: true,
+        heroBadgeTwo: true,
+        heroBadgeThree: true,
+        highlightSubheadline: true,
+        insightTitle: true,
+        insightBody: true,
+        highlights: {
+          orderBy: { sortOrder: "asc" },
+          select: { highlight: true },
+        },
+        overviewItems: {
+          orderBy: { sortOrder: "asc" },
+          select: { title: true, body: true },
+        },
       },
     });
   } catch (error) {
@@ -1337,12 +1426,25 @@ export const saveLoanProgram = async (formData: FormData) => {
 
   const id = await getSubmittedId(formData, "loan-programs");
   const existingLoanProgram = id ? await getExistingLoanProgramContext(id) : null;
+  const existingLoanProgramBaseSlug =
+    existingLoanProgram && "baseSlug" in existingLoanProgram
+      ? existingLoanProgram.baseSlug
+      : existingLoanProgram?.slug ?? null;
   const editPath = id ? `/admin/loan-programs/${id}` : "/admin/loan-programs/new";
+  const highlights = parseSimpleLines(asOptionalString(formData.get("highlightsText")));
+  const overviewItems = normalizeLoanProgramOverviewItems(
+    parsePipeRows(asOptionalString(formData.get("overviewItemsText"))),
+  );
+  const serializedHighlights = serializeSimpleLines(highlights);
   const parsed = loanProgramSchema.safeParse({
     id,
     title: String(formData.get("title") ?? "").trim(),
     slug: slugify(String(formData.get("slug") ?? formData.get("title") ?? "")),
     lifecycleStatus: intentToLifecycleStatus(formData),
+    titleTail: asOptionalString(formData.get("titleTail")),
+    heroBadgeOne: asOptionalString(formData.get("heroBadgeOne")),
+    heroBadgeTwo: asOptionalString(formData.get("heroBadgeTwo")),
+    heroBadgeThree: asOptionalString(formData.get("heroBadgeThree")),
     shortDescription: String(formData.get("shortDescription") ?? "").trim(),
     fullDescription: String(formData.get("fullDescription") ?? "").trim(),
     interestRate: asOptionalString(formData.get("interestRate")),
@@ -1351,10 +1453,15 @@ export const saveLoanProgram = async (formData: FormData) => {
     fees: asOptionalString(formData.get("fees")),
     minAmount: asOptionalString(formData.get("minAmount")),
     maxAmount: asOptionalString(formData.get("maxAmount")),
-    keyHighlights: asOptionalString(formData.get("keyHighlights")),
+    keyHighlights: serializedHighlights,
+    highlightSubheadline: asOptionalString(formData.get("highlightSubheadline")),
+    insightTitle: asOptionalString(formData.get("insightTitle")),
+    insightBody: asOptionalString(formData.get("insightBody")),
     crmTag: asOptionalString(formData.get("crmTag")),
     imageUrl: asOptionalString(formData.get("imageUrl")),
     imageAlt: asOptionalString(formData.get("imageAlt")),
+    highlightImageUrl: asOptionalString(formData.get("highlightImageUrl")),
+    highlightImageAlt: asOptionalString(formData.get("highlightImageAlt")),
     isActive: Boolean(formData.get("isActive")),
     sortOrder: Number(formData.get("sortOrder") ?? 0),
   });
@@ -1374,57 +1481,87 @@ export const saveLoanProgram = async (formData: FormData) => {
   let loanProgram;
 
   try {
+    const loanProgramFields = {
+      title: loanProgramData.title,
+      slug: loanProgramData.slug,
+      lifecycleStatus: loanProgramData.lifecycleStatus,
+      titleTail: loanProgramData.titleTail,
+      heroBadgeOne: loanProgramData.heroBadgeOne,
+      heroBadgeTwo: loanProgramData.heroBadgeTwo,
+      heroBadgeThree: loanProgramData.heroBadgeThree,
+      shortDescription: loanProgramData.shortDescription,
+      fullDescription: loanProgramData.fullDescription,
+      interestRate: loanProgramData.interestRate,
+      ltv: loanProgramData.ltv,
+      loanTerm: loanProgramData.loanTerm,
+      fees: loanProgramData.fees,
+      minAmount: loanProgramData.minAmount,
+      maxAmount: loanProgramData.maxAmount,
+      keyHighlights: loanProgramData.keyHighlights,
+      highlightSubheadline: loanProgramData.highlightSubheadline,
+      insightTitle: loanProgramData.insightTitle,
+      insightBody: loanProgramData.insightBody,
+      crmTag: loanProgramData.crmTag,
+      imageUrl: loanProgramData.imageUrl,
+      imageAlt: loanProgramData.imageAlt,
+      highlightImageUrl: loanProgramData.highlightImageUrl,
+      highlightImageAlt: loanProgramData.highlightImageAlt,
+      isActive: loanProgramData.isActive,
+      sortOrder: loanProgramData.sortOrder,
+    };
+
     loanProgram = loanProgramData.id
       ? await prisma.loanProgram.update({
           where: { id: loanProgramData.id },
-          data: {
-            title: loanProgramData.title,
-            slug: loanProgramData.slug,
-            lifecycleStatus: loanProgramData.lifecycleStatus,
-            shortDescription: loanProgramData.shortDescription,
-            fullDescription: loanProgramData.fullDescription,
-            interestRate: loanProgramData.interestRate,
-            ltv: loanProgramData.ltv,
-            loanTerm: loanProgramData.loanTerm,
-            fees: loanProgramData.fees,
-            minAmount: loanProgramData.minAmount,
-            maxAmount: loanProgramData.maxAmount,
-            keyHighlights: loanProgramData.keyHighlights,
-            crmTag: loanProgramData.crmTag,
-            imageUrl: loanProgramData.imageUrl,
-            imageAlt: loanProgramData.imageAlt,
-            isActive: loanProgramData.isActive,
-            sortOrder: loanProgramData.sortOrder,
-          },
+          data: loanProgramFields,
         })
       : await prisma.loanProgram.create({
-          data: {
-            title: loanProgramData.title,
-            slug: loanProgramData.slug,
-            lifecycleStatus: loanProgramData.lifecycleStatus,
-            shortDescription: loanProgramData.shortDescription,
-            fullDescription: loanProgramData.fullDescription,
-            interestRate: loanProgramData.interestRate,
-            ltv: loanProgramData.ltv,
-            loanTerm: loanProgramData.loanTerm,
-            fees: loanProgramData.fees,
-            minAmount: loanProgramData.minAmount,
-            maxAmount: loanProgramData.maxAmount,
-            keyHighlights: loanProgramData.keyHighlights,
-            crmTag: loanProgramData.crmTag,
-            imageUrl: loanProgramData.imageUrl,
-            imageAlt: loanProgramData.imageAlt,
-            isActive: loanProgramData.isActive,
-            sortOrder: loanProgramData.sortOrder,
-          },
+          data: loanProgramFields,
         });
+
+    // Step 1: Delete all existing related records via nested update
+    await prisma.loanProgram.update({
+      where: { id: loanProgram.id },
+      data: {
+        highlights: { deleteMany: {} },
+        overviewItems: { deleteMany: {} },
+      },
+    });
+
+    // Step 2: Re-create using individual nested creates (createMany is not
+    // supported in nested writes for SQL Server in Prisma).
+    if (highlights.length || overviewItems.length) {
+      await prisma.$transaction([
+        ...highlights.map((highlight, index) =>
+          prisma.loanProgram.update({
+            where: { id: loanProgram.id },
+            data: { highlights: { create: { highlight, sortOrder: index } } },
+          }),
+        ),
+        ...overviewItems.map((row, index) =>
+          prisma.loanProgram.update({
+            where: { id: loanProgram.id },
+            data: {
+              overviewItems: {
+                create: { title: row.title, body: row.body, sortOrder: index },
+              },
+            },
+          }),
+        ),
+      ]);
+    }
   } catch (error) {
     if (isLoanProgramSchemaCompatibilityError(error)) {
       loanProgram = await upsertFallbackLoanProgram({
         id: loanProgramData.id,
+        baseSlug: existingLoanProgramBaseSlug,
         title: loanProgramData.title,
         slug: loanProgramData.slug,
         lifecycleStatus: loanProgramData.lifecycleStatus,
+        titleTail: loanProgramData.titleTail,
+        heroBadgeOne: loanProgramData.heroBadgeOne,
+        heroBadgeTwo: loanProgramData.heroBadgeTwo,
+        heroBadgeThree: loanProgramData.heroBadgeThree,
         shortDescription: loanProgramData.shortDescription,
         fullDescription: loanProgramData.fullDescription,
         interestRate: loanProgramData.interestRate,
@@ -1434,9 +1571,16 @@ export const saveLoanProgram = async (formData: FormData) => {
         minAmount: loanProgramData.minAmount,
         maxAmount: loanProgramData.maxAmount,
         keyHighlights: loanProgramData.keyHighlights,
+        highlightSubheadline: loanProgramData.highlightSubheadline,
+        insightTitle: loanProgramData.insightTitle,
+        insightBody: loanProgramData.insightBody,
         crmTag: loanProgramData.crmTag,
         imageUrl: loanProgramData.imageUrl,
         imageAlt: loanProgramData.imageAlt,
+        highlightImageUrl: loanProgramData.highlightImageUrl,
+        highlightImageAlt: loanProgramData.highlightImageAlt,
+        highlights,
+        overviewItems,
         isActive: loanProgramData.isActive,
         sortOrder: loanProgramData.sortOrder,
       });
@@ -1448,6 +1592,39 @@ export const saveLoanProgram = async (formData: FormData) => {
       );
     }
   }
+
+  await upsertFallbackLoanProgram({
+    id: loanProgram.id,
+    baseSlug: existingLoanProgramBaseSlug,
+    title: loanProgramData.title,
+    slug: loanProgramData.slug,
+    lifecycleStatus: loanProgramData.lifecycleStatus,
+    titleTail: loanProgramData.titleTail,
+    heroBadgeOne: loanProgramData.heroBadgeOne,
+    heroBadgeTwo: loanProgramData.heroBadgeTwo,
+    heroBadgeThree: loanProgramData.heroBadgeThree,
+    shortDescription: loanProgramData.shortDescription,
+    fullDescription: loanProgramData.fullDescription,
+    interestRate: loanProgramData.interestRate,
+    ltv: loanProgramData.ltv,
+    loanTerm: loanProgramData.loanTerm,
+    fees: loanProgramData.fees,
+    minAmount: loanProgramData.minAmount,
+    maxAmount: loanProgramData.maxAmount,
+    keyHighlights: loanProgramData.keyHighlights,
+    highlightSubheadline: loanProgramData.highlightSubheadline,
+    insightTitle: loanProgramData.insightTitle,
+    insightBody: loanProgramData.insightBody,
+    crmTag: loanProgramData.crmTag,
+    imageUrl: loanProgramData.imageUrl,
+    imageAlt: loanProgramData.imageAlt,
+    highlightImageUrl: loanProgramData.highlightImageUrl,
+    highlightImageAlt: loanProgramData.highlightImageAlt,
+    highlights,
+    overviewItems,
+    isActive: loanProgramData.isActive,
+    sortOrder: loanProgramData.sortOrder,
+  });
 
   revalidatePath("/admin/loan-programs");
   revalidatePath(`/admin/loan-programs/${loanProgram.id}`);
@@ -1484,11 +1661,13 @@ export const deleteLoanProgram = async (formData: FormData) => {
     await prisma.loanProgram.delete({ where: { id } });
   } catch (error) {
     if (isLoanProgramSchemaCompatibilityError(error)) {
-      await deleteFallbackLoanProgram(id);
+      // Continue below so the mirrored fallback record is removed as well.
     } else {
       throw error;
     }
   }
+
+  await deleteFallbackLoanProgram(id);
 
   revalidatePath("/admin/loan-programs");
   revalidatePath("/get-financing");
@@ -2066,10 +2245,7 @@ export const saveHomePage = async (formData: FormData) => {
 export const saveSingletonPage = async (formData: FormData) => {
   await requireAdminSession();
   const key = String(formData.get("key") ?? "");
-  const currentPage = await prisma.singletonPage.findUnique({
-    where: { key: key as never },
-    select: { id: true, routePath: true },
-  });
+  const currentPage = await getOrCreateSingletonPageRecord(key);
 
   if (!currentPage) {
     redirect("/admin/pages");
@@ -2431,11 +2607,17 @@ export const autosaveLoanProgramDraft = async (formData: FormData) => {
 
   const id = await getSubmittedId(formData, "loan-programs");
   const existing = id ? await getExistingLoanProgramContext(id) : null;
+  const existingLoanProgramBaseSlug =
+    existing && "baseSlug" in existing ? existing.baseSlug : existing?.slug ?? null;
 
   const rawTitle = String(formData.get("title") ?? "").trim();
   const shortDescription = String(formData.get("shortDescription") ?? "").trim();
   const fullDescription = String(formData.get("fullDescription") ?? "").trim();
-  const keyHighlights = asOptionalString(formData.get("keyHighlights"));
+  const highlights = parseSimpleLines(asOptionalString(formData.get("highlightsText")));
+  const overviewItems = normalizeLoanProgramOverviewItems(
+    parsePipeRows(asOptionalString(formData.get("overviewItemsText"))),
+  );
+  const keyHighlights = serializeSimpleLines(highlights);
   const interestRate = asOptionalString(formData.get("interestRate"));
   const ltv = asOptionalString(formData.get("ltv"));
   const loanTerm = asOptionalString(formData.get("loanTerm"));
@@ -2465,64 +2647,7 @@ export const autosaveLoanProgramDraft = async (formData: FormData) => {
   let loanProgram;
 
   try {
-    loanProgram = existing
-      ? await prisma.loanProgram.update({
-          where: { id: existing.id },
-          data: {
-            title: getAutosaveTitle({
-              rawTitle,
-              existingTitle: existing.title,
-              fallback: "Untitled loan program",
-            }),
-            slug,
-            lifecycleStatus: existing.lifecycleStatus ?? "DRAFT",
-            shortDescription,
-            fullDescription,
-            interestRate,
-            ltv,
-            loanTerm,
-            fees: asOptionalString(formData.get("fees")),
-            minAmount,
-            maxAmount,
-            keyHighlights,
-            crmTag: asOptionalString(formData.get("crmTag")),
-            imageUrl: asOptionalString(formData.get("imageUrl")),
-            imageAlt: asOptionalString(formData.get("imageAlt")),
-            isActive: Boolean(formData.get("isActive")),
-            sortOrder: Number(formData.get("sortOrder") ?? existing.sortOrder ?? 0),
-          },
-        })
-      : await prisma.loanProgram.create({
-          data: {
-            title: getAutosaveTitle({
-              rawTitle,
-              fallback: "Untitled loan program",
-            }),
-            slug,
-            lifecycleStatus: "DRAFT",
-            shortDescription,
-            fullDescription,
-            interestRate,
-            ltv,
-            loanTerm,
-            fees: asOptionalString(formData.get("fees")),
-            minAmount,
-            maxAmount,
-            keyHighlights,
-            crmTag: asOptionalString(formData.get("crmTag")),
-            imageUrl: asOptionalString(formData.get("imageUrl")),
-            imageAlt: asOptionalString(formData.get("imageAlt")),
-            isActive: Boolean(formData.get("isActive")),
-            sortOrder: Number(formData.get("sortOrder") ?? 0),
-          },
-        });
-  } catch (error) {
-    if (!isLoanProgramSchemaCompatibilityError(error)) {
-      throw error;
-    }
-
-    loanProgram = await upsertFallbackLoanProgram({
-      id: existing?.id,
+    const loanProgramFields = {
       title: getAutosaveTitle({
         rawTitle,
         existingTitle: existing?.title,
@@ -2530,6 +2655,10 @@ export const autosaveLoanProgramDraft = async (formData: FormData) => {
       }),
       slug,
       lifecycleStatus: existing?.lifecycleStatus ?? "DRAFT",
+      titleTail: asOptionalString(formData.get("titleTail")),
+      heroBadgeOne: asOptionalString(formData.get("heroBadgeOne")),
+      heroBadgeTwo: asOptionalString(formData.get("heroBadgeTwo")),
+      heroBadgeThree: asOptionalString(formData.get("heroBadgeThree")),
       shortDescription,
       fullDescription,
       interestRate,
@@ -2539,13 +2668,139 @@ export const autosaveLoanProgramDraft = async (formData: FormData) => {
       minAmount,
       maxAmount,
       keyHighlights,
+      highlightSubheadline: asOptionalString(formData.get("highlightSubheadline")),
+      insightTitle: asOptionalString(formData.get("insightTitle")),
+      insightBody: asOptionalString(formData.get("insightBody")),
       crmTag: asOptionalString(formData.get("crmTag")),
       imageUrl: asOptionalString(formData.get("imageUrl")),
       imageAlt: asOptionalString(formData.get("imageAlt")),
+      highlightImageUrl: asOptionalString(formData.get("highlightImageUrl")),
+      highlightImageAlt: asOptionalString(formData.get("highlightImageAlt")),
+      isActive: Boolean(formData.get("isActive")),
+      sortOrder: Number(formData.get("sortOrder") ?? existing?.sortOrder ?? 0),
+    };
+
+    loanProgram = existing
+      ? await prisma.loanProgram.update({
+          where: { id: existing.id },
+          data: loanProgramFields,
+        })
+      : await prisma.loanProgram.create({
+          data: {
+            ...loanProgramFields,
+            title: getAutosaveTitle({ rawTitle, fallback: "Untitled loan program" }),
+            lifecycleStatus: "DRAFT",
+            sortOrder: Number(formData.get("sortOrder") ?? 0),
+          },
+        });
+
+    await prisma.loanProgram.update({
+      where: { id: loanProgram.id },
+      data: {
+        highlights: { deleteMany: {} },
+        overviewItems: { deleteMany: {} },
+      },
+    });
+
+    if (highlights.length || overviewItems.length) {
+      await prisma.$transaction([
+        ...highlights.map((highlight, index) =>
+          prisma.loanProgram.update({
+            where: { id: loanProgram.id },
+            data: { highlights: { create: { highlight, sortOrder: index } } },
+          }),
+        ),
+        ...overviewItems.map((row, index) =>
+          prisma.loanProgram.update({
+            where: { id: loanProgram.id },
+            data: {
+              overviewItems: {
+                create: { title: row.title, body: row.body, sortOrder: index },
+              },
+            },
+          }),
+        ),
+      ]);
+    }
+  } catch (error) {
+    if (!isLoanProgramSchemaCompatibilityError(error)) {
+      throw error;
+    }
+
+    loanProgram = await upsertFallbackLoanProgram({
+      id: existing?.id,
+      baseSlug: existingLoanProgramBaseSlug,
+      title: getAutosaveTitle({
+        rawTitle,
+        existingTitle: existing?.title,
+        fallback: "Untitled loan program",
+      }),
+      slug,
+      lifecycleStatus: existing?.lifecycleStatus ?? "DRAFT",
+      titleTail: asOptionalString(formData.get("titleTail")),
+      heroBadgeOne: asOptionalString(formData.get("heroBadgeOne")),
+      heroBadgeTwo: asOptionalString(formData.get("heroBadgeTwo")),
+      heroBadgeThree: asOptionalString(formData.get("heroBadgeThree")),
+      shortDescription,
+      fullDescription,
+      interestRate,
+      ltv,
+      loanTerm,
+      fees: asOptionalString(formData.get("fees")),
+      minAmount,
+      maxAmount,
+      keyHighlights,
+      highlightSubheadline: asOptionalString(formData.get("highlightSubheadline")),
+      insightTitle: asOptionalString(formData.get("insightTitle")),
+      insightBody: asOptionalString(formData.get("insightBody")),
+      crmTag: asOptionalString(formData.get("crmTag")),
+      imageUrl: asOptionalString(formData.get("imageUrl")),
+      imageAlt: asOptionalString(formData.get("imageAlt")),
+      highlightImageUrl: asOptionalString(formData.get("highlightImageUrl")),
+      highlightImageAlt: asOptionalString(formData.get("highlightImageAlt")),
+      highlights,
+      overviewItems,
       isActive: Boolean(formData.get("isActive")),
       sortOrder: Number(formData.get("sortOrder") ?? existing?.sortOrder ?? 0),
     });
   }
+
+  await upsertFallbackLoanProgram({
+    id: loanProgram.id,
+    baseSlug: existingLoanProgramBaseSlug,
+    title: getAutosaveTitle({
+      rawTitle,
+      existingTitle: existing?.title,
+      fallback: "Untitled loan program",
+    }),
+    slug,
+    lifecycleStatus: existing?.lifecycleStatus ?? "DRAFT",
+    titleTail: asOptionalString(formData.get("titleTail")),
+    heroBadgeOne: asOptionalString(formData.get("heroBadgeOne")),
+    heroBadgeTwo: asOptionalString(formData.get("heroBadgeTwo")),
+    heroBadgeThree: asOptionalString(formData.get("heroBadgeThree")),
+    shortDescription,
+    fullDescription,
+    interestRate,
+    ltv,
+    loanTerm,
+    fees: asOptionalString(formData.get("fees")),
+    minAmount,
+    maxAmount,
+    keyHighlights,
+    highlightSubheadline: asOptionalString(formData.get("highlightSubheadline")),
+    insightTitle: asOptionalString(formData.get("insightTitle")),
+    insightBody: asOptionalString(formData.get("insightBody")),
+    crmTag: asOptionalString(formData.get("crmTag")),
+    imageUrl: asOptionalString(formData.get("imageUrl")),
+    imageAlt: asOptionalString(formData.get("imageAlt")),
+    highlightImageUrl: asOptionalString(formData.get("highlightImageUrl")),
+    highlightImageAlt: asOptionalString(formData.get("highlightImageAlt")),
+    highlights,
+    overviewItems,
+    isActive: Boolean(formData.get("isActive")),
+    sortOrder: Number(formData.get("sortOrder") ?? existing?.sortOrder ?? 0),
+  });
 
   return {
     path: getAutosavePath("/admin/loan-programs", loanProgram.id),
@@ -3031,10 +3286,7 @@ export const autosaveSingletonPageDraft = async (formData: FormData) => {
   await requireAdminSession();
 
   const key = String(formData.get("key") ?? "");
-  const currentPage = await prisma.singletonPage.findUnique({
-    where: { key: key as never },
-    select: { id: true, updatedAt: true },
-  });
+  const currentPage = await getOrCreateSingletonPageRecord(key);
 
   if (!currentPage) {
     return null;
@@ -3139,4 +3391,35 @@ export const autosaveFormDefinitionDraft = async (formData: FormData) => {
     recordId: formRecord.id,
     savedAt: formRecord.updatedAt.toISOString(),
   };
+};
+
+export const deleteFormDefinition = async (formData: FormData) => {
+  await requireAdminSession();
+  const id = await getSubmittedId(formData, "forms");
+  if (!id) return;
+
+  const existing = await prisma.formDefinition.findUnique({ 
+    where: { id },
+    include: { linkedLoanProgram: { select: { slug: true } } }
+  });
+  
+  await prisma.formDefinition.delete({ where: { id } });
+  
+  revalidatePath("/admin/forms");
+  revalidatePath("/cash-offer");
+  revalidatePath("/properties");
+  revalidatePath("/investments");
+  revalidatePath("/get-financing");
+  
+  if (existing?.slug) {
+    revalidateFormCache(existing.slug);
+  }
+  if (existing?.linkedLoanProgram?.slug) {
+    revalidatePath(`/get-financing/${existing.linkedLoanProgram.slug}`);
+    revalidateLoanProgramCaches(existing.linkedLoanProgram.slug);
+  }
+  
+  await redirectWithSuccessMessage("/admin/forms", "Form deleted successfully.", {
+    title: "Form deleted",
+  });
 };
