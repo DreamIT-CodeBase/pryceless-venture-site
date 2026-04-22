@@ -28,7 +28,12 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html className={poppins.variable} data-scroll-behavior="smooth" lang="en">
+    <html
+      suppressHydrationWarning
+      className={poppins.variable}
+      data-scroll-behavior="smooth"
+      lang="en"
+    >
       <body className="antialiased">
         <Script id="pv-browser-flag" strategy="beforeInteractive">
           {`

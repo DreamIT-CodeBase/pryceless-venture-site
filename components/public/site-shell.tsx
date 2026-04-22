@@ -29,7 +29,7 @@ export async function SiteShell({
   const footerLinks = [
     { href: "/", label: "Home" },
     { href: "/get-financing", label: "Loan Offers" },
-    { href: "/properties", label: "Properties" },
+    { href: "/properties", label: "Portfolio" },
     { href: "/case-studies", label: "Case Studies" },
     { href: "/blogs", label: "Insights" },
     { href: "/calculators", label: "ROI Calculators" },

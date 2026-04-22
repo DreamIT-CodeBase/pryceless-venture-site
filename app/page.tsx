@@ -131,7 +131,7 @@ const fallbackPlatformCards = [
     ctaHref: "/get-financing",
   },
   {
-    title: "Properties",
+    title: "Portfolio",
     body: "Turnkey and value-add properties across select markets.",
     ctaLabel: "Request Details",
     ctaHref: "/properties",

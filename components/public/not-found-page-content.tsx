@@ -41,7 +41,7 @@ const fallbackSupportPoints: ContentCard[] = [
 
 const fallbackQuickLinks: ContentCard[] = [
   { title: "Loan Offers", body: "/get-financing" },
-  { title: "Properties", body: "/properties" },
+  { title: "Portfolio", body: "/properties" },
   { title: "Case Studies", body: "/case-studies" },
   { title: "Insights", body: "/blogs" },
 ];

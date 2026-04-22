@@ -1,4 +1,5 @@
 import { getDefaultLoanProgramImage } from "@/lib/loan-program-images";
+import { propertyDealTypeOptions } from "@/lib/property-templates";
 export { propertyStatusOptions } from "@/lib/property-portfolio";
 
 export const investmentStatusOptions = [
@@ -29,13 +30,7 @@ export const propertyTypeOptions = [
   { value: "OTHER", label: "Other" },
 ] as const;
 
-export const propertyStrategyOptions = [
-  { value: "FIX_FLIP", label: "Fix & Flip" },
-  { value: "BUY_HOLD", label: "Buy & Hold" },
-  { value: "VALUE_ADD", label: "Value-Add" },
-  { value: "BRRRR", label: "BRRRR" },
-  { value: "OTHER", label: "Other" },
-] as const;
+export const propertyStrategyOptions = propertyDealTypeOptions;
 
 export const caseStudyCategoryOptions = [
   { value: "VALUE_ADD_MULTIFAMILY", label: "Value-Add Multifamily" },
@@ -82,7 +77,7 @@ export const singletonPageLabels: Record<string, string> = {
   INVESTMENTS_INDEX: "Investments Index",
   CASH_OFFER: "Cash Offer",
   NOT_FOUND: "404 / Not Found",
-  PROPERTIES_INDEX: "Properties Index",
+  PROPERTIES_INDEX: "Portfolio Index",
   CASE_STUDIES_INDEX: "Case Studies Index",
   CALCULATORS_INDEX: "Calculators Index",
   INVESTMENT_DETAIL: "Investment Detail Template",
@@ -147,7 +142,7 @@ export const singletonPageGroups: Record<
     {
       key: "quick_links",
       label: "Quick Links",
-      placeholder: "Browse Properties | /properties",
+      placeholder: "Browse Portfolio | /properties",
       supportsBody: true,
     },
   ],
@@ -487,7 +482,7 @@ export const homePageSeed = {
       ctaHref: "/get-financing",
     },
     {
-      title: "Properties",
+      title: "Portfolio",
       body: "Turnkey and value-add properties across select markets.",
       ctaLabel: "Request Details",
       ctaHref: "/properties",
@@ -783,7 +778,7 @@ export const singletonPageSeed = [
         body: "If you were trying to reach a specific page, contact us and we will help you find the right route.",
       },
       { groupKey: "quick_links", title: "Loan Offers", body: "/get-financing" },
-      { groupKey: "quick_links", title: "Properties", body: "/properties" },
+      { groupKey: "quick_links", title: "Portfolio", body: "/properties" },
       { groupKey: "quick_links", title: "Case Studies", body: "/case-studies" },
       { groupKey: "quick_links", title: "Insights", body: "/blogs" },
     ],
@@ -791,9 +786,9 @@ export const singletonPageSeed = [
   {
     key: "PROPERTIES_INDEX",
     routePath: "/properties",
-    pageTitle: "Properties",
+    pageTitle: "Portfolio",
     intro:
-      "Select a stage to view Pryceless Ventures properties that are for sale, sold, or currently in progress.",
+      "Filter Pryceless Ventures deals by Fix & Flip, Buy & Hold, and Wholesale templates while keeping the same portfolio experience.",
     disclaimer:
       "Portfolio entries may represent active listings, completed executions, or renovation-stage projects. Availability, pricing, and timelines can change.",
     ctaLabel: "Request Details",

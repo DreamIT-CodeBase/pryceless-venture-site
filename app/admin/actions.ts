@@ -20,6 +20,13 @@ import {
 import { stringifyPropertyDetailContent } from "@/lib/property-detail-content";
 import { getPropertyEditorStatus, propertyStatusValues } from "@/lib/property-portfolio";
 import { prisma } from "@/lib/prisma";
+import {
+  coercePropertyDealType,
+  getPropertyTemplateMetricFields,
+  propertyDealTypeValues,
+  type PropertyDealType,
+  type PropertyTemplateMetricKey,
+} from "@/lib/property-templates";
 import { asOptionalString, parseJson, slugify } from "@/lib/utils";
 
 type UploadedImagePayload = {
@@ -65,7 +72,7 @@ const propertySchema = baseEntitySchema.extend({
   locationCity: z.string().optional(),
   locationState: z.string().optional(),
   propertyType: z.enum(["SFR", "MULTIFAMILY", "COMMERCIAL", "LAND", "OTHER"]),
-  strategy: z.enum(["FIX_FLIP", "BUY_HOLD", "VALUE_ADD", "BRRRR", "OTHER"]),
+  strategy: z.enum(propertyDealTypeValues),
   summary: z.string().min(10),
   buyerFit: z.string().optional(),
   inquiryFormId: z.string().optional(),
@@ -168,24 +175,63 @@ const parsePropertyStandoutRows = (value: string | undefined) =>
     .filter((item) => item.title && item.description)
     .slice(0, 4);
 
-const buildPropertyDetailContent = (formData: FormData) =>
+const legacyPropertyMetricInputMap: Partial<Record<PropertyTemplateMetricKey, string[]>> = {
+  annualizedRoi: ["performanceRoi"],
+  arv: ["snapshotArv"],
+  holdTime: ["performanceInvestmentHorizon"],
+  noi: ["performanceMonthlyCashFlow"],
+  purchasePrice: ["snapshotPurchasePrice"],
+  rehabBudget: ["snapshotRenovationCost"],
+};
+
+const getPropertyDescriptionText = (formData: FormData) =>
+  asOptionalString(formData.get("descriptionText")) ??
+  asOptionalString(formData.get("buyerFit"));
+
+const getPropertyMetricInputValue = (
+  formData: FormData,
+  metricKey: PropertyTemplateMetricKey,
+) => {
+  const directValue = asOptionalString(formData.get(`templateMetric_${metricKey}`));
+  if (directValue) {
+    return directValue;
+  }
+
+  for (const fieldName of legacyPropertyMetricInputMap[metricKey] ?? []) {
+    const legacyValue = asOptionalString(formData.get(fieldName));
+    if (legacyValue) {
+      return legacyValue;
+    }
+  }
+
+  return undefined;
+};
+
+const buildPropertyTemplateMetrics = (
+  formData: FormData,
+  strategy: PropertyDealType,
+) =>
+  getPropertyTemplateMetricFields(strategy).map((metric) => ({
+    key: metric.key,
+    label: metric.label,
+    value: getPropertyMetricInputValue(formData, metric.key),
+  }));
+
+const buildPropertyDetailContent = (
+  formData: FormData,
+  strategy: PropertyDealType,
+) =>
   stringifyPropertyDetailContent({
     googleMapsUrl: asOptionalString(formData.get("googleMapsUrl")),
-    investorProfile: parseSimpleLines(asOptionalString(formData.get("investorProfileText"))),
     locationBenefits: parseSimpleLines(asOptionalString(formData.get("locationBenefitsText"))),
-    performance: {
-      capRate: asOptionalString(formData.get("performanceCapRate")),
-      investmentHorizon: asOptionalString(formData.get("performanceInvestmentHorizon")),
-      monthlyCashFlow: asOptionalString(formData.get("performanceMonthlyCashFlow")),
-      roi: asOptionalString(formData.get("performanceRoi")),
-    },
-    snapshot: {
-      arv: asOptionalString(formData.get("snapshotArv")),
-      estimatedRent: asOptionalString(formData.get("snapshotEstimatedRent")),
-      purchasePrice: asOptionalString(formData.get("snapshotPurchasePrice")),
-      renovationCost: asOptionalString(formData.get("snapshotRenovationCost")),
-    },
+    overviewBulletPoints: parseSimpleLines(asOptionalString(formData.get("overviewBulletPointsText"))),
+    overviewShortDescription: asOptionalString(formData.get("overviewShortDescription")),
+    overviewTitle: asOptionalString(formData.get("overviewTitle")),
+    rawDescription: getPropertyDescriptionText(formData),
     standoutItems: parsePropertyStandoutRows(asOptionalString(formData.get("standoutItemsText"))),
+    templateMetrics: buildPropertyTemplateMetrics(formData, strategy),
+    timelineLabel: asOptionalString(formData.get("timelineLabel")),
+    templateType: strategy,
   });
 
 const parseOptionalDateValue = (value: string | null | undefined) => {
@@ -1134,6 +1180,7 @@ export const saveProperty = async (formData: FormData) => {
     : null;
   const id = submittedId ?? matchingDraft?.id;
   const editPath = id ? `/admin/properties/${id}` : "/admin/properties/new";
+  const descriptionText = getPropertyDescriptionText(formData);
   const parsed = propertySchema.safeParse({
     id,
     title: rawTitle,
@@ -1143,9 +1190,9 @@ export const saveProperty = async (formData: FormData) => {
     locationCity: asOptionalString(formData.get("locationCity")),
     locationState: asOptionalString(formData.get("locationState")),
     propertyType: String(formData.get("propertyType") ?? ""),
-    strategy: String(formData.get("strategy") ?? ""),
+    strategy: coercePropertyDealType(asOptionalString(formData.get("strategy"))),
     summary: String(formData.get("summary") ?? "").trim(),
-    buyerFit: asOptionalString(formData.get("buyerFit")),
+    buyerFit: descriptionText,
     inquiryFormId: asOptionalString(formData.get("inquiryFormId")),
   });
 
@@ -1155,7 +1202,7 @@ export const saveProperty = async (formData: FormData) => {
 
   const propertyData = {
     ...parsed.data,
-    detailContent: buildPropertyDetailContent(formData),
+    detailContent: buildPropertyDetailContent(formData, parsed.data.strategy),
     slug: await ensureUniqueSlug({
       baseSlug: parsed.data.slug,
       currentId: parsed.data.id,
@@ -2395,10 +2442,13 @@ export const autosavePropertyDraft = async (formData: FormData) => {
 
   const rawTitle = String(formData.get("title") ?? "").trim();
   const summary = String(formData.get("summary") ?? "").trim();
-  const buyerFit = asOptionalString(formData.get("buyerFit"));
+  const buyerFit = getPropertyDescriptionText(formData);
   const locationCity = asOptionalString(formData.get("locationCity"));
   const locationState = asOptionalString(formData.get("locationState"));
-  const detailContent = buildPropertyDetailContent(formData);
+  const strategy = coercePropertyDealType(
+    asOptionalString(formData.get("strategy")) ?? existing?.strategy ?? "FIX_FLIP",
+  );
+  const detailContent = buildPropertyDetailContent(formData, strategy);
   const highlights = parseSimpleLines(asOptionalString(formData.get("highlightsText")));
   const images = dedupeUploadedImages(parseImages(formData));
   const primaryMediaFileId = parsePrimaryMediaFileId(formData);
@@ -2445,7 +2495,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
           locationCity,
           locationState,
           propertyType: String(formData.get("propertyType") ?? existing.propertyType ?? "SFR"),
-          strategy: String(formData.get("strategy") ?? existing.strategy ?? "FIX_FLIP"),
+          strategy,
           summary,
           buyerFit,
           detailContent,
@@ -2464,7 +2514,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
           locationCity,
           locationState,
           propertyType: String(formData.get("propertyType") ?? "SFR"),
-          strategy: String(formData.get("strategy") ?? "FIX_FLIP"),
+          strategy,
           summary,
           buyerFit,
           detailContent,

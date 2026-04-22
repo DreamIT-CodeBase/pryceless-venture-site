@@ -6,8 +6,8 @@ import heroSectionImage from "@/app/assets/herosectionimage.jpg";
 import { Suspense } from "react";
 import { PageSectionHero } from "@/components/public/page-section-hero";
 import {
-  PropertyStageFilter,
-  PropertyStageHeroSelect,
+  PropertyTemplateFilter,
+  PropertyTemplateHeroSelect,
 } from "@/components/public/property-stage-filter";
 import { SiteShell } from "@/components/public/site-shell";
 import { getPublishedProperties, getSingletonPage } from "@/lib/data/public";
@@ -17,9 +17,15 @@ import {
   getPropertyPortfolioStage,
   getPropertyStageContent,
   parsePropertyHighlights,
-  propertyPortfolioStageOrder,
   type PropertyPortfolioStage,
 } from "@/lib/property-portfolio";
+import {
+  coercePropertyDealType,
+  getPropertyDealTypeLabel,
+  propertyDealTypeValues,
+  propertyTemplateConfigMap,
+  type PropertyDealType,
+} from "@/lib/property-templates";
 
 export const revalidate = 300;
 
@@ -46,80 +52,84 @@ const fallbackImages = [
   heroSectionImage.src,
 ];
 
-const legacyPropertiesPageTitles = new Set(["Available Properties", "Property Portfolio"]);
+const legacyPropertiesPageTitles = new Set([
+  "Available Properties",
+  "Property Portfolio",
+  "Properties",
+]);
 const legacyPropertiesPageIntros = new Set([
   "Explore a selection of properties sourced through our acquisition channels and partner network.",
   "Explore Pryceless Ventures' portfolio across properties for sale, completed executions, and renovation projects currently in progress.",
 ]);
 
-const fallbackPortfolioCards: Record<PropertyPortfolioStage, PortfolioCard[]> = {
-  FOR_SALE: [
+const fallbackPortfolioCards: Record<PropertyDealType, PortfolioCard[]> = {
+  FIX_FLIP: [
     {
       address: "Illustrative active listing",
       bulletItems: [
-        "Showcase the property, positioning, and buyer-fit story here.",
-        "Use the inquiry flow to collect interest on active inventory.",
+        "Use this template for acquisition basis, rehab plan, and exit upside.",
+        "The public slug keeps the same structure while surfacing fix and flip metrics.",
       ],
       ctaLabel: "Request Details",
       href: "/properties",
-      id: "fallback-property-for-sale",
-      imageAlt: "Illustrative for-sale property",
+      id: "fallback-property-fix-flip",
+      imageAlt: "Illustrative fix and flip property",
       imageUrl: featuredPropertiesLeftImage.src,
       propertyType: "Residential",
       statItems: [
-        { label: "Status", value: "For Sale" },
-        { label: "Property Type", value: "Residential" },
+        { label: "Purchase Price", value: "$470,000" },
+        { label: "ARV", value: "$585,000" },
       ],
       strategy: "Fix & Flip",
       summary:
-        "Active portfolio listing preview aligned with the current Pryceless property card design.",
-      title: "Illustrative For Sale Property",
+        "Portfolio preview aligned to the fix and flip template with acquisition, rehab, and exit storytelling.",
+      title: "Illustrative Fix & Flip Property",
     },
   ],
-  SOLD: [
+  BUY_HOLD: [
     {
-      address: "Illustrative completed execution",
+      address: "Illustrative long-term hold",
       bulletItems: [
-        "Use sold deals to show underwriting discipline and execution skill.",
-        "Purchase, rehab, and sale outcomes can be surfaced on the card.",
+        "This template is built for NOI, cash invested, and partner return storytelling.",
+        "Long descriptions can still be transformed into overview boxes and standout bullets.",
       ],
       ctaLabel: "View Underwriting",
       href: "/properties",
-      id: "fallback-property-sold",
-      imageAlt: "Illustrative sold property",
+      id: "fallback-property-buy-hold",
+      imageAlt: "Illustrative buy and hold property",
       imageUrl: featuredPropertiesRightUpperImage.src,
-      propertyType: "Residential",
+      propertyType: "Multifamily",
       statItems: [
-        { label: "Purchase Price", value: "$248,000" },
-        { label: "Selling Price", value: "$389,000" },
+        { label: "Cash Invested", value: "$150,000" },
+        { label: "NOI", value: "$14,670 / month" },
       ],
-      strategy: "Value-Add",
+      strategy: "Buy & Hold",
       summary:
-        "Completed Pryceless project preview showing how sold assets can act like mini case studies.",
-      title: "Illustrative Sold Property",
+        "Portfolio preview aligned to a buy and hold deal with the same polished card structure.",
+      title: "Illustrative Buy & Hold Property",
     },
   ],
-  IN_PROGRESS: [
+  WHOLESALE: [
     {
-      address: "Illustrative renovation project",
+      address: "Illustrative assignment deal",
       bulletItems: [
-        "Keep this profile updated with rehab milestones and current notes.",
-        "Add new site photos so the renovation story evolves over time.",
+        "Wholesale deals can focus on purchase basis, sale price, timeline, and gross profit.",
+        "The card and slug page still keep the same visual shell as the rest of the portfolio.",
       ],
-      ctaLabel: "View Progress",
+      ctaLabel: "View Deal",
       href: "/properties",
-      id: "fallback-property-in-progress",
-      imageAlt: "Illustrative renovation project",
+      id: "fallback-property-wholesale",
+      imageAlt: "Illustrative wholesale property",
       imageUrl: featuredPropertiesRightLowerImage.src,
       propertyType: "Residential",
       statItems: [
-        { label: "Current Phase", value: "Interior Framing" },
-        { label: "Target Finish", value: "Q3 2026" },
+        { label: "Purchase Price", value: "$1,100,000" },
+        { label: "Sale Price", value: "$1,150,000" },
       ],
-      strategy: "Fix & Flip",
+      strategy: "Wholesale",
       summary:
-        "Active rehab preview showing how in-progress properties can share renovation updates and fresh images.",
-      title: "Illustrative In Progress Property",
+        "Portfolio preview aligned to the wholesale template with clean acquisition and resale stat boxes.",
+      title: "Illustrative Wholesale Property",
     },
   ],
 };
@@ -168,11 +178,11 @@ function PropertyStageHeroSelectFallback() {
   return (
     <div className="rounded-[24px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.04)_100%)] px-4 py-3.5 text-white shadow-[0_20px_46px_rgba(3,12,25,0.24)] backdrop-blur-xl sm:px-5 sm:py-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#d7b18f]">
-        Property Filter
+        Deal Type Filter
       </p>
       <div className="mt-3">
         <div className="flex h-[54px] items-center rounded-[18px] border border-white/12 bg-[#0f2740]/88 px-4 text-[15px] font-medium tracking-[-0.015em] text-white/74">
-          Loading property stages...
+          Loading deal types...
         </div>
       </div>
     </div>
@@ -185,7 +195,7 @@ function PropertyStageFilterFallback() {
       className="rounded-[28px] border border-dashed border-slate-300 bg-white px-5 py-12 text-center text-[var(--pv-text)] sm:px-8 sm:py-16"
       id="property-stage-filter"
     >
-      Loading property stages...
+      Loading deal types...
     </div>
   );
 }
@@ -199,27 +209,28 @@ export default async function PropertiesPage() {
   const heroTitle =
     page?.pageTitle && !legacyPropertiesPageTitles.has(page.pageTitle)
       ? page.pageTitle
-      : "Properties";
+      : "Portfolio";
   const heroIntro =
     page?.intro && !legacyPropertiesPageIntros.has(page.intro)
       ? page.intro
-      : "Browse for-sale listings, sold deals, and active rehab updates.";
+      : "Browse fix and flip, buy and hold, and wholesale opportunities across the portfolio.";
 
-  const groupedCards = {
-    FOR_SALE: [] as PortfolioCard[],
-    SOLD: [] as PortfolioCard[],
-    IN_PROGRESS: [] as PortfolioCard[],
+  const groupedCards: Record<PropertyDealType, PortfolioCard[]> = {
+    FIX_FLIP: [] as PortfolioCard[],
+    BUY_HOLD: [] as PortfolioCard[],
+    WHOLESALE: [] as PortfolioCard[],
   };
 
   properties.forEach((property, index) => {
     const stage = getPropertyPortfolioStage(property.status);
+    const template = coercePropertyDealType(property.strategy);
     const fallbackCard =
-      fallbackPortfolioCards[stage][index % fallbackPortfolioCards[stage].length];
+      fallbackPortfolioCards[template][index % fallbackPortfolioCards[template].length];
     const propertyImage =
       resolvePrimaryImage(property) || fallbackImages[index % fallbackImages.length];
     const location = [property.locationCity, property.locationState].filter(Boolean).join(", ");
     const propertyType = formatDisplayValue(property.propertyType) || fallbackCard.propertyType;
-    const strategy = formatDisplayValue(property.strategy) || fallbackCard.strategy;
+    const strategy = getPropertyDealTypeLabel(property.strategy) || fallbackCard.strategy;
     const statusLabel = formatPropertyStatusLabel(property.status);
     const parsedHighlights = parsePropertyHighlights(
       property.highlights.map((item) => item.highlight),
@@ -231,7 +242,7 @@ export default async function PropertiesPage() {
         : fallbackCard.bulletItems
     ).map((item) => truncate(item, 48));
 
-    groupedCards[stage].push({
+    groupedCards[template].push({
       address: truncate(location || property.title || fallbackCard.address, 34),
       bulletItems,
       ctaLabel:
@@ -255,24 +266,14 @@ export default async function PropertiesPage() {
     });
   });
 
-  const portfolioSections = propertyPortfolioStageOrder
-    .map((stage) => {
-      const stageContent = getPropertyStageContent(stage);
-
-      return {
-        emptyMessage: stageContent.emptyMessage,
-        cards: properties.length ? groupedCards[stage] : fallbackPortfolioCards[stage],
-        count: groupedCards[stage].length,
-        helper:
-          stage === "FOR_SALE"
-            ? "See active listings"
-            : stage === "SOLD"
-              ? "See sold properties"
-              : "See current rehab projects",
-        stage,
-        title: stageContent.indexTitle,
-      };
-    });
+  const portfolioSections = propertyDealTypeValues.map((template) => ({
+    cards: properties.length ? groupedCards[template] : fallbackPortfolioCards[template],
+    count: groupedCards[template].length,
+    emptyMessage: `No ${propertyTemplateConfigMap[template].label.toLowerCase()} properties are available yet.`,
+    helper: propertyTemplateConfigMap[template].helperText,
+    template,
+    title: propertyTemplateConfigMap[template].label,
+  }));
 
   return (
     <SiteShell cta={{ href: "/cash-offer", label: "Sell a Property" }}>
@@ -281,7 +282,7 @@ export default async function PropertiesPage() {
           currentLabel={heroTitle}
           heroContent={
             <Suspense fallback={<PropertyStageHeroSelectFallback />}>
-              <PropertyStageHeroSelect sections={portfolioSections} />
+              <PropertyTemplateHeroSelect sections={portfolioSections} />
             </Suspense>
           }
           heroContentPosition="side"
@@ -293,7 +294,7 @@ export default async function PropertiesPage() {
           <div className="mx-auto w-full min-[1400px]:max-w-[1760px] min-[1400px]:px-[164px]">
             <div className="mx-auto w-full">
               <Suspense fallback={<PropertyStageFilterFallback />}>
-                <PropertyStageFilter sections={portfolioSections} />
+                <PropertyTemplateFilter sections={portfolioSections} />
               </Suspense>
             </div>
 

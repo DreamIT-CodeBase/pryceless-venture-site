@@ -6,9 +6,13 @@ import { useMemo, useTransition } from "react";
 import { ThreeUpCollectionGrid } from "@/components/public/collection-card-layout";
 import { EmptyCollectionCard } from "@/components/public/marketing-ui";
 import { OpportunityCard } from "@/components/public/opportunity-card";
-import type { PropertyPortfolioStage } from "@/lib/property-portfolio";
+import {
+  propertyTemplateQueryMap,
+  propertyTemplateQueryValueMap,
+  type PropertyDealType,
+} from "@/lib/property-templates";
 
-type PropertyStageCard = {
+type PropertyTemplateCard = {
   address: string;
   bulletItems: string[];
   ctaLabel: string;
@@ -23,46 +27,38 @@ type PropertyStageCard = {
   title: string;
 };
 
-type PropertyStageSection = {
-  cards: PropertyStageCard[];
+type PropertyTemplateSection = {
+  cards: PropertyTemplateCard[];
   count: number;
   emptyMessage: string;
   helper: string;
-  stage: PropertyPortfolioStage;
+  template: PropertyDealType;
   title: string;
 };
 
-type PropertyStageFilterValue = PropertyPortfolioStage | "ALL";
+type PropertyTemplateFilterValue = PropertyDealType | "ALL";
 
-type StageFilterOption = {
+type TemplateFilterOption = {
   count: number;
   helper: string;
   label: string;
   queryValue: string;
-  value: PropertyStageFilterValue;
+  value: PropertyTemplateFilterValue;
 };
-
-const stageQueryValueMap: Record<PropertyPortfolioStage, string> = {
-  FOR_SALE: "for-sale",
-  SOLD: "sold",
-  IN_PROGRESS: "in-progress",
-};
-
-const queryValueStageMap: Record<string, PropertyPortfolioStage> = Object.fromEntries(
-  Object.entries(stageQueryValueMap).map(([stage, value]) => [value, stage]),
-) as Record<string, PropertyPortfolioStage>;
 
 const allPropertiesHelper =
-  "See every listing, sold deal, and rehab update together, then narrow the view with the dropdown.";
+  "Browse the full portfolio across every deal template, then narrow it down with the dropdown.";
 
-const buildFilterOptions = (sections: PropertyStageSection[]): StageFilterOption[] => {
+const buildFilterOptions = (
+  sections: PropertyTemplateSection[],
+): TemplateFilterOption[] => {
   const totalCount = sections.reduce((sum, section) => sum + section.cards.length, 0);
 
   return [
     {
       count: totalCount,
       helper: allPropertiesHelper,
-      label: "All Properties",
+      label: "Full Portfolio",
       queryValue: "all",
       value: "ALL",
     },
@@ -70,48 +66,50 @@ const buildFilterOptions = (sections: PropertyStageSection[]): StageFilterOption
       count: section.cards.length,
       helper: section.helper,
       label: section.title,
-      queryValue: stageQueryValueMap[section.stage],
-      value: section.stage,
+      queryValue: propertyTemplateQueryValueMap[section.template],
+      value: section.template,
     })),
   ];
 };
 
-const getFilterValueFromSearch = (searchParams: ReturnType<typeof useSearchParams>): PropertyStageFilterValue => {
-  const stageParam = searchParams.get("stage");
+const getFilterValueFromSearch = (
+  searchParams: ReturnType<typeof useSearchParams>,
+): PropertyTemplateFilterValue => {
+  const templateParam = searchParams.get("template");
 
-  if (!stageParam || stageParam === "all") {
+  if (!templateParam || templateParam === "all") {
     return "ALL";
   }
 
-  return queryValueStageMap[stageParam] ?? "ALL";
+  return propertyTemplateQueryMap[templateParam] ?? "ALL";
 };
 
 const getVisibleCards = (
-  sections: PropertyStageSection[],
-  activeFilter: PropertyStageFilterValue,
+  sections: PropertyTemplateSection[],
+  activeFilter: PropertyTemplateFilterValue,
 ) => {
   if (activeFilter === "ALL") {
     return sections.flatMap((section) => section.cards);
   }
 
-  return sections.find((section) => section.stage === activeFilter)?.cards ?? [];
+  return sections.find((section) => section.template === activeFilter)?.cards ?? [];
 };
 
 const getFilterEmptyMessage = (
-  sections: PropertyStageSection[],
-  activeFilter: PropertyStageFilterValue,
+  sections: PropertyTemplateSection[],
+  activeFilter: PropertyTemplateFilterValue,
 ) => {
   if (activeFilter === "ALL") {
-    return "Properties will appear here once portfolio listings are published from the admin portal.";
+    return "Portfolio entries will appear here once listings are published from the admin portal.";
   }
 
   return (
-    sections.find((section) => section.stage === activeFilter)?.emptyMessage ??
-    "No properties are available for the selected stage yet."
+    sections.find((section) => section.template === activeFilter)?.emptyMessage ??
+    "No portfolio entries are available for the selected deal type yet."
   );
 };
 
-function usePropertyStageSelection(sections: PropertyStageSection[]) {
+function usePropertyTemplateSelection(sections: PropertyTemplateSection[]) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -121,13 +119,13 @@ function usePropertyStageSelection(sections: PropertyStageSection[]) {
   const activeFilter = getFilterValueFromSearch(searchParams);
   const activeOption = options.find((option) => option.value === activeFilter) ?? options[0];
 
-  const handleStageChange = (nextFilter: PropertyStageFilterValue) => {
+  const handleTemplateChange = (nextFilter: PropertyTemplateFilterValue) => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (nextFilter === "ALL") {
-      params.delete("stage");
+      params.delete("template");
     } else {
-      params.set("stage", stageQueryValueMap[nextFilter]);
+      params.set("template", propertyTemplateQueryValueMap[nextFilter]);
     }
 
     const nextUrl = params.size ? `${pathname}?${params.toString()}` : pathname;
@@ -140,24 +138,24 @@ function usePropertyStageSelection(sections: PropertyStageSection[]) {
   return {
     activeFilter,
     activeOption,
-    handleStageChange,
+    handleTemplateChange,
     isPending,
     options,
   };
 }
 
-export function PropertyStageHeroSelect({
+export function PropertyTemplateHeroSelect({
   sections,
 }: {
-  sections: PropertyStageSection[];
+  sections: PropertyTemplateSection[];
 }) {
-  const { activeFilter, activeOption, handleStageChange, isPending, options } =
-    usePropertyStageSelection(sections);
+  const { activeFilter, activeOption, handleTemplateChange, isPending, options } =
+    usePropertyTemplateSelection(sections);
 
   return (
     <div className="rounded-[24px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.04)_100%)] px-4 py-3.5 text-white shadow-[0_20px_46px_rgba(3,12,25,0.24)] backdrop-blur-xl sm:px-5 sm:py-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#d7b18f]">
-        Property Filter
+        Deal Type Filter
       </p>
 
       <div className="mt-3">
@@ -165,9 +163,9 @@ export function PropertyStageHeroSelect({
           <select
             className="h-[54px] w-full appearance-none rounded-[18px] border border-white/12 bg-[#0f2740]/88 px-4 pr-12 text-[15px] font-medium tracking-[-0.015em] text-white outline-none transition-[border-color,box-shadow,background-color] duration-300 focus:border-[#d7b18f]/80 focus:bg-[#12314f] focus:shadow-[0_0_0_1px_rgba(215,177,143,0.65)] disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isPending}
-            id="properties-stage-select"
+            id="properties-template-select"
             onChange={(event) =>
-              handleStageChange(event.target.value as PropertyStageFilterValue)
+              handleTemplateChange(event.target.value as PropertyTemplateFilterValue)
             }
             value={activeFilter}
           >
@@ -193,16 +191,18 @@ export function PropertyStageHeroSelect({
           </svg>
         </div>
       </div>
+
+      <p className="mt-3 text-[12px] leading-[1.6] text-white/72">{activeOption.helper}</p>
     </div>
   );
 }
 
-export function PropertyStageFilter({
+export function PropertyTemplateFilter({
   sections,
 }: {
-  sections: PropertyStageSection[];
+  sections: PropertyTemplateSection[];
 }) {
-  const { activeFilter } = usePropertyStageSelection(sections);
+  const { activeFilter } = usePropertyTemplateSelection(sections);
 
   const visibleCards = useMemo(
     () => getVisibleCards(sections, activeFilter),
@@ -226,7 +226,7 @@ export function PropertyStageFilter({
             <OpportunityCard
               bulletItems={property.bulletItems}
               ctaLabel={property.ctaLabel}
-              footer={{ label: "Strategy", value: property.strategy }}
+              footer={{ label: "Deal Type", value: property.strategy }}
               href={property.href}
               image={property.imageUrl}
               imageAlt={property.imageAlt}
@@ -245,3 +245,6 @@ export function PropertyStageFilter({
     </div>
   );
 }
+
+export const PropertyStageHeroSelect = PropertyTemplateHeroSelect;
+export const PropertyStageFilter = PropertyTemplateFilter;

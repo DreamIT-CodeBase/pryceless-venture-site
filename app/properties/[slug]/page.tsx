@@ -16,8 +16,10 @@ import { SiteShell } from "@/components/public/site-shell";
 import { getPublishedProperty, getSingletonPage } from "@/lib/data/public";
 import { resolvePrimaryImage } from "@/lib/media";
 import {
+  derivePropertyDescriptionContent,
   getPropertyGoogleMapsEmbedUrl,
   getPropertyGoogleMapsOpenUrl,
+  getPropertyDetailMetricMap,
   parsePropertyDetailContent,
 } from "@/lib/property-detail-content";
 import {
@@ -25,6 +27,12 @@ import {
   getPropertyPortfolioStage,
   parsePropertyHighlights,
 } from "@/lib/property-portfolio";
+import {
+  coercePropertyDealType,
+  getPropertyDealTypeLabel,
+  propertyTemplateMetricDefinitions,
+  propertyTemplateConfigMap,
+} from "@/lib/property-templates";
 
 export const revalidate = 300;
 export const dynamic = "force-dynamic";
@@ -75,11 +83,97 @@ const splitParagraphs = (value: string | null | undefined) =>
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
 
+const dedupeTextItems = (items: Array<string | null | undefined>) =>
+  items.filter((item): item is string => Boolean(item && item.trim())).filter((item, index, array) => {
+    const normalized = item.trim();
+    return array.findIndex((candidate) => candidate?.trim() === normalized) === index;
+  });
+
+const splitOverviewBulletCopy = (value: string) => {
+  const match = value.match(/^(.+?)\s(?:\||:|-|\u2013|\u2014)\s(.+)$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    body: match[2].trim(),
+    label: match[1].trim(),
+  };
+};
+
 const getMetricValue = (
   lookup: Map<string, string>,
   explicitValue: string | null | undefined,
   fallbackLabel: string,
 ) => explicitValue || lookup.get(normalizeMetricKey(fallbackLabel)) || null;
+
+type DisplayMetricCard = {
+  icon: ReactNode;
+  key: string;
+  label: string;
+  toneClassName: string;
+  value: string;
+};
+
+const metricToneClassNames = [
+  "bg-[#e9fbf2] text-[#28b777]",
+  "bg-[#edf4ff] text-[#2563eb]",
+  "bg-[#f2ebff] text-[#7c3aed]",
+  "bg-[#fff4e6] text-[#ea7f00]",
+  "bg-[#f8fafc] text-[#1e293b]",
+  "bg-[#eef5ff] text-[#335c99]",
+];
+
+const getMetricCardIcon = (metricKey: string, label: string) => {
+  const normalized = normalizeMetricKey(metricKey || label);
+
+  if (
+    normalized.includes("roi") ||
+    normalized.includes("caprate") ||
+    normalized.includes("profit") ||
+    normalized.includes("return")
+  ) {
+    return <ArrowTrendIcon className="h-6 w-6" />;
+  }
+
+  if (normalized.includes("hold") || normalized.includes("horizon") || normalized.includes("time")) {
+    return <CalendarIcon className="h-6 w-6" />;
+  }
+
+  if (normalized.includes("arv") || normalized.includes("saleprice")) {
+    return <MedalIcon className="h-6 w-6" />;
+  }
+
+  if (
+    normalized.includes("noi") ||
+    normalized.includes("rent") ||
+    normalized.includes("multifamily")
+  ) {
+    return <BuildingIcon className="h-6 w-6" />;
+  }
+
+  if (normalized.includes("cash") || normalized.includes("rehab") || normalized.includes("budget")) {
+    return <WalletIcon className="h-6 w-6" />;
+  }
+
+  if (normalized.includes("purchase") || normalized.includes("price")) {
+    return <HomeIcon className="h-6 w-6" />;
+  }
+
+  return <DollarIcon className="h-6 w-6" />;
+};
+
+const createMetricCard = (
+  metric: { key: string; label: string; value: string },
+  index: number,
+): DisplayMetricCard => ({
+  icon: getMetricCardIcon(metric.key, metric.label),
+  key: normalizeMetricKey(metric.key || metric.label) || `${metric.label}-${index}`,
+  label: metric.label,
+  toneClassName: metricToneClassNames[index % metricToneClassNames.length],
+  value: metric.value,
+});
 
 const createGalleryImages = (
   property: NonNullable<Awaited<ReturnType<typeof getPublishedProperty>>>,
@@ -435,115 +529,190 @@ export default async function PropertyDetailPage({
   const highlightContent = parsePropertyHighlights(
     property.highlights.map((highlight) => highlight.highlight),
   );
+  const dealType = coercePropertyDealType(detailContent.templateType ?? property.strategy);
+  const templateConfig = propertyTemplateConfigMap[dealType];
+  const narrativeSource =
+    detailContent.rawDescription || property.buyerFit || page?.intro || property.summary;
+  const narrativeDerivatives = derivePropertyDescriptionContent(narrativeSource);
+  const narrativeContent = detailContent.rawDescription
+    ? detailContent.narrative
+    : {
+        bulletPoints: narrativeDerivatives.bulletPoints,
+        leadParagraph: narrativeDerivatives.leadParagraph,
+        supportParagraphs: narrativeDerivatives.supportParagraphs,
+      };
+
+  const orderedMetrics = Array.from(
+    [
+      ...detailContent.templateMetrics,
+      ...narrativeDerivatives.metrics,
+      ...highlightContent.metrics.map((item) => ({
+        key: normalizeMetricKey(item.label),
+        label: item.label,
+        value: item.value,
+      })),
+    ].reduce(
+      (map, metric) => {
+        const metricKey = normalizeMetricKey(metric.key || metric.label);
+        if (!metricKey || !metric.value || map.has(metricKey)) {
+          return map;
+        }
+
+        map.set(metricKey, {
+          key: metricKey,
+          label: metric.label,
+          value: metric.value,
+        });
+        return map;
+      },
+      new Map<string, { key: string; label: string; value: string }>(),
+    ).values(),
+  );
+  const detailMetricMap = getPropertyDetailMetricMap(detailContent.templateMetrics);
   const metricLookup = new Map(
-    highlightContent.metrics.map((item) => [normalizeMetricKey(item.label), item.value]),
+    orderedMetrics.flatMap((metric) => [
+      [metric.key, metric.value] as const,
+      [normalizeMetricKey(metric.label), metric.value] as const,
+    ]),
   );
 
-  const performanceCards = [
-    {
-      icon: <ArrowTrendIcon className="h-6 w-6" />,
-      label: "ROI",
-      toneClassName: "bg-[#e9fbf2] text-[#28b777]",
-      value: getMetricValue(metricLookup, detailContent.performance.roi, "ROI"),
-    },
-    {
-      icon: <PercentIcon className="h-6 w-6" />,
-      label: "Cap Rate",
-      toneClassName: "bg-[#edf4ff] text-[#2563eb]",
-      value: getMetricValue(metricLookup, detailContent.performance.capRate, "Cap Rate"),
-    },
-    {
-      icon: <DollarIcon className="h-6 w-6" />,
-      label: "Monthly Cash Flow",
-      toneClassName: "bg-[#f2ebff] text-[#7c3aed]",
-      value: getMetricValue(
+  const templateHeroMetrics = templateConfig.heroMetricKeys
+    .map((metricKey) => {
+      const value = getMetricValue(
         metricLookup,
-        detailContent.performance.monthlyCashFlow,
-        "Monthly Cash Flow",
-      ),
-    },
-    {
-      icon: <CalendarIcon className="h-6 w-6" />,
-      label: "Investment Horizon",
-      toneClassName: "bg-[#fff4e6] text-[#ea7f00]",
-      value: getMetricValue(
-        metricLookup,
-        detailContent.performance.investmentHorizon,
-        "Investment Horizon",
-      ),
-    },
-  ].filter((item) => item.value) as Array<{
-    icon: ReactNode;
-    label: string;
-    toneClassName: string;
-    value: string;
-  }>;
+        detailMetricMap.get(metricKey),
+        propertyTemplateMetricDefinitions[metricKey].label,
+      );
 
-  const snapshotCards = [
-    {
-      icon: <HomeIcon className="h-6 w-6" />,
-      label: "Purchase Price",
-      toneClassName: "bg-[#f8fafc] text-[#1e293b]",
-      value: getMetricValue(metricLookup, detailContent.snapshot.purchasePrice, "Purchase Price"),
-    },
-    {
-      icon: <BuildingIcon className="h-6 w-6" />,
-      label: "Estimated Rent",
-      toneClassName: "bg-[#f8fafc] text-[#1e293b]",
-      value: getMetricValue(metricLookup, detailContent.snapshot.estimatedRent, "Estimated Rent"),
-    },
-    {
-      icon: <WalletIcon className="h-6 w-6" />,
-      label: "Renovation Cost",
-      toneClassName: "bg-[#f8fafc] text-[#1e293b]",
-      value: getMetricValue(
-        metricLookup,
-        detailContent.snapshot.renovationCost,
-        "Renovation Cost",
-      ),
-    },
-    {
-      icon: <MedalIcon className="h-6 w-6" />,
-      label: "ARV",
-      toneClassName: "bg-[#f8fafc] text-[#1e293b]",
-      value: getMetricValue(metricLookup, detailContent.snapshot.arv, "ARV"),
-    },
-  ].filter((item) => item.value) as Array<{
-    icon: ReactNode;
-    label: string;
-    toneClassName: string;
-    value: string;
-  }>;
+      return value
+        ? {
+            key: metricKey,
+            label: propertyTemplateMetricDefinitions[metricKey].label,
+            value,
+          }
+        : null;
+    })
+    .filter(Boolean) as Array<{ key: string; label: string; value: string }>;
 
-  const investmentOverviewParagraphs = splitParagraphs(
-    property.buyerFit || page?.intro || property.summary,
+  const templateDetailMetrics = templateConfig.detailMetricKeys
+    .map((metricKey) => {
+      const value = getMetricValue(
+        metricLookup,
+        detailMetricMap.get(metricKey),
+        propertyTemplateMetricDefinitions[metricKey].label,
+      );
+
+      return value
+        ? {
+            key: metricKey,
+            label: propertyTemplateMetricDefinitions[metricKey].label,
+            value,
+          }
+        : null;
+    })
+    .filter(Boolean) as Array<{ key: string; label: string; value: string }>;
+
+  const configuredMetricKeys = new Set(
+    [...templateConfig.heroMetricKeys, ...templateConfig.detailMetricKeys].map((item) =>
+      normalizeMetricKey(item),
+    ),
+  );
+  const remainingMetrics = orderedMetrics.filter(
+    (metric) => !configuredMetricKeys.has(normalizeMetricKey(metric.key || metric.label)),
+  );
+  const heroMetricData = templateHeroMetrics.length
+    ? [...templateHeroMetrics, ...remainingMetrics.slice(0, Math.max(0, 4 - templateHeroMetrics.length))]
+    : orderedMetrics.slice(0, 4);
+  const heroMetricKeys = new Set(
+    heroMetricData.map((metric) => normalizeMetricKey(metric.key || metric.label)),
+  );
+  const remainingAfterHeroMetrics = remainingMetrics.filter(
+    (metric) => !heroMetricKeys.has(normalizeMetricKey(metric.key || metric.label)),
+  );
+  const snapshotMetricData = (
+    templateDetailMetrics.length
+      ? [...templateDetailMetrics, ...remainingAfterHeroMetrics]
+      : orderedMetrics.filter(
+          (metric) => !heroMetricKeys.has(normalizeMetricKey(metric.key || metric.label)),
+        )
+  ).filter(
+    (metric, index, items) =>
+      items.findIndex(
+        (item) =>
+          normalizeMetricKey(item.key || item.label) ===
+          normalizeMetricKey(metric.key || metric.label),
+      ) === index,
   );
 
-  const overviewFeatureStats = snapshotCards
-    .slice(0, 3)
-    .map((item) => ({ label: item.label, value: item.value }));
+  const metricHeroCards = heroMetricData.map((metric, index) => createMetricCard(metric, index));
+  const snapshotCards = snapshotMetricData.map((metric, index) =>
+    createMetricCard(metric, index + metricHeroCards.length),
+  );
+  const narrativeParagraphs = [
+    narrativeContent.leadParagraph,
+    ...narrativeContent.supportParagraphs,
+  ].filter(Boolean) as string[];
+  const heroDescriptionParagraphs = (
+    narrativeParagraphs.length ? narrativeParagraphs : splitParagraphs(property.summary)
+  ).slice(0, 2);
+  const heroDescriptionText = heroDescriptionParagraphs.join(" ").trim();
+  const remainingOverviewParagraphs = narrativeParagraphs.length
+    ? narrativeParagraphs.slice(heroDescriptionParagraphs.length)
+    : [];
+  const uniqueMetricCards = Array.from(
+    new Map(
+      [...metricHeroCards, ...snapshotCards].map((card) => [
+        normalizeMetricKey(card.key || card.label),
+        card,
+      ]),
+    ).values(),
+  );
+  const dealTypeLabel = getPropertyDealTypeLabel(dealType);
+  const dealTimelineLabel = detailContent.timelineLabel;
+  const propertyTypeLabel = getPropertyTypeBadgeLabel(property.propertyType) || "Property";
 
-  const overviewSupportItems =
-    investmentOverviewParagraphs.length > 1
-      ? investmentOverviewParagraphs.slice(1, 3)
-      : highlightContent.bullets.slice(0, 2);
+  const overviewParagraphs = remainingOverviewParagraphs.length
+    ? remainingOverviewParagraphs
+    : dedupeTextItems([
+        ...narrativeParagraphs,
+        ...splitParagraphs(property.buyerFit),
+        ...splitParagraphs(property.summary),
+      ]);
+  const overviewLeadText =
+    overviewParagraphs[0] ?? heroDescriptionParagraphs[0] ?? property.summary ?? null;
+  const overviewTitle = detailContent.overviewTitle ?? overviewLeadText;
+  const overviewDescriptionFallback = overviewParagraphs.length > 1 ? overviewParagraphs[1] : null;
+  const overviewDescription =
+    detailContent.overviewShortDescription ??
+    (overviewDescriptionFallback && overviewDescriptionFallback !== overviewTitle
+      ? overviewDescriptionFallback
+      : null);
+  const overviewBulletPoints = dedupeTextItems(
+    detailContent.overviewBulletPoints.length
+      ? detailContent.overviewBulletPoints
+      : narrativeContent.bulletPoints.length > 0
+        ? narrativeContent.bulletPoints
+        : highlightContent.bullets,
+  );
+  const hasOverviewContent =
+    Boolean(overviewTitle) ||
+    Boolean(overviewDescription) ||
+    overviewBulletPoints.length > 0;
 
   const standoutItems =
     detailContent.standoutItems.length > 0
       ? detailContent.standoutItems
-      : highlightContent.bullets.slice(0, 4).map((item, index) => ({
-          description: item,
-          title: ["Deal Highlight", "Execution Angle", "Market Context", "Investor Upside"][index],
-        }));
-
-  const investorProfile =
-    detailContent.investorProfile.length > 0
-      ? detailContent.investorProfile
-      : [
-          formatDisplayValue(property.strategy),
-          formatDisplayValue(property.propertyType),
-          stage === "FOR_SALE" ? "Active Inventory" : null,
-        ].filter(Boolean);
+      : narrativeDerivatives.standoutItems.length > 0
+        ? narrativeDerivatives.standoutItems
+        : highlightContent.bullets.slice(0, 4).map((item, index) => ({
+            description: item,
+            title: [
+              "Deal Highlight",
+              "Execution Angle",
+              "Market Context",
+              "Investor Upside",
+            ][index],
+          }));
 
   const locationBenefits = detailContent.locationBenefits;
   const mapSearchFallback = [property.title, locationLabel].filter(Boolean).join(", ");
@@ -561,8 +730,8 @@ export default async function PropertyDetailPage({
   const ctaLabel = page?.ctaLabel || inquiryForm?.formName || "Get Full Deal Access";
 
   const heroCards =
-    performanceCards.length > 0
-      ? performanceCards
+    metricHeroCards.length > 0
+      ? metricHeroCards
       : [
           {
             icon: <PinIcon className="h-6 w-6" />,
@@ -574,13 +743,13 @@ export default async function PropertyDetailPage({
             icon: <HomeIcon className="h-6 w-6" />,
             label: "Property Type",
             toneClassName: "bg-[#e9fbf2] text-[#28b777]",
-            value: getPropertyTypeBadgeLabel(property.propertyType) || "Property",
+            value: propertyTypeLabel,
           },
           {
             icon: <ArrowTrendIcon className="h-6 w-6" />,
-            label: "Strategy",
+            label: "Deal Type",
             toneClassName: "bg-[#f2ebff] text-[#7c3aed]",
-            value: formatDisplayValue(property.strategy) || "Not specified",
+            value: dealTypeLabel,
           },
           {
             icon: <CalendarIcon className="h-6 w-6" />,
@@ -589,29 +758,15 @@ export default async function PropertyDetailPage({
             value: statusLabel,
           },
         ];
-
-  const heroBadges = [
-    heroCards.some((item) => item.label === "ROI")
-      ? {
-          label: "High ROI",
-          toneClassName: "bg-[#e8f8ee] text-[#17986b]",
-        }
-      : {
-          label: formatDisplayValue(property.strategy) || "Opportunity",
-          toneClassName: "bg-[#e8f8ee] text-[#17986b]",
-        },
-    {
-      label: stage === "FOR_SALE" ? "Hot Deal" : statusLabel,
-      toneClassName: "bg-[#ffe8ec] text-[#dc4e6b]",
-    },
-    {
-      label: getPropertyTypeBadgeLabel(property.propertyType) || "Property",
-      toneClassName: "bg-[#e8f0ff] text-[#2962eb]",
-    },
-  ];
+  const keyMetricCards = uniqueMetricCards.length
+    ? uniqueMetricCards.slice(0, 2)
+    : heroCards.slice(0, 2);
+  const dealSnapshotCards = uniqueMetricCards.length
+    ? uniqueMetricCards.slice(0, 4)
+    : heroCards.slice(0, 4);
 
   return (
-    <SiteShell cta={{ href: "/properties", label: "Back to Properties" }}>
+    <SiteShell cta={{ href: "/properties", label: "Back to Portfolio" }}>
       <DetailPageCanvas>
         <div className="bg-[linear-gradient(180deg,#fffdf9_0%,#ffffff_24%,#fffdf7_100%)]">
           <DetailSection className="pb-14 pt-10 sm:pt-12 lg:pb-18 lg:pt-14">
@@ -620,48 +775,85 @@ export default async function PropertyDetailPage({
             <div className="mt-8">
               <div className="flex flex-col">
                 <div
-                  className={`grid gap-10 xl:grid-cols-[minmax(0,0.98fr)_minmax(420px,1fr)] xl:items-center xl:gap-14 ${
+                  className={`grid gap-10 xl:grid-cols-[minmax(0,0.98fr)_minmax(420px,1fr)] xl:items-start xl:gap-14 ${
                     heroImage ? "" : "max-w-[980px]"
                   }`}
                 >
                   <div>
-                    <div className="flex flex-wrap gap-3">
-                      {heroBadges.map((item) => (
-                        <PropertyBadge
-                          key={item.label}
-                          label={item.label}
-                          toneClassName={item.toneClassName}
-                        />
-                      ))}
+                    <div className="space-y-6 sm:space-y-7">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                          <p className="text-[16px] font-semibold uppercase tracking-[0.34em] text-[#bf9375] sm:text-[18px]">
+                            {dealTypeLabel}
+                          </p>
+                          {dealTimelineLabel ? (
+                            <>
+                              <span className="text-[18px] font-medium text-[#d7c1a5] sm:text-[20px]">
+                                |
+                              </span>
+                              <p className="text-[16px] font-medium tracking-[-0.02em] text-[#bf9375] sm:text-[18px]">
+                                {dealTimelineLabel}
+                              </p>
+                            </>
+                          ) : null}
+                        </div>
+                        <h1
+                          className="mt-4 max-w-[660px] text-balance text-[32px] font-semibold leading-[1.02] tracking-[-0.05em] text-[#14213c] sm:text-[42px] lg:text-[52px]"
+                          style={serifHeadingStyle}
+                        >
+                          {property.title}
+                        </h1>
+                        {locationLabel ? (
+                          <div className="mt-5 flex items-center gap-3 text-[16px] font-medium tracking-[-0.02em] text-slate-600 sm:text-[18px]">
+                            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#faf6ef] text-[#cca24f]">
+                              <PinIcon className="h-5 w-5" />
+                            </span>
+                            <span>{locationLabel}</span>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      {heroDescriptionText ? (
+                        <p className="max-w-[760px] text-[16px] leading-[1.9] text-slate-600 sm:text-[17px]">
+                          {heroDescriptionText}
+                        </p>
+                      ) : null}
                     </div>
 
-                    <div className="mt-5 space-y-8 sm:space-y-10">
-                      <h1
-                        className="max-w-[660px] text-balance text-[32px] font-semibold leading-[1.02] tracking-[-0.05em] text-[#14213c] sm:text-[42px] lg:text-[52px]"
-                        style={serifHeadingStyle}
-                      >
-                        {property.title}
-                      </h1>
-                      <p className="max-w-[760px] text-[16px] leading-[1.78] text-slate-600 sm:text-[17px]">
-                        {property.summary}
-                      </p>
-                    </div>
-
-                    <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                      {heroCards.slice(0, 4).map((item) => (
-                        <PropertyValueCard
-                          icon={item.icon}
-                          key={item.label}
-                          label={item.label}
-                          toneClassName={item.toneClassName}
-                          value={item.value}
-                        />
-                      ))}
-                    </div>
+                    {keyMetricCards.length ? (
+                      <div className="mt-10">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.24em] text-[#8b96a8]">
+                          Key Metrics
+                        </p>
+                        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                          {keyMetricCards.map((item) => (
+                            <PropertyValueCard
+                              icon={item.icon}
+                              key={item.key}
+                              label={item.label}
+                              toneClassName={item.toneClassName}
+                              value={item.value}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                        {heroCards.slice(0, 4).map((item) => (
+                          <PropertyValueCard
+                            icon={item.icon}
+                            key={item.label}
+                            label={item.label}
+                            toneClassName={item.toneClassName}
+                            value={item.value}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {heroImage ? (
-                    <div className="relative overflow-hidden rounded-[36px] border border-[#e8e1d6] bg-white shadow-[0_22px_54px_rgba(15,23,42,0.1)]">
+                    <div className="relative overflow-hidden rounded-[36px] border border-[#e8e1d6] bg-white shadow-[0_22px_54px_rgba(15,23,42,0.1)] xl:mt-4 xl:self-start">
                       <div className="relative min-h-[360px] sm:min-h-[460px] xl:min-h-[560px]">
                         <Image
                           alt={heroImage.alt}
@@ -686,14 +878,14 @@ export default async function PropertyDetailPage({
                 </div>
               </div>
 
-              {snapshotCards.length ? (
+              {dealSnapshotCards.length ? (
                 <div className="mt-14">
-                  <PropertySectionHeading title="Investment Snapshot" />
+                  <PropertySectionHeading title="Deal Snapshot" />
                   <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                    {snapshotCards.map((item) => (
+                    {dealSnapshotCards.map((item) => (
                       <PropertyValueCard
                         icon={item.icon}
-                        key={item.label}
+                        key={item.key}
                         label={item.label}
                         toneClassName={item.toneClassName}
                         value={item.value}
@@ -765,51 +957,75 @@ export default async function PropertyDetailPage({
                 </section>
               ) : null}
 
-              {investmentOverviewParagraphs.length ? (
+              {hasOverviewContent ? (
                 <section>
-                  <PropertySectionHeading title="Investment Overview" />
-                  <div className="mt-8 rounded-[30px] border border-[#eadfcf] bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] sm:p-6">
-                    <div className="rounded-[24px] border border-[#ecdcc6] bg-[#fffdf9] px-5 py-5 shadow-[0_10px_28px_rgba(15,23,42,0.04)] sm:px-6 sm:py-6">
-                      <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-[#bf9375]">
-                        Overview
-                      </p>
-                      <p className="mt-3 max-w-[820px] text-[20px] font-semibold leading-[1.45] tracking-[-0.03em] text-[#14213c] sm:text-[24px]">
-                        {investmentOverviewParagraphs[0]}
-                      </p>
+                  <PropertySectionHeading title="Deal Overview" />
+                  <div className="relative mt-8 overflow-hidden rounded-[34px] border border-[#eadfcf] bg-[linear-gradient(180deg,#fffdfa_0%,#fffaf2_100%)] p-5 shadow-[0_28px_65px_rgba(15,23,42,0.08)] sm:p-7">
+                    <div className="absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top_left,rgba(215,165,80,0.16),transparent_58%)]" />
+                    <div className="absolute bottom-0 right-0 h-36 w-36 rounded-full bg-[radial-gradient(circle,rgba(20,33,60,0.05),transparent_68%)]" />
 
-                      {overviewFeatureStats.length ? (
-                        <div className="mt-5 flex flex-wrap gap-3">
-                          {overviewFeatureStats.map((item) => (
-                            <div
-                              className="rounded-full border border-[#ecdcc6] bg-white px-4 py-3"
-                              key={`${item.label}-${item.value}`}
-                            >
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#bf9375]">
-                                {item.label}
-                              </p>
-                              <p className="mt-1 text-[16px] font-semibold leading-none text-[#14213c]">
-                                {item.value}
+                    <div className="relative">
+                      <div className="rounded-[28px] border border-[#ecdcc6] bg-white/80 px-5 py-5 shadow-[0_16px_32px_rgba(15,23,42,0.05)] backdrop-blur-[2px] sm:px-7 sm:py-7">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="inline-flex rounded-full border border-[#ecd5b7] bg-[#fff7eb] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.26em] text-[#bf9375]">
+                            Overview
+                          </span>
+                          <span className="inline-flex rounded-full border border-[#e6e8ef] bg-white px-3 py-1.5 text-[12px] font-medium tracking-[-0.01em] text-slate-600">
+                            {dealTypeLabel}
+                          </span>
+                          <span className="inline-flex rounded-full border border-[#e6e8ef] bg-white px-3 py-1.5 text-[12px] font-medium tracking-[-0.01em] text-slate-600">
+                            {propertyTypeLabel}
+                          </span>
+                        </div>
+
+                        {overviewTitle ? (
+                          <p className="mt-5 w-full text-[23px] font-semibold leading-[1.42] tracking-[-0.035em] text-[#14213c] sm:text-[28px]">
+                            {overviewTitle}
+                          </p>
+                        ) : null}
+
+                        {overviewDescription ? (
+                          <div className="mt-6 border-t border-[#eee4d7] pt-6">
+                            <div className="rounded-[22px] border border-[#edf1f7] bg-[linear-gradient(180deg,#fcfdff_0%,#f8fbff_100%)] px-5 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+                              <p className="text-[16px] leading-[1.85] tracking-[-0.01em] text-slate-600">
+                                {overviewDescription}
                               </p>
                             </div>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      {overviewBulletPoints.length ? (
+                        <ul className="mt-5 grid gap-4 xl:grid-cols-2">
+                          {overviewBulletPoints.map((item, index) => (
+                            <li
+                              className="flex items-start gap-3 rounded-[22px] border border-[#ece3d6] bg-white/95 px-5 py-4 text-[15px] leading-[1.75] text-slate-600 shadow-[0_12px_24px_rgba(15,23,42,0.04)]"
+                              key={`${item}-${index}`}
+                            >
+                              <span className="mt-[7px] h-2.5 w-2.5 shrink-0 rounded-full bg-[#d7a550]" />
+                              {(() => {
+                                const bulletCopy = splitOverviewBulletCopy(item);
+
+                                if (!bulletCopy) {
+                                  return <span>{item}</span>;
+                                }
+
+                                return (
+                                  <span>
+                                    <span className="font-semibold text-[#14213c]">
+                                      {bulletCopy.label}
+                                    </span>
+                                    <span className="text-slate-600">
+                                      {` - ${bulletCopy.body}`}
+                                    </span>
+                                  </span>
+                                );
+                              })()}
+                            </li>
                           ))}
-                        </div>
+                        </ul>
                       ) : null}
                     </div>
-
-                    {overviewSupportItems.length ? (
-                      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                        {overviewSupportItems.map((item, index) => (
-                          <div
-                            className="rounded-[22px] border border-[#e7edf4] bg-[#fcfdff] px-5 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
-                            key={`${item}-${index}`}
-                          >
-                            <p className="text-[15px] leading-[1.75] text-slate-600 sm:text-[16px]">
-                              {item}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
                   </div>
                 </section>
               ) : null}
@@ -835,22 +1051,6 @@ export default async function PropertyDetailPage({
                         />
                       );
                     })}
-                  </div>
-                </section>
-              ) : null}
-
-              {investorProfile.length ? (
-                <section>
-                  <PropertySectionHeading title="Ideal Investor Profile" />
-                  <div className="mt-8 flex flex-wrap gap-4">
-                    {investorProfile.map((item) => (
-                      <span
-                        className="rounded-full bg-[#1c2d4e] px-6 py-4 text-[18px] font-semibold tracking-[-0.02em] text-white shadow-[0_16px_28px_rgba(28,45,78,0.18)]"
-                        key={item}
-                      >
-                        {item}
-                      </span>
-                    ))}
                   </div>
                 </section>
               ) : null}

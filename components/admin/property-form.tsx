@@ -3,13 +3,16 @@ import Link from "next/link";
 import { autosavePropertyDraft, deleteProperty, saveProperty } from "@/app/admin/actions";
 import { AdminAutosaveForm } from "@/components/admin/admin-autosave-form";
 import { ImageManager } from "@/components/admin/image-manager";
-import { propertyStrategyOptions, propertyTypeOptions } from "@/lib/content-blueprint";
+import { PropertyTemplateFields } from "@/components/admin/property-template-fields";
+import { propertyTypeOptions } from "@/lib/content-blueprint";
 import {
   formatPropertyStandoutItemsForEditor,
   formatPropertyStringListForEditor,
+  getPropertyDetailMetricValue,
   parsePropertyDetailContent,
 } from "@/lib/property-detail-content";
 import { getPropertyEditorStatus, propertyStatusOptions } from "@/lib/property-portfolio";
+import { propertyTemplateMetricDefinitions } from "@/lib/property-templates";
 import { SubmitButton } from "@/components/admin/submit-button";
 
 type PropertyFormProps = {
@@ -20,6 +23,12 @@ type PropertyFormProps = {
 
 export function PropertyForm({ property, forms, errorMessage }: PropertyFormProps) {
   const detailContent = parsePropertyDetailContent(property?.detailContent);
+  const templateMetricValues = Object.fromEntries(
+    Object.values(propertyTemplateMetricDefinitions).map((metric) => [
+      metric.key,
+      getPropertyDetailMetricValue(detailContent.templateMetrics, metric.key) ?? "",
+    ]),
+  );
   const images =
     property?.images?.map((image: any) => ({
       mediaFileId: image.mediaFileId,
@@ -70,10 +79,11 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
                 ))}
               </select>
               <span className="mt-2 block text-xs leading-5 text-slate-500">
-                Use <span className="font-semibold text-slate-700">For Sale</span> for active inventory,
-                <span className="font-semibold text-slate-700"> Sold</span> for completed deals that show
-                execution results, and <span className="font-semibold text-slate-700">In Progress</span> for
-                rehab projects receiving ongoing updates.
+                Use <span className="font-semibold text-slate-700">For Sale</span> for current portfolio
+                listings, <span className="font-semibold text-slate-700"> Sold</span> for completed deals
+                that show execution results, and{" "}
+                <span className="font-semibold text-slate-700">In Progress</span> for rehab projects
+                receiving ongoing updates.
               </span>
             </label>
 
@@ -92,20 +102,10 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
               </select>
             </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Strategy</span>
-              <select
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={property?.strategy ?? "FIX_FLIP"}
-                name="strategy"
-              >
-                {propertyStrategyOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <PropertyTemplateFields
+              initialMetricValues={templateMetricValues}
+              initialStrategy={detailContent.templateType ?? property?.strategy}
+            />
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">Location City</span>
@@ -126,6 +126,63 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
             </label>
 
             <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Overview Title</span>
+              <input
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={detailContent.overviewTitle ?? ""}
+                name="overviewTitle"
+                placeholder="Off-market value-add opportunity in a fast-moving Dallas submarket"
+              />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                This is the main headline inside the public Deal Overview section.
+              </span>
+            </label>
+
+            <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Overview Short Description
+              </span>
+              <textarea
+                className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={detailContent.overviewShortDescription ?? ""}
+                name="overviewShortDescription"
+                placeholder="A short editorial paragraph that explains the deal clearly before the bullet points."
+              />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                Keep this concise. It renders directly under the overview title on the public page.
+              </span>
+            </label>
+
+            <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Overview Bullet Points
+              </span>
+              <textarea
+                className="min-h-32 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={formatPropertyStringListForEditor(detailContent.overviewBulletPoints)}
+                name="overviewBulletPointsText"
+                placeholder={"One bullet per line.\nAcquired below market value\nStrong resale margin after renovation\nLocated in a high-demand buyer corridor"}
+              />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                Each line becomes a styled bullet card in the Deal Overview section.
+              </span>
+            </label>
+
+            <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Deal Timeline Label</span>
+              <input
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={detailContent.timelineLabel ?? ""}
+                name="timelineLabel"
+                placeholder="Sep 2025 - Present"
+              />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                This shows beside the deal type on the public property page. Use a flexible display
+                format like <span className="font-semibold text-slate-700">Sep 2025 - Present</span>.
+              </span>
+            </label>
+
+            <label className="block md:col-span-2">
               <span className="mb-2 block text-sm font-medium text-slate-700">Hero Summary</span>
               <textarea
                 className="min-h-32 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
@@ -140,118 +197,23 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
             </label>
 
             <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Investment Overview / Long-form note</span>
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Fallback Long-form Narrative
+              </span>
               <textarea
-                className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={property?.buyerFit ?? ""}
-                name="buyerFit"
+                className="min-h-40 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={detailContent.rawDescription ?? property?.buyerFit ?? ""}
+                name="descriptionText"
               />
               <span className="mt-2 block text-xs leading-5 text-slate-500">
-                This powers the long narrative section on the slug page and can still hold buyer-fit or execution commentary.
+                This is optional fallback content. If the title, short description, or overview bullets
+                above are empty, the public page can still derive overview content from this narrative.
+                Use blank lines between paragraphs, bullet prefixes like{" "}
+                <span className="font-semibold text-slate-700">-</span> for supporting bullets, and{" "}
+                <span className="font-semibold text-slate-700">Title | Description</span> rows when
+                you want standout cards derived automatically.
               </span>
             </label>
-
-            <div className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/70 p-5 md:col-span-2">
-              <div className="grid gap-5 md:grid-cols-2">
-                <div className="md:col-span-2">
-                  <h3 className="text-base font-semibold text-slate-900">Performance Metrics</h3>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
-                    These populate the top four metric cards on the property slug page.
-                  </p>
-                </div>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">ROI</span>
-                  <input
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                    defaultValue={detailContent.performance.roi ?? ""}
-                    name="performanceRoi"
-                    placeholder="18%"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Cap Rate</span>
-                  <input
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                    defaultValue={detailContent.performance.capRate ?? ""}
-                    name="performanceCapRate"
-                    placeholder="7.2%"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Monthly Cash Flow</span>
-                  <input
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                    defaultValue={detailContent.performance.monthlyCashFlow ?? ""}
-                    name="performanceMonthlyCashFlow"
-                    placeholder="$1,200"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Investment Horizon</span>
-                  <input
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                    defaultValue={detailContent.performance.investmentHorizon ?? ""}
-                    name="performanceInvestmentHorizon"
-                    placeholder="5 Years"
-                  />
-                </label>
-              </div>
-            </div>
-
-            <div className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/70 p-5 md:col-span-2">
-              <div className="grid gap-5 md:grid-cols-2">
-                <div className="md:col-span-2">
-                  <h3 className="text-base font-semibold text-slate-900">Investment Snapshot</h3>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
-                    These values populate the four large snapshot cards below the hero area.
-                  </p>
-                </div>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Purchase Price</span>
-                  <input
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                    defaultValue={detailContent.snapshot.purchasePrice ?? ""}
-                    name="snapshotPurchasePrice"
-                    placeholder="$285,000"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Estimated Rent</span>
-                  <input
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                    defaultValue={detailContent.snapshot.estimatedRent ?? ""}
-                    name="snapshotEstimatedRent"
-                    placeholder="$2,400/mo"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Renovation Cost</span>
-                  <input
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                    defaultValue={detailContent.snapshot.renovationCost ?? ""}
-                    name="snapshotRenovationCost"
-                    placeholder="$45,000"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">ARV</span>
-                  <input
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
-                    defaultValue={detailContent.snapshot.arv ?? ""}
-                    name="snapshotArv"
-                    placeholder="$365,000"
-                  />
-                </label>
-              </div>
-            </div>
 
             <label className="block md:col-span-2">
               <span className="mb-2 block text-sm font-medium text-slate-700">Why This Deal Stands Out</span>
@@ -262,18 +224,10 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
                 placeholder={"One standout card per line.\nStrong Rental Demand | Charlotte MSA shows 14% population growth over 3 years"}
               />
               <span className="mt-2 block text-xs leading-5 text-slate-500">
-                Use the format <span className="font-semibold text-slate-700">Title | Description</span>. Up to four cards render on the public page.
+                Use the format <span className="font-semibold text-slate-700">Title | Description</span>.
+                Up to four cards render on the public page. Leave this blank if you want the long
+                description parser to create these automatically.
               </span>
-            </label>
-
-            <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Ideal Investor Profile</span>
-              <textarea
-                className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"
-                defaultValue={formatPropertyStringListForEditor(detailContent.investorProfile)}
-                name="investorProfileText"
-                placeholder={"One profile tag per line.\nPassive Income"}
-              />
             </label>
 
             <label className="block md:col-span-2">
@@ -308,7 +262,9 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
                 placeholder={"One item per line. Use Label | Value for snapshot rows.\nPurchase Price | $245,000"}
               />
               <span className="mt-2 block text-xs leading-5 text-slate-500">
-                Plain lines become bullets on the public page. Lines written as <span className="font-semibold text-slate-700">Label | Value</span> render as sold underwriting stats or rehab progress snapshot rows.
+                Plain lines become bullets on portfolio cards and public fallbacks. Lines written as{" "}
+                <span className="font-semibold text-slate-700">Label | Value</span> still work for
+                extra stats when you want supplemental metrics beyond the template boxes.
               </span>
             </label>
 
