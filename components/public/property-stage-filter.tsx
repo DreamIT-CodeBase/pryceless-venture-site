@@ -1,7 +1,15 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useTransition } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
 
 import { ThreeUpCollectionGrid } from "@/components/public/collection-card-layout";
 import { EmptyCollectionCard } from "@/components/public/marketing-ui";
@@ -36,7 +44,7 @@ type PropertyTemplateSection = {
   title: string;
 };
 
-type PropertyTemplateFilterValue = PropertyDealType | "ALL";
+export type PropertyTemplateFilterValue = PropertyDealType | "ALL";
 
 type TemplateFilterOption = {
   count: number;
@@ -72,16 +80,18 @@ const buildFilterOptions = (
   ];
 };
 
-const getFilterValueFromSearch = (
-  searchParams: ReturnType<typeof useSearchParams>,
+export const getFilterValueFromTemplateParam = (
+  templateParam: string | string[] | null | undefined,
 ): PropertyTemplateFilterValue => {
-  const templateParam = searchParams.get("template");
+  const resolvedTemplateParam = Array.isArray(templateParam)
+    ? templateParam[0]
+    : templateParam;
 
-  if (!templateParam || templateParam === "all") {
+  if (!resolvedTemplateParam || resolvedTemplateParam === "all") {
     return "ALL";
   }
 
-  return propertyTemplateQueryMap[templateParam] ?? "ALL";
+  return propertyTemplateQueryMap[resolvedTemplateParam] ?? "ALL";
 };
 
 const getVisibleCards = (
@@ -109,26 +119,65 @@ const getFilterEmptyMessage = (
   );
 };
 
-function usePropertyTemplateSelection(sections: PropertyTemplateSection[]) {
+type PropertyTemplateFilterContextValue = {
+  activeFilter: PropertyTemplateFilterValue;
+  activeOption: TemplateFilterOption;
+  emptyMessage: string;
+  handleTemplateChange: (nextFilter: PropertyTemplateFilterValue) => void;
+  isPending: boolean;
+  options: TemplateFilterOption[];
+  visibleCards: PropertyTemplateCard[];
+};
+
+const PropertyTemplateFilterContext =
+  createContext<PropertyTemplateFilterContextValue | null>(null);
+
+const readFilterValueFromWindow = () =>
+  getFilterValueFromTemplateParam(
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("template"),
+  );
+
+function usePropertyTemplateSelection(
+  sections: PropertyTemplateSection[],
+) {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const [activeFilter, setActiveFilter] = useState<PropertyTemplateFilterValue>("ALL");
 
   const options = useMemo(() => buildFilterOptions(sections), [sections]);
-  const activeFilter = getFilterValueFromSearch(searchParams);
   const activeOption = options.find((option) => option.value === activeFilter) ?? options[0];
+  const visibleCards = useMemo(
+    () => getVisibleCards(sections, activeFilter),
+    [activeFilter, sections],
+  );
+  const emptyMessage = useMemo(
+    () => getFilterEmptyMessage(sections, activeFilter),
+    [activeFilter, sections],
+  );
+
+  useEffect(() => {
+    const syncFromLocation = () => {
+      setActiveFilter(readFilterValueFromWindow());
+    };
+
+    syncFromLocation();
+    window.addEventListener("popstate", syncFromLocation);
+
+    return () => {
+      window.removeEventListener("popstate", syncFromLocation);
+    };
+  }, []);
 
   const handleTemplateChange = (nextFilter: PropertyTemplateFilterValue) => {
-    const params = new URLSearchParams(searchParams.toString());
+    setActiveFilter(nextFilter);
 
-    if (nextFilter === "ALL") {
-      params.delete("template");
-    } else {
-      params.set("template", propertyTemplateQueryValueMap[nextFilter]);
-    }
-
-    const nextUrl = params.size ? `${pathname}?${params.toString()}` : pathname;
+    const nextUrl =
+      nextFilter === "ALL"
+        ? pathname
+        : `${pathname}?template=${propertyTemplateQueryValueMap[nextFilter]}`;
 
     startTransition(() => {
       router.replace(nextUrl, { scroll: false });
@@ -138,19 +187,43 @@ function usePropertyTemplateSelection(sections: PropertyTemplateSection[]) {
   return {
     activeFilter,
     activeOption,
+    emptyMessage,
     handleTemplateChange,
     isPending,
     options,
+    visibleCards,
   };
 }
 
-export function PropertyTemplateHeroSelect({
+function usePropertyTemplateFilterContext() {
+  const context = useContext(PropertyTemplateFilterContext);
+
+  if (!context) {
+    throw new Error("PropertyTemplateFilter components must be wrapped in PropertyTemplateFilterProvider.");
+  }
+
+  return context;
+}
+
+export function PropertyTemplateFilterProvider({
+  children,
   sections,
 }: {
+  children: ReactNode;
   sections: PropertyTemplateSection[];
 }) {
+  const value = usePropertyTemplateSelection(sections);
+
+  return (
+    <PropertyTemplateFilterContext.Provider value={value}>
+      {children}
+    </PropertyTemplateFilterContext.Provider>
+  );
+}
+
+export function PropertyTemplateHeroSelect() {
   const { activeFilter, activeOption, handleTemplateChange, isPending, options } =
-    usePropertyTemplateSelection(sections);
+    usePropertyTemplateFilterContext();
 
   return (
     <div className="rounded-[24px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.04)_100%)] px-4 py-3.5 text-white shadow-[0_20px_46px_rgba(3,12,25,0.24)] backdrop-blur-xl sm:px-5 sm:py-4">
@@ -197,21 +270,8 @@ export function PropertyTemplateHeroSelect({
   );
 }
 
-export function PropertyTemplateFilter({
-  sections,
-}: {
-  sections: PropertyTemplateSection[];
-}) {
-  const { activeFilter } = usePropertyTemplateSelection(sections);
-
-  const visibleCards = useMemo(
-    () => getVisibleCards(sections, activeFilter),
-    [activeFilter, sections],
-  );
-  const emptyMessage = useMemo(
-    () => getFilterEmptyMessage(sections, activeFilter),
-    [activeFilter, sections],
-  );
+export function PropertyTemplateFilter() {
+  const { emptyMessage, visibleCards } = usePropertyTemplateFilterContext();
 
   return (
     <div id="property-stage-filter">

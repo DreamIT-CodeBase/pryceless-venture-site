@@ -3,10 +3,10 @@ import featuredPropertiesLeftImage from "@/app/assets/featuredpropertieslegftbox
 import featuredPropertiesRightLowerImage from "@/app/assets/featuredpropoertiesrightboxlowerimage.jpg";
 import featuredPropertiesRightUpperImage from "@/app/assets/featuredpropertiesstaicrightupperboximages.jpg";
 import heroSectionImage from "@/app/assets/herosectionimage.jpg";
-import { Suspense } from "react";
 import { PageSectionHero } from "@/components/public/page-section-hero";
 import {
   PropertyTemplateFilter,
+  PropertyTemplateFilterProvider,
   PropertyTemplateHeroSelect,
 } from "@/components/public/property-stage-filter";
 import { SiteShell } from "@/components/public/site-shell";
@@ -174,32 +174,6 @@ const getCardStatItems = ({
   return [...metricItems, ...fallbackItems].slice(0, 2);
 };
 
-function PropertyStageHeroSelectFallback() {
-  return (
-    <div className="rounded-[24px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.04)_100%)] px-4 py-3.5 text-white shadow-[0_20px_46px_rgba(3,12,25,0.24)] backdrop-blur-xl sm:px-5 sm:py-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#d7b18f]">
-        Deal Type Filter
-      </p>
-      <div className="mt-3">
-        <div className="flex h-[54px] items-center rounded-[18px] border border-white/12 bg-[#0f2740]/88 px-4 text-[15px] font-medium tracking-[-0.015em] text-white/74">
-          Loading deal types...
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PropertyStageFilterFallback() {
-  return (
-    <div
-      className="rounded-[28px] border border-dashed border-slate-300 bg-white px-5 py-12 text-center text-[var(--pv-text)] sm:px-8 sm:py-16"
-      id="property-stage-filter"
-    >
-      Loading deal types...
-    </div>
-  );
-}
-
 export default async function PropertiesPage() {
   const [page, properties] = await Promise.all([
     getSingletonPage("PROPERTIES_INDEX"),
@@ -277,40 +251,36 @@ export default async function PropertiesPage() {
 
   return (
     <SiteShell cta={{ href: "/cash-offer", label: "Sell a Property" }}>
-      <div className="pb-[92px]">
-        <PageSectionHero
-          currentLabel={heroTitle}
-          heroContent={
-            <Suspense fallback={<PropertyStageHeroSelectFallback />}>
-              <PropertyTemplateHeroSelect sections={portfolioSections} />
-            </Suspense>
-          }
-          heroContentPosition="side"
-          intro={heroIntro}
-          title={heroTitle}
-        />
+      <PropertyTemplateFilterProvider sections={portfolioSections}>
+        <div className="pb-[92px]">
+          <PageSectionHero
+            currentLabel={heroTitle}
+            heroContent={<PropertyTemplateHeroSelect />}
+            heroContentPosition="side"
+            intro={heroIntro}
+            title={heroTitle}
+          />
 
-        <section className="bg-white px-4 pt-[36px] sm:px-6 lg:px-0 lg:pt-[44px] min-[1400px]:pt-[56px]">
-          <div className="mx-auto w-full min-[1400px]:max-w-[1760px] min-[1400px]:px-[164px]">
-            <div className="mx-auto w-full">
-              <Suspense fallback={<PropertyStageFilterFallback />}>
-                <PropertyTemplateFilter sections={portfolioSections} />
-              </Suspense>
-            </div>
-
-            {page?.disclaimer ? (
-              <div className="mx-auto mt-[30px] w-full max-w-[1080px] min-[1400px]:max-w-[1432px]">
-                <p className="text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#555555]">
-                  Disclaimer:
-                </p>
-                <p className="mt-[7px] text-[14px] leading-[1.5] tracking-[-0.01em] text-[#6d6d6d] min-[1400px]:max-w-[1120px]">
-                  {page.disclaimer}
-                </p>
+          <section className="bg-white px-4 pt-[36px] sm:px-6 lg:px-0 lg:pt-[44px] min-[1400px]:pt-[56px]">
+            <div className="mx-auto w-full min-[1400px]:max-w-[1760px] min-[1400px]:px-[164px]">
+              <div className="mx-auto w-full">
+                <PropertyTemplateFilter />
               </div>
-            ) : null}
-          </div>
-        </section>
-      </div>
+
+              {page?.disclaimer ? (
+                <div className="mx-auto mt-[30px] w-full max-w-[1080px] min-[1400px]:max-w-[1432px]">
+                  <p className="text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#555555]">
+                    Disclaimer:
+                  </p>
+                  <p className="mt-[7px] text-[14px] leading-[1.5] tracking-[-0.01em] text-[#6d6d6d] min-[1400px]:max-w-[1120px]">
+                    {page.disclaimer}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </section>
+        </div>
+      </PropertyTemplateFilterProvider>
     </SiteShell>
   );
 }
