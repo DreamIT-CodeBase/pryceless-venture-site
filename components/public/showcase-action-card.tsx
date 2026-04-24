@@ -34,6 +34,7 @@ type ShowcaseActionCardProps = {
   body: ReactNode;
   ctaLabel: ReactNode;
   href: string;
+  fullCardClickable?: boolean;
   icon: string | StaticImageData;
   iconAlt?: string;
   iconClassName?: string;
@@ -53,6 +54,7 @@ export function ShowcaseActionCard({
   body,
   ctaLabel,
   href,
+  fullCardClickable = false,
   icon,
   iconAlt,
   iconClassName,
@@ -66,7 +68,13 @@ export function ShowcaseActionCard({
   buttonWrapClassName,
   buttonClassName,
 }: ShowcaseActionCardProps) {
-  return (
+  const buttonContent = (
+    <span className="inline-flex w-full items-center justify-center text-center leading-[1.2] !text-white" style={{ color: "#ffffff" }}>
+      {ctaLabel}
+    </span>
+  );
+
+  const card = (
     <ShowcasePanelCard
       className={joinClasses(
         "border border-[rgba(203,203,203,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.45)_inset]",
@@ -109,20 +117,39 @@ export function ShowcaseActionCard({
         </p>
 
         <div className={joinClasses("mx-auto mt-auto flex w-full max-w-[210px] justify-center pt-[18px]", buttonWrapClassName)}>
-          <Link
-            className={joinClasses(
-              "inline-flex min-h-[44px] w-full max-w-none items-center justify-center rounded-[10px] border border-[#284868] bg-[linear-gradient(180deg,#1d3a59_0%,#11283e_100%)] px-6 py-3 text-center text-[13px] font-semibold leading-[16px] tracking-[-0.01em] !text-white shadow-[0_10px_22px_rgba(17,40,62,0.18)] pv-interactive-button transition-[transform,box-shadow,border-color,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_14px_26px_rgba(17,40,62,0.22)] hover:border-[#33577d] hover:!text-white visited:!text-white 2xl:min-h-[48px] 2xl:text-[13.5px]",
-              buttonClassName,
-            )}
-            href={href}
-            style={{ color: "#ffffff" }}
-          >
-            <span className="inline-flex w-full items-center justify-center text-center leading-[1.2] !text-white" style={{ color: "#ffffff" }}>
-              {ctaLabel}
+          {fullCardClickable ? (
+            <span
+              className={joinClasses(
+                "inline-flex min-h-[44px] w-full max-w-none items-center justify-center rounded-[10px] border border-[#284868] bg-[linear-gradient(180deg,#1d3a59_0%,#11283e_100%)] px-6 py-3 text-center text-[13px] font-semibold leading-[16px] tracking-[-0.01em] !text-white shadow-[0_10px_22px_rgba(17,40,62,0.18)] pv-interactive-button transition-[transform,box-shadow,border-color,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_14px_26px_rgba(17,40,62,0.22)] hover:border-[#33577d] hover:!text-white visited:!text-white 2xl:min-h-[48px] 2xl:text-[13.5px]",
+                buttonClassName,
+              )}
+            >
+              {buttonContent}
             </span>
-          </Link>
+          ) : (
+            <Link
+              className={joinClasses(
+                "inline-flex min-h-[44px] w-full max-w-none items-center justify-center rounded-[10px] border border-[#284868] bg-[linear-gradient(180deg,#1d3a59_0%,#11283e_100%)] px-6 py-3 text-center text-[13px] font-semibold leading-[16px] tracking-[-0.01em] !text-white shadow-[0_10px_22px_rgba(17,40,62,0.18)] pv-interactive-button transition-[transform,box-shadow,border-color,background-color] duration-300 group-hover:-translate-y-[1px] group-hover:shadow-[0_14px_26px_rgba(17,40,62,0.22)] hover:border-[#33577d] hover:!text-white visited:!text-white 2xl:min-h-[48px] 2xl:text-[13.5px]",
+                buttonClassName,
+              )}
+              href={href}
+              style={{ color: "#ffffff" }}
+            >
+              {buttonContent}
+            </Link>
+          )}
         </div>
       </div>
     </ShowcasePanelCard>
   );
+
+  if (fullCardClickable) {
+    return (
+      <Link className="block w-full max-w-full no-underline" href={href}>
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }

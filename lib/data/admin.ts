@@ -468,7 +468,7 @@ export const getLoanProgramAdmin = async (id: string): Promise<any | null> =>
     }
 
     try {
-      return await loanProgramDelegate.findUnique({
+      const loanProgram = await loanProgramDelegate.findUnique({
         where: { id },
         include: {
           forms: {
@@ -480,8 +480,23 @@ export const getLoanProgramAdmin = async (id: string): Promise<any | null> =>
               slug: true,
             },
           },
+          highlights: {
+            orderBy: { sortOrder: "asc" },
+          },
+          overviewItems: {
+            orderBy: { sortOrder: "asc" },
+          },
         },
       }) as any | null;
+
+      if (!loanProgram) {
+        return fallback;
+      }
+
+      return {
+        ...loanProgram,
+        highlightTitle: fallback?.highlightTitle ?? null,
+      };
     } catch (error) {
       if (isSchemaSyncFailure(error)) {
         warnAdminFallbackOnce(

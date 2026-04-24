@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 
 import { blogPostSeed, formDefinitionsSeed, loanProgramSeed } from "@/lib/content-blueprint";
 import {
+  getFallbackLoanProgram,
   getFallbackLoanPrograms,
 } from "@/lib/loan-program-fallback-store";
 import { prisma } from "@/lib/prisma";
@@ -936,6 +937,7 @@ type SeedBackedLoanProgramDetailItem = SeedBackedLoanProgramListItem & {
   }>;
   fullDescription: string | null;
   keyHighlights: string | null;
+  highlightTitle?: string | null;
   heroBadgeOne?: string | null;
   heroBadgeTwo?: string | null;
   heroBadgeThree?: string | null;
@@ -1096,6 +1098,7 @@ const getSeedLoanProgramDetail = async (
       };
     }),
     fullDescription: program.fullDescription ?? null,
+    highlightTitle: program.highlightTitle ?? null,
     heroBadgeOne: program.heroBadgeOne ?? null,
     heroBadgeTwo: program.heroBadgeTwo ?? null,
     heroBadgeThree: program.heroBadgeThree ?? null,
@@ -1558,7 +1561,7 @@ export const getPublishedLoanProgram = async (slug: string) =>
         }
 
         try {
-          return (await loanProgramDelegate.findFirst({
+          const program = (await loanProgramDelegate.findFirst({
             where: {
               slug: {
                 in: slugCandidates,
@@ -1569,6 +1572,19 @@ export const getPublishedLoanProgram = async (slug: string) =>
             orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
             select: loanProgramDetailSelect,
           })) as SeedBackedLoanProgramDetailItem | null;
+
+          if (!program) {
+            return fallback;
+          }
+
+          const fallbackProgram =
+            (await getFallbackLoanProgram(program.id)) ??
+            (await getFallbackLoanProgram(program.slug));
+
+          return {
+            ...program,
+            highlightTitle: fallbackProgram?.highlightTitle ?? null,
+          };
         } catch (error) {
           if (isSchemaSyncFailure(error)) {
             warnFallbackOnce(
@@ -1600,12 +1616,19 @@ export const getPublishedLoanProgram = async (slug: string) =>
               select: loanProgramDetailLegacyFormSelect,
             })) as SeedBackedLoanProgramDetailItem | null;
 
-            return program
-              ? {
-                  ...program,
-                  forms: normalizeLegacyForms(program.forms),
-                }
-              : null;
+            if (!program) {
+              return fallback;
+            }
+
+            const fallbackProgram =
+              (await getFallbackLoanProgram(program.id)) ??
+              (await getFallbackLoanProgram(program.slug));
+
+            return {
+              ...program,
+              forms: normalizeLegacyForms(program.forms),
+              highlightTitle: fallbackProgram?.highlightTitle ?? null,
+            };
           } catch (error) {
             if (!isSchemaSyncFailure(error)) {
               throw error;

@@ -159,6 +159,9 @@ const performanceSnapshot = [
   { value: "5,300+", label: "Units Managed", color: "#ff5a1f" },
 ];
 
+const lenderLeadFormUrl =
+  "https://media.prycelessventures.com/widget/form/ZiMxWHPiHAmTZtx8dNCC";
+
 const formatDisplayValue = (value: string | null | undefined) =>
   (value ?? "")
     .split(/[_\s-]+/)
@@ -177,6 +180,12 @@ const normalizeRemovedLabel = (
   label: string | null | undefined,
   fallbackLabel: string,
 ) => (href === "/capital-rates" || href === "/investments" ? fallbackLabel : label ?? fallbackLabel);
+
+const isLenderAudienceSegment = (segment: {
+  title?: string | null;
+  body?: string | null;
+  ctaLabel?: string | null;
+}) => `${segment.title ?? ""} ${segment.body ?? ""} ${segment.ctaLabel ?? ""}`.toLowerCase().includes("lender");
 
 const getPropertyProgressPercent = (status: string | null | undefined) => {
   const normalizedStatus = String(status ?? "").trim().toUpperCase();
@@ -361,18 +370,27 @@ export default async function Home() {
         }))
       : fallbackMetrics;
 
-  const segments = (homeSegments.length ? homeSegments : fallbackSegments).map((segment, index) => ({
-    ...segment,
-    ctaHref: normalizeRemovedHref(
-      segment.ctaHref,
-      index === 2 ? "/cash-offer" : index === 3 ? "/properties" : "/get-financing",
-    ),
-    ctaLabel: normalizeRemovedLabel(
-      segment.ctaHref,
-      segment.ctaLabel,
-      index === 2 ? "Get a Cash Offer" : index === 3 ? "Request Details" : index === 1 ? "View Financing" : "Get Financing",
-    ),
-  }));
+  const segments = (homeSegments.length ? homeSegments : fallbackSegments).map((segment, index) => {
+    const defaultHref =
+      index === 2 ? "/cash-offer" : index === 3 ? "/properties" : "/get-financing";
+    const normalizedHref = normalizeRemovedHref(segment.ctaHref, defaultHref);
+
+    return {
+      ...segment,
+      ctaHref: isLenderAudienceSegment(segment) ? lenderLeadFormUrl : normalizedHref,
+      ctaLabel: normalizeRemovedLabel(
+        segment.ctaHref,
+        segment.ctaLabel,
+        index === 2
+          ? "Get a Cash Offer"
+          : index === 3
+            ? "Request Details"
+            : index === 1
+              ? "View Financing"
+              : "Get Financing",
+      ),
+    };
+  });
   const platformCards = (homePlatformCards.length ? homePlatformCards : fallbackPlatformCards).map(
     (card, index) => ({
       ...card,
@@ -392,6 +410,7 @@ export default async function Home() {
     body: segment.body,
     ctaHref: segment.ctaHref,
     ctaLabel: segment.ctaLabel,
+    fullCardClickable: isLenderAudienceSegment(segment),
     title: segment.title,
   }));
   const investmentOpportunityShowcaseCards = platformCards.slice(0, 3).map((card, index) => ({
@@ -793,6 +812,7 @@ export default async function Home() {
                   bodyClassName="mt-[10px] max-w-full px-3 text-[12.5px] leading-[1.45] sm:text-[13px]"
                   cardStyle={{ backgroundColor: card.background }}
                   ctaLabel={card.ctaLabel}
+                  fullCardClickable={card.fullCardClickable}
                   href={card.ctaHref}
                   icon={card.icon}
                   iconAlt={card.title}

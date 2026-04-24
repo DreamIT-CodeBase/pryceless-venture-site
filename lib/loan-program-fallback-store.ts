@@ -24,6 +24,7 @@ type StoredLoanProgramOverride = {
   slug: string;
   title: string;
   lifecycleStatus: string;
+  highlightTitle?: string | null;
   titleTail?: string | null;
   heroBadgeOne?: string | null;
   heroBadgeTwo?: string | null;
@@ -60,6 +61,7 @@ export type FallbackLoanProgramRecord = {
   title: string;
   slug: string;
   lifecycleStatus: string;
+  highlightTitle?: string | null;
   titleTail?: string | null;
   heroBadgeOne?: string | null;
   heroBadgeTwo?: string | null;
@@ -107,6 +109,7 @@ type UpsertFallbackLoanProgramInput = {
   title: string;
   slug: string;
   lifecycleStatus: string;
+  highlightTitle?: string | null;
   titleTail?: string | null;
   heroBadgeOne?: string | null;
   heroBadgeTwo?: string | null;
@@ -190,6 +193,7 @@ const toStoredRecord = (
     slug: input.slug,
     title: input.title,
     lifecycleStatus: input.lifecycleStatus,
+    highlightTitle: toStoredValue(input.highlightTitle),
     titleTail: toStoredValue(input.titleTail),
     heroBadgeOne: toStoredValue(input.heroBadgeOne),
     heroBadgeTwo: toStoredValue(input.heroBadgeTwo),
@@ -248,6 +252,7 @@ const toFallbackRecord = (
   title: record.title,
   slug: record.slug,
   lifecycleStatus: record.lifecycleStatus,
+  highlightTitle: record.highlightTitle ?? null,
   titleTail: record.titleTail ?? null,
   heroBadgeOne: record.heroBadgeOne ?? null,
   heroBadgeTwo: record.heroBadgeTwo ?? null,
@@ -293,6 +298,7 @@ const createSeedFallbackRecord = (program: BaseLoanProgram): FallbackLoanProgram
     title: program.title,
     slug: program.slug,
     lifecycleStatus: program.lifecycleStatus,
+    highlightTitle: null,
     titleTail: null,
     heroBadgeOne: null,
     heroBadgeTwo: null,
@@ -506,6 +512,7 @@ export const deleteFallbackLoanProgram = async (id: string) => {
       slug: existing.slug,
       title: existing.title,
       lifecycleStatus: existing.lifecycleStatus,
+      highlightTitle: existing.highlightTitle ?? null,
       titleTail: existing.titleTail ?? null,
       heroBadgeOne: existing.heroBadgeOne ?? null,
       heroBadgeTwo: existing.heroBadgeTwo ?? null,

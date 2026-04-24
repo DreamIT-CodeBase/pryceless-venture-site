@@ -231,6 +231,16 @@ export function LoanProgramForm({ errorMessage, loanProgram }: LoanProgramFormPr
             <h3 className="mb-6 text-lg font-semibold text-slate-950">Highlights Section</h3>
             <div className="grid gap-5 md:grid-cols-2">
               <label className="block md:col-span-2">
+                <span className="mb-2 block text-sm font-medium text-slate-700">Program Highlights Title</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  defaultValue={loanProgram?.highlightTitle ?? ""}
+                  name="highlightTitle"
+                  placeholder="Why Investors Choose {program}"
+                />
+              </label>
+
+              <label className="block md:col-span-2">
                 <span className="mb-2 block text-sm font-medium text-slate-700">Highlight Subheadline</span>
                 <textarea
                   className="min-h-24 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3"

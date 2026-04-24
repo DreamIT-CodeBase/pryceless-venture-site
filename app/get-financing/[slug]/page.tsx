@@ -2,13 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { PublicForm } from "@/components/forms/public-form";
+import { LoanDealIntakeEmbed } from "@/components/forms/loan-deal-intake-embed";
 import {
   DetailBulletList,
   DetailGlassPanel,
   DetailSection,
   DetailSectionHeading,
-  detailPrimaryButtonClassName,
 } from "@/components/public/slug-detail-ui";
 import { SiteShell } from "@/components/public/site-shell";
 import { getPublishedLoanProgram, getSingletonPage } from "@/lib/data/public";
@@ -163,13 +162,10 @@ export default async function LoanProgramDetailPage({
   const highlights = loanProgram.highlights
     .map((item) => normalizeContentLine(item.highlight))
     .filter(Boolean);
-  const form = loanProgram.forms[0] ?? null;
   const heroMetricLabels = getPageGroupItems(page, "hero_metric_labels").map((item) => item.title);
   const termDetailLabels = getPageGroupItems(page, "term_detail_labels").map((item) => item.title);
   const highlightSectionContent = getPageGroupItem(page, "highlights_section_content");
   const termsSectionContent = getPageGroupItem(page, "terms_section_content");
-  const applicationFallbackAction = getPageGroupItem(page, "application_fallback_action");
-  const applicationFallbackContent = getPageGroupItem(page, "application_fallback_content");
   const pageCtaLabel = getCmsText(page?.ctaLabel) ?? "Apply Now";
   const pageCtaHref = getCmsText(page?.ctaHref) ?? "#apply-now";
   const heroStats = [
@@ -220,8 +216,9 @@ export default async function LoanProgramDetailPage({
   ].filter((item) => item.value);
   const overviewSectionTitle =
     getCmsText(getPageGroupItem(page, "overview_section_title")?.title) ?? "Loan Overview";
-  const applicationFormTitle =
-    getCmsText(getPageGroupItem(page, "application_form_title")?.title) ?? pageCtaLabel;
+  const applicationEyebrow =
+    getCmsText(getPageGroupItem(page, "application_section_eyebrow")?.title) ?? "Application";
+  const applicationSubtitle = "Complete the short form below and our team will follow up.";
   const heroFeatureCards = [
     {
       kind: "clock" as const,
@@ -477,31 +474,22 @@ export default async function LoanProgramDetailPage({
           </div>
         </DetailSection>
 
-        <DetailSection className="pt-6">
-          <div id="apply-now">
-            {form ? (
-              <PublicForm
-                form={form}
-                layout="wide"
-                sourcePath={`/get-financing/${loanProgram.slug}`}
-                title={applicationFormTitle}
-              />
-            ) : (
-              <DetailGlassPanel>
-                <DetailSectionHeading
-                  eyebrow={getPageGroupItem(page, "application_section_eyebrow")?.title ?? "Application"}
-                  title={applicationFallbackContent?.title || "Application form coming soon"}
-                  body={applicationFallbackContent?.body || ""}
-                />
-                {applicationFallbackAction?.title && applicationFallbackAction?.body ? (
-                  <div className="mt-6">
-                    <Link className={detailPrimaryButtonClassName} href={applicationFallbackAction.body}>
-                      {applicationFallbackAction.title}
-                    </Link>
-                  </div>
-                ) : null}
-              </DetailGlassPanel>
-            )}
+        <DetailSection className="pb-4 pt-0">
+          <div className="scroll-mt-28" id="apply-now">
+            <div className="rounded-[24px] border border-[rgba(191,147,117,0.22)] bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#bf9375]">
+                {applicationEyebrow}
+              </p>
+              <h2 className="mt-2 text-[24px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#12284b] sm:text-[28px]">
+                Apply Now
+              </h2>
+              <p className="mt-2 text-[14px] leading-[1.7] text-slate-600 sm:text-[15px]">
+                {applicationSubtitle}
+              </p>
+              <div className="mt-5 overflow-hidden rounded-[18px] bg-white">
+                <LoanDealIntakeEmbed className="bg-white" />
+              </div>
+            </div>
           </div>
         </DetailSection>
       </div>
