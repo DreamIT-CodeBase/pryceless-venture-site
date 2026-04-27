@@ -296,7 +296,7 @@ export function PropertyTemplateFilter() {
               statItems={property.statItems}
               summary={property.summary}
               title={property.title}
-              variant="property"
+              
             />
           ))}
         </ThreeUpCollectionGrid>
