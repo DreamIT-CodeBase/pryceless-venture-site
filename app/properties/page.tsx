@@ -12,6 +12,7 @@ import {
 import { SiteShell } from "@/components/public/site-shell";
 import { getPublishedProperties, getSingletonPage } from "@/lib/data/public";
 import { resolvePrimaryImage } from "@/lib/media";
+import { parsePropertyDetailContent } from "@/lib/property-detail-content";
 import {
   formatPropertyStatusLabel,
   getPropertyPortfolioStage,
@@ -206,14 +207,15 @@ export default async function PropertiesPage() {
     const propertyType = formatDisplayValue(property.propertyType) || fallbackCard.propertyType;
     const strategy = getPropertyDealTypeLabel(property.strategy) || fallbackCard.strategy;
     const statusLabel = formatPropertyStatusLabel(property.status);
+    const detailContent = parsePropertyDetailContent(property.detailContent);
     const parsedHighlights = parsePropertyHighlights(
       property.highlights.map((item) => item.highlight),
     );
     const stageContent = getPropertyStageContent(stage);
     const bulletItems = (
-      parsedHighlights.bullets.length
-        ? parsedHighlights.bullets
-        : fallbackCard.bulletItems
+      detailContent.overviewBulletPoints.length
+        ? detailContent.overviewBulletPoints
+        : parsedHighlights.bullets
     ).map((item) => truncate(item, 48));
 
     groupedCards[template].push({

@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 
 import { blogPostSeed, formDefinitionsSeed, loanProgramSeed } from "@/lib/content-blueprint";
 import {
+  type FallbackLoanProgramRecord,
   getFallbackLoanProgram,
   getFallbackLoanPrograms,
 } from "@/lib/loan-program-fallback-store";
@@ -316,7 +317,7 @@ const propertyListImageSelect = {
   },
 } as const;
 
-const propertyListSelect = {
+const propertyListCoreSelect = {
   id: true,
   locationCity: true,
   locationState: true,
@@ -335,6 +336,15 @@ const propertyListSelect = {
       highlight: true,
     },
   },
+} as const;
+
+const propertyListSelect = {
+  ...propertyListCoreSelect,
+  detailContent: true,
+} as const;
+
+const propertyListLegacySchemaSelect = {
+  ...propertyListCoreSelect,
 } as const;
 
 const propertyDetailCoreSelect = {
@@ -813,6 +823,14 @@ type PublishedPropertyRecord = Prisma.PropertyGetPayload<{
   select: typeof propertyDetailSelect;
 }>;
 
+type PublishedPropertyListRecord = Prisma.PropertyGetPayload<{
+  select: typeof propertyListSelect;
+}>;
+
+type PublishedPropertyListLegacySchemaRecord = Prisma.PropertyGetPayload<{
+  select: typeof propertyListLegacySchemaSelect;
+}>;
+
 type PublishedPropertyLegacyFormRecord = Prisma.PropertyGetPayload<{
   select: typeof propertyDetailLegacyFormSelect;
 }>;
@@ -852,6 +870,21 @@ const normalizePublishedPropertyRecord = (
       : property.inquiryForm,
   };
 };
+
+const normalizePublishedPropertyListRecord = (
+  property:
+    | PublishedPropertyListRecord
+    | PublishedPropertyListLegacySchemaRecord,
+  options?: {
+    missingDetailContent?: boolean;
+  },
+) => ({
+  ...property,
+  detailContent:
+    options?.missingDetailContent || !("detailContent" in property)
+      ? null
+      : property.detailContent ?? null,
+});
 
 const getSeedActiveForm = (slug: string) => {
   const definition = formDefinitionsSeed.find((form) => form.slug === slug);
@@ -954,6 +987,55 @@ type SeedBackedLoanProgramDetailItem = SeedBackedLoanProgramListItem & {
     title: string;
   }>;
   titleTail?: string | null;
+};
+
+const applyLoanProgramFallbackOverride = <T extends SeedBackedLoanProgramListItem>(
+  program: T,
+  fallbackProgram: FallbackLoanProgramRecord | null | undefined,
+): T => {
+  if (!fallbackProgram) {
+    return program;
+  }
+
+  const merged: SeedBackedLoanProgramListItem = {
+    ...program,
+    crmTag: fallbackProgram.crmTag ?? null,
+    imageAlt: fallbackProgram.imageAlt ?? null,
+    imageUrl: fallbackProgram.imageUrl ?? null,
+    interestRate: fallbackProgram.interestRate ?? null,
+    keyHighlights: fallbackProgram.keyHighlights ?? null,
+    loanTerm: fallbackProgram.loanTerm ?? null,
+    ltv: fallbackProgram.ltv ?? null,
+    maxAmount: fallbackProgram.maxAmount ?? null,
+    minAmount: fallbackProgram.minAmount ?? null,
+    shortDescription: fallbackProgram.shortDescription ?? null,
+    slug: fallbackProgram.slug,
+    title: fallbackProgram.title,
+  };
+
+  if (!("fees" in program)) {
+    return merged as T;
+  }
+
+  return {
+    ...program,
+    ...merged,
+    fees: fallbackProgram.fees ?? null,
+    forms: (program as unknown as SeedBackedLoanProgramDetailItem).forms,
+    fullDescription: fallbackProgram.fullDescription ?? null,
+    heroBadgeOne: fallbackProgram.heroBadgeOne ?? null,
+    heroBadgeTwo: fallbackProgram.heroBadgeTwo ?? null,
+    heroBadgeThree: fallbackProgram.heroBadgeThree ?? null,
+    highlightImageAlt: fallbackProgram.highlightImageAlt ?? null,
+    highlightImageUrl: fallbackProgram.highlightImageUrl ?? null,
+    highlightSubheadline: fallbackProgram.highlightSubheadline ?? null,
+    highlights: fallbackProgram.highlights,
+    highlightTitle: fallbackProgram.highlightTitle ?? null,
+    insightBody: fallbackProgram.insightBody ?? null,
+    insightTitle: fallbackProgram.insightTitle ?? null,
+    overviewItems: fallbackProgram.overviewItems,
+    titleTail: fallbackProgram.titleTail ?? null,
+  } as T;
 };
 
 type SeedBackedBlogPostListItem = {
@@ -1164,12 +1246,38 @@ const getHomePageCached = unstable_cache(
 );
 
 const getPublishedPropertiesCached = unstable_cache(
-  () =>
-    prisma.property.findMany({
-      where: { lifecycleStatus: "PUBLISHED" },
-      orderBy: { updatedAt: "desc" },
-      select: propertyListSelect,
-    }),
+  async () => {
+    try {
+      const properties = await prisma.property.findMany({
+        where: { lifecycleStatus: "PUBLISHED" },
+        orderBy: { updatedAt: "desc" },
+        select: propertyListSelect,
+      });
+
+      return properties.map((property) => normalizePublishedPropertyListRecord(property));
+    } catch (error) {
+      if (!isPropertyDetailSchemaSyncFailure(error)) {
+        throw error;
+      }
+
+      warnFallbackOnce(
+        "published-properties",
+        "property detail content column is unavailable, using a compatible query.",
+      );
+
+      const properties = await prisma.property.findMany({
+        where: { lifecycleStatus: "PUBLISHED" },
+        orderBy: { updatedAt: "desc" },
+        select: propertyListLegacySchemaSelect,
+      });
+
+      return properties.map((property) =>
+        normalizePublishedPropertyListRecord(property, {
+          missingDetailContent: true,
+        }),
+      );
+    }
+  },
   ["public-published-properties"],
   {
     revalidate: PUBLIC_REVALIDATE_SECONDS,
@@ -1279,6 +1387,28 @@ const getPublishedLoanProgramsCached = unstable_cache(
         orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
         select: loanProgramListSelect,
       })
+      .then(async (programs) => {
+        const mergedPrograms = await Promise.all(
+          (programs as SeedBackedLoanProgramListItem[]).map(async (program) => {
+            const fallbackProgram =
+              (await getFallbackLoanProgram(program.id)) ??
+              (await getFallbackLoanProgram(program.slug));
+
+            if (
+              fallbackProgram &&
+              (!fallbackProgram.isActive || fallbackProgram.lifecycleStatus !== "PUBLISHED")
+            ) {
+              return null;
+            }
+
+            return applyLoanProgramFallbackOverride(program, fallbackProgram);
+          }),
+        );
+
+        return mergedPrograms.filter(
+          (program): program is SeedBackedLoanProgramListItem => Boolean(program),
+        );
+      })
       .catch((error) => {
         if (isSchemaSyncFailure(error)) {
           warnFallbackOnce(
@@ -1287,9 +1417,8 @@ const getPublishedLoanProgramsCached = unstable_cache(
           );
           return fallback;
         }
-
         throw error;
-      }) as Promise<SeedBackedLoanProgramListItem[]>;
+      });
   },
   ["public-published-loan-programs"],
   {
@@ -1581,10 +1710,14 @@ export const getPublishedLoanProgram = async (slug: string) =>
             (await getFallbackLoanProgram(program.id)) ??
             (await getFallbackLoanProgram(program.slug));
 
-          return {
-            ...program,
-            highlightTitle: fallbackProgram?.highlightTitle ?? null,
-          };
+          if (
+            fallbackProgram &&
+            (!fallbackProgram.isActive || fallbackProgram.lifecycleStatus !== "PUBLISHED")
+          ) {
+            return fallback;
+          }
+
+          return applyLoanProgramFallbackOverride(program, fallbackProgram);
         } catch (error) {
           if (isSchemaSyncFailure(error)) {
             warnFallbackOnce(
@@ -1624,11 +1757,20 @@ export const getPublishedLoanProgram = async (slug: string) =>
               (await getFallbackLoanProgram(program.id)) ??
               (await getFallbackLoanProgram(program.slug));
 
-            return {
-              ...program,
-              forms: normalizeLegacyForms(program.forms),
-              highlightTitle: fallbackProgram?.highlightTitle ?? null,
-            };
+            if (
+              fallbackProgram &&
+              (!fallbackProgram.isActive || fallbackProgram.lifecycleStatus !== "PUBLISHED")
+            ) {
+              return fallback;
+            }
+
+            return applyLoanProgramFallbackOverride(
+              {
+                ...program,
+                forms: normalizeLegacyForms(program.forms),
+              },
+              fallbackProgram,
+            );
           } catch (error) {
             if (!isSchemaSyncFailure(error)) {
               throw error;

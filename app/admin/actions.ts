@@ -167,6 +167,35 @@ const normalizeLoanProgramOverviewItems = (rows: string[][]) =>
       title: row[0],
     }));
 
+const getSubmittedText = (
+  formData: FormData,
+  name: string,
+  fallback?: string | null,
+) => (formData.has(name) ? String(formData.get(name) ?? "").trim() : fallback ?? "");
+
+const getSubmittedOptionalText = (
+  formData: FormData,
+  name: string,
+  fallback?: string | null,
+) => (formData.has(name) ? asOptionalString(formData.get(name)) : fallback ?? null);
+
+const getSubmittedNumber = (
+  formData: FormData,
+  name: string,
+  fallback = 0,
+) => (formData.has(name) ? Number(formData.get(name) ?? fallback) : fallback);
+
+const getSubmittedCheckbox = (
+  formData: FormData,
+  name: string,
+  fallback: boolean,
+) =>
+  formData.has(name)
+    ? formData
+        .getAll(name)
+        .some((value) => ["1", "on", "true"].includes(String(value).toLowerCase()))
+    : fallback;
+
 const parsePropertyStandoutRows = (value: string | undefined) =>
   parsePipeRows(value)
     .map((row) => ({
@@ -699,6 +728,15 @@ const getExistingLoanProgramContext = async (id: string) => {
 
     return getFallbackLoanProgram(id);
   }
+};
+
+const getFallbackOnlyLoanProgramHighlightTitle = (program: unknown) => {
+  if (!program || typeof program !== "object" || !("highlightTitle" in program)) {
+    return null;
+  }
+
+  const value = (program as { highlightTitle?: unknown }).highlightTitle;
+  return typeof value === "string" ? value : null;
 };
 
 const ensureLoanProgramSlug = async ({
@@ -1479,40 +1517,58 @@ export const saveLoanProgram = async (formData: FormData) => {
       ? existingLoanProgram.baseSlug
       : existingLoanProgram?.slug ?? null;
   const editPath = id ? `/admin/loan-programs/${id}` : "/admin/loan-programs/new";
-  const highlights = parseSimpleLines(asOptionalString(formData.get("highlightsText")));
-  const overviewItems = normalizeLoanProgramOverviewItems(
-    parsePipeRows(asOptionalString(formData.get("overviewItemsText"))),
-  );
+  const hasHighlightsText = formData.has("highlightsText");
+  const hasOverviewItemsText = formData.has("overviewItemsText");
+  const highlights = hasHighlightsText
+    ? parseSimpleLines(asOptionalString(formData.get("highlightsText")))
+    : existingLoanProgram?.highlights?.map((item) => item.highlight) ?? [];
+  const overviewItems = hasOverviewItemsText
+    ? normalizeLoanProgramOverviewItems(
+        parsePipeRows(asOptionalString(formData.get("overviewItemsText"))),
+      )
+    : existingLoanProgram?.overviewItems?.map((item) => ({
+        body: item.body ?? null,
+        title: item.title,
+      })) ?? [];
   const serializedHighlights = serializeSimpleLines(highlights);
+  const submittedTitle = getSubmittedText(formData, "title", existingLoanProgram?.title);
   const parsed = loanProgramSchema.safeParse({
     id,
-    title: String(formData.get("title") ?? "").trim(),
-    slug: slugify(String(formData.get("slug") ?? formData.get("title") ?? "")),
+    title: submittedTitle,
+    slug: slugify(
+      formData.has("slug")
+        ? String(formData.get("slug") ?? "")
+        : submittedTitle || existingLoanProgram?.slug || "",
+    ),
     lifecycleStatus: intentToLifecycleStatus(formData),
-    highlightTitle: asOptionalString(formData.get("highlightTitle")),
-    titleTail: asOptionalString(formData.get("titleTail")),
-    heroBadgeOne: asOptionalString(formData.get("heroBadgeOne")),
-    heroBadgeTwo: asOptionalString(formData.get("heroBadgeTwo")),
-    heroBadgeThree: asOptionalString(formData.get("heroBadgeThree")),
-    shortDescription: String(formData.get("shortDescription") ?? "").trim(),
-    fullDescription: String(formData.get("fullDescription") ?? "").trim(),
-    interestRate: asOptionalString(formData.get("interestRate")),
-    ltv: asOptionalString(formData.get("ltv")),
-    loanTerm: asOptionalString(formData.get("loanTerm")),
-    fees: asOptionalString(formData.get("fees")),
-    minAmount: asOptionalString(formData.get("minAmount")),
-    maxAmount: asOptionalString(formData.get("maxAmount")),
+    highlightTitle: getSubmittedOptionalText(
+      formData,
+      "highlightTitle",
+      getFallbackOnlyLoanProgramHighlightTitle(existingLoanProgram),
+    ),
+    titleTail: getSubmittedOptionalText(formData, "titleTail", existingLoanProgram?.titleTail),
+    heroBadgeOne: getSubmittedOptionalText(formData, "heroBadgeOne", existingLoanProgram?.heroBadgeOne),
+    heroBadgeTwo: getSubmittedOptionalText(formData, "heroBadgeTwo", existingLoanProgram?.heroBadgeTwo),
+    heroBadgeThree: getSubmittedOptionalText(formData, "heroBadgeThree", existingLoanProgram?.heroBadgeThree),
+    shortDescription: getSubmittedText(formData, "shortDescription", existingLoanProgram?.shortDescription),
+    fullDescription: getSubmittedText(formData, "fullDescription", existingLoanProgram?.fullDescription),
+    interestRate: getSubmittedOptionalText(formData, "interestRate", existingLoanProgram?.interestRate),
+    ltv: getSubmittedOptionalText(formData, "ltv", existingLoanProgram?.ltv),
+    loanTerm: getSubmittedOptionalText(formData, "loanTerm", existingLoanProgram?.loanTerm),
+    fees: getSubmittedOptionalText(formData, "fees", existingLoanProgram?.fees),
+    minAmount: getSubmittedOptionalText(formData, "minAmount", existingLoanProgram?.minAmount),
+    maxAmount: getSubmittedOptionalText(formData, "maxAmount", existingLoanProgram?.maxAmount),
     keyHighlights: serializedHighlights,
-    highlightSubheadline: asOptionalString(formData.get("highlightSubheadline")),
-    insightTitle: asOptionalString(formData.get("insightTitle")),
-    insightBody: asOptionalString(formData.get("insightBody")),
-    crmTag: asOptionalString(formData.get("crmTag")),
-    imageUrl: asOptionalString(formData.get("imageUrl")),
-    imageAlt: asOptionalString(formData.get("imageAlt")),
-    highlightImageUrl: asOptionalString(formData.get("highlightImageUrl")),
-    highlightImageAlt: asOptionalString(formData.get("highlightImageAlt")),
-    isActive: Boolean(formData.get("isActive")),
-    sortOrder: Number(formData.get("sortOrder") ?? 0),
+    highlightSubheadline: getSubmittedOptionalText(formData, "highlightSubheadline", existingLoanProgram?.highlightSubheadline),
+    insightTitle: getSubmittedOptionalText(formData, "insightTitle", existingLoanProgram?.insightTitle),
+    insightBody: getSubmittedOptionalText(formData, "insightBody", existingLoanProgram?.insightBody),
+    crmTag: getSubmittedOptionalText(formData, "crmTag", existingLoanProgram?.crmTag),
+    imageUrl: getSubmittedOptionalText(formData, "imageUrl", existingLoanProgram?.imageUrl),
+    imageAlt: getSubmittedOptionalText(formData, "imageAlt", existingLoanProgram?.imageAlt),
+    highlightImageUrl: getSubmittedOptionalText(formData, "highlightImageUrl", existingLoanProgram?.highlightImageUrl),
+    highlightImageAlt: getSubmittedOptionalText(formData, "highlightImageAlt", existingLoanProgram?.highlightImageAlt),
+    isActive: getSubmittedCheckbox(formData, "isActive", existingLoanProgram?.isActive ?? true),
+    sortOrder: getSubmittedNumber(formData, "sortOrder", existingLoanProgram?.sortOrder ?? 0),
   });
 
   if (!parsed.success) {
@@ -1568,35 +1624,53 @@ export const saveLoanProgram = async (formData: FormData) => {
           data: loanProgramFields,
         });
 
-    // Step 1: Delete all existing related records via nested update
-    await prisma.loanProgram.update({
-      where: { id: loanProgram.id },
-      data: {
-        highlights: { deleteMany: {} },
-        overviewItems: { deleteMany: {} },
-      },
-    });
+    const relationDeletes: {
+      highlights?: { deleteMany: Record<string, never> };
+      overviewItems?: { deleteMany: Record<string, never> };
+    } = {};
 
-    // Step 2: Re-create using individual nested creates (createMany is not
-    // supported in nested writes for SQL Server in Prisma).
-    if (highlights.length || overviewItems.length) {
-      await prisma.$transaction([
-        ...highlights.map((highlight, index) =>
-          prisma.loanProgram.update({
-            where: { id: loanProgram.id },
-            data: { highlights: { create: { highlight, sortOrder: index } } },
-          }),
-        ),
-        ...overviewItems.map((row, index) =>
-          prisma.loanProgram.update({
-            where: { id: loanProgram.id },
-            data: {
-              overviewItems: {
-                create: { title: row.title, body: row.body, sortOrder: index },
+    if (hasHighlightsText) {
+      relationDeletes.highlights = { deleteMany: {} };
+    }
+
+    if (hasOverviewItemsText) {
+      relationDeletes.overviewItems = { deleteMany: {} };
+    }
+
+    if (Object.keys(relationDeletes).length) {
+      await prisma.loanProgram.update({
+        where: { id: loanProgram.id },
+        data: relationDeletes,
+      });
+    }
+
+    const relationCreates = [
+      ...(hasHighlightsText
+        ? highlights.map((highlight, index) =>
+            prisma.loanProgram.update({
+              where: { id: loanProgram.id },
+              data: { highlights: { create: { highlight, sortOrder: index } } },
+            }),
+          )
+        : []),
+      ...(hasOverviewItemsText
+        ? overviewItems.map((row, index) =>
+            prisma.loanProgram.update({
+              where: { id: loanProgram.id },
+              data: {
+                overviewItems: {
+                  create: { title: row.title, body: row.body, sortOrder: index },
+                },
               },
-            },
-          }),
-        ),
+            }),
+          )
+        : []),
+    ];
+
+    // Nested createMany is not supported for SQL Server in Prisma.
+    if (relationCreates.length) {
+      await prisma.$transaction([
+        ...relationCreates,
       ]);
     }
   } catch (error) {
@@ -2315,12 +2389,18 @@ export const saveSingletonPage = async (formData: FormData) => {
   });
 
   const groups = singletonPageGroups[key] ?? [];
+  const submittedGroups = groups.filter((group) => formData.has(`group_${group.key}`));
 
-  await prisma.singletonPageItem.deleteMany({
-    where: { pageId: currentPage.id },
-  });
+  if (submittedGroups.length) {
+    await prisma.singletonPageItem.deleteMany({
+      where: {
+        pageId: currentPage.id,
+        groupKey: { in: submittedGroups.map((group) => group.key) },
+      },
+    });
+  }
 
-  for (const group of groups) {
+  for (const group of submittedGroups) {
     const rows = parseSingletonPageGroupRows(
       group,
       asOptionalString(formData.get(`group_${group.key}`)),
@@ -2664,19 +2744,36 @@ export const autosaveLoanProgramDraft = async (formData: FormData) => {
   const existingLoanProgramBaseSlug =
     existing && "baseSlug" in existing ? existing.baseSlug : existing?.slug ?? null;
 
-  const rawTitle = String(formData.get("title") ?? "").trim();
-  const shortDescription = String(formData.get("shortDescription") ?? "").trim();
-  const fullDescription = String(formData.get("fullDescription") ?? "").trim();
-  const highlights = parseSimpleLines(asOptionalString(formData.get("highlightsText")));
-  const overviewItems = normalizeLoanProgramOverviewItems(
-    parsePipeRows(asOptionalString(formData.get("overviewItemsText"))),
+  const rawTitle = getSubmittedText(formData, "title", existing?.title);
+  const shortDescription = getSubmittedText(
+    formData,
+    "shortDescription",
+    existing?.shortDescription,
   );
+  const fullDescription = getSubmittedText(
+    formData,
+    "fullDescription",
+    existing?.fullDescription,
+  );
+  const hasHighlightsText = formData.has("highlightsText");
+  const hasOverviewItemsText = formData.has("overviewItemsText");
+  const highlights = hasHighlightsText
+    ? parseSimpleLines(asOptionalString(formData.get("highlightsText")))
+    : existing?.highlights?.map((item) => item.highlight) ?? [];
+  const overviewItems = hasOverviewItemsText
+    ? normalizeLoanProgramOverviewItems(
+        parsePipeRows(asOptionalString(formData.get("overviewItemsText"))),
+      )
+    : existing?.overviewItems?.map((item) => ({
+        body: item.body ?? null,
+        title: item.title,
+      })) ?? [];
   const keyHighlights = serializeSimpleLines(highlights);
-  const interestRate = asOptionalString(formData.get("interestRate"));
-  const ltv = asOptionalString(formData.get("ltv"));
-  const loanTerm = asOptionalString(formData.get("loanTerm"));
-  const minAmount = asOptionalString(formData.get("minAmount"));
-  const maxAmount = asOptionalString(formData.get("maxAmount"));
+  const interestRate = getSubmittedOptionalText(formData, "interestRate", existing?.interestRate);
+  const ltv = getSubmittedOptionalText(formData, "ltv", existing?.ltv);
+  const loanTerm = getSubmittedOptionalText(formData, "loanTerm", existing?.loanTerm);
+  const minAmount = getSubmittedOptionalText(formData, "minAmount", existing?.minAmount);
+  const maxAmount = getSubmittedOptionalText(formData, "maxAmount", existing?.maxAmount);
 
   if (
     !existing &&
@@ -2709,30 +2806,46 @@ export const autosaveLoanProgramDraft = async (formData: FormData) => {
       }),
       slug,
       lifecycleStatus: existing?.lifecycleStatus ?? "DRAFT",
-      highlightTitle: asOptionalString(formData.get("highlightTitle")),
-      titleTail: asOptionalString(formData.get("titleTail")),
-      heroBadgeOne: asOptionalString(formData.get("heroBadgeOne")),
-      heroBadgeTwo: asOptionalString(formData.get("heroBadgeTwo")),
-      heroBadgeThree: asOptionalString(formData.get("heroBadgeThree")),
+      highlightTitle: getSubmittedOptionalText(
+        formData,
+        "highlightTitle",
+        getFallbackOnlyLoanProgramHighlightTitle(existing),
+      ),
+      titleTail: getSubmittedOptionalText(formData, "titleTail", existing?.titleTail),
+      heroBadgeOne: getSubmittedOptionalText(formData, "heroBadgeOne", existing?.heroBadgeOne),
+      heroBadgeTwo: getSubmittedOptionalText(formData, "heroBadgeTwo", existing?.heroBadgeTwo),
+      heroBadgeThree: getSubmittedOptionalText(formData, "heroBadgeThree", existing?.heroBadgeThree),
       shortDescription,
       fullDescription,
       interestRate,
       ltv,
       loanTerm,
-      fees: asOptionalString(formData.get("fees")),
+      fees: getSubmittedOptionalText(formData, "fees", existing?.fees),
       minAmount,
       maxAmount,
       keyHighlights,
-      highlightSubheadline: asOptionalString(formData.get("highlightSubheadline")),
-      insightTitle: asOptionalString(formData.get("insightTitle")),
-      insightBody: asOptionalString(formData.get("insightBody")),
-      crmTag: asOptionalString(formData.get("crmTag")),
-      imageUrl: asOptionalString(formData.get("imageUrl")),
-      imageAlt: asOptionalString(formData.get("imageAlt")),
-      highlightImageUrl: asOptionalString(formData.get("highlightImageUrl")),
-      highlightImageAlt: asOptionalString(formData.get("highlightImageAlt")),
-      isActive: Boolean(formData.get("isActive")),
-      sortOrder: Number(formData.get("sortOrder") ?? existing?.sortOrder ?? 0),
+      highlightSubheadline: getSubmittedOptionalText(
+        formData,
+        "highlightSubheadline",
+        existing?.highlightSubheadline,
+      ),
+      insightTitle: getSubmittedOptionalText(formData, "insightTitle", existing?.insightTitle),
+      insightBody: getSubmittedOptionalText(formData, "insightBody", existing?.insightBody),
+      crmTag: getSubmittedOptionalText(formData, "crmTag", existing?.crmTag),
+      imageUrl: getSubmittedOptionalText(formData, "imageUrl", existing?.imageUrl),
+      imageAlt: getSubmittedOptionalText(formData, "imageAlt", existing?.imageAlt),
+      highlightImageUrl: getSubmittedOptionalText(
+        formData,
+        "highlightImageUrl",
+        existing?.highlightImageUrl,
+      ),
+      highlightImageAlt: getSubmittedOptionalText(
+        formData,
+        "highlightImageAlt",
+        existing?.highlightImageAlt,
+      ),
+      isActive: getSubmittedCheckbox(formData, "isActive", existing?.isActive ?? true),
+      sortOrder: getSubmittedNumber(formData, "sortOrder", existing?.sortOrder ?? 0),
     };
 
     loanProgram = existing
@@ -2745,36 +2858,56 @@ export const autosaveLoanProgramDraft = async (formData: FormData) => {
             ...loanProgramFields,
             title: getAutosaveTitle({ rawTitle, fallback: "Untitled loan program" }),
             lifecycleStatus: "DRAFT",
-            sortOrder: Number(formData.get("sortOrder") ?? 0),
+            sortOrder: getSubmittedNumber(formData, "sortOrder", 0),
           },
         });
 
-    await prisma.loanProgram.update({
-      where: { id: loanProgram.id },
-      data: {
-        highlights: { deleteMany: {} },
-        overviewItems: { deleteMany: {} },
-      },
-    });
+    const relationDeletes: {
+      highlights?: { deleteMany: Record<string, never> };
+      overviewItems?: { deleteMany: Record<string, never> };
+    } = {};
 
-    if (highlights.length || overviewItems.length) {
-      await prisma.$transaction([
-        ...highlights.map((highlight, index) =>
-          prisma.loanProgram.update({
-            where: { id: loanProgram.id },
-            data: { highlights: { create: { highlight, sortOrder: index } } },
-          }),
-        ),
-        ...overviewItems.map((row, index) =>
-          prisma.loanProgram.update({
-            where: { id: loanProgram.id },
-            data: {
-              overviewItems: {
-                create: { title: row.title, body: row.body, sortOrder: index },
+    if (hasHighlightsText) {
+      relationDeletes.highlights = { deleteMany: {} };
+    }
+
+    if (hasOverviewItemsText) {
+      relationDeletes.overviewItems = { deleteMany: {} };
+    }
+
+    if (Object.keys(relationDeletes).length) {
+      await prisma.loanProgram.update({
+        where: { id: loanProgram.id },
+        data: relationDeletes,
+      });
+    }
+
+    const relationCreates = [
+      ...(hasHighlightsText
+        ? highlights.map((highlight, index) =>
+            prisma.loanProgram.update({
+              where: { id: loanProgram.id },
+              data: { highlights: { create: { highlight, sortOrder: index } } },
+            }),
+          )
+        : []),
+      ...(hasOverviewItemsText
+        ? overviewItems.map((row, index) =>
+            prisma.loanProgram.update({
+              where: { id: loanProgram.id },
+              data: {
+                overviewItems: {
+                  create: { title: row.title, body: row.body, sortOrder: index },
+                },
               },
-            },
-          }),
-        ),
+            }),
+          )
+        : []),
+    ];
+
+    if (relationCreates.length) {
+      await prisma.$transaction([
+        ...relationCreates,
       ]);
     }
   } catch (error) {
@@ -2792,32 +2925,48 @@ export const autosaveLoanProgramDraft = async (formData: FormData) => {
       }),
       slug,
       lifecycleStatus: existing?.lifecycleStatus ?? "DRAFT",
-      highlightTitle: asOptionalString(formData.get("highlightTitle")),
-      titleTail: asOptionalString(formData.get("titleTail")),
-      heroBadgeOne: asOptionalString(formData.get("heroBadgeOne")),
-      heroBadgeTwo: asOptionalString(formData.get("heroBadgeTwo")),
-      heroBadgeThree: asOptionalString(formData.get("heroBadgeThree")),
+      highlightTitle: getSubmittedOptionalText(
+        formData,
+        "highlightTitle",
+        getFallbackOnlyLoanProgramHighlightTitle(existing),
+      ),
+      titleTail: getSubmittedOptionalText(formData, "titleTail", existing?.titleTail),
+      heroBadgeOne: getSubmittedOptionalText(formData, "heroBadgeOne", existing?.heroBadgeOne),
+      heroBadgeTwo: getSubmittedOptionalText(formData, "heroBadgeTwo", existing?.heroBadgeTwo),
+      heroBadgeThree: getSubmittedOptionalText(formData, "heroBadgeThree", existing?.heroBadgeThree),
       shortDescription,
       fullDescription,
       interestRate,
       ltv,
       loanTerm,
-      fees: asOptionalString(formData.get("fees")),
+      fees: getSubmittedOptionalText(formData, "fees", existing?.fees),
       minAmount,
       maxAmount,
       keyHighlights,
-      highlightSubheadline: asOptionalString(formData.get("highlightSubheadline")),
-      insightTitle: asOptionalString(formData.get("insightTitle")),
-      insightBody: asOptionalString(formData.get("insightBody")),
-      crmTag: asOptionalString(formData.get("crmTag")),
-      imageUrl: asOptionalString(formData.get("imageUrl")),
-      imageAlt: asOptionalString(formData.get("imageAlt")),
-      highlightImageUrl: asOptionalString(formData.get("highlightImageUrl")),
-      highlightImageAlt: asOptionalString(formData.get("highlightImageAlt")),
+      highlightSubheadline: getSubmittedOptionalText(
+        formData,
+        "highlightSubheadline",
+        existing?.highlightSubheadline,
+      ),
+      insightTitle: getSubmittedOptionalText(formData, "insightTitle", existing?.insightTitle),
+      insightBody: getSubmittedOptionalText(formData, "insightBody", existing?.insightBody),
+      crmTag: getSubmittedOptionalText(formData, "crmTag", existing?.crmTag),
+      imageUrl: getSubmittedOptionalText(formData, "imageUrl", existing?.imageUrl),
+      imageAlt: getSubmittedOptionalText(formData, "imageAlt", existing?.imageAlt),
+      highlightImageUrl: getSubmittedOptionalText(
+        formData,
+        "highlightImageUrl",
+        existing?.highlightImageUrl,
+      ),
+      highlightImageAlt: getSubmittedOptionalText(
+        formData,
+        "highlightImageAlt",
+        existing?.highlightImageAlt,
+      ),
       highlights,
       overviewItems,
-      isActive: Boolean(formData.get("isActive")),
-      sortOrder: Number(formData.get("sortOrder") ?? existing?.sortOrder ?? 0),
+      isActive: getSubmittedCheckbox(formData, "isActive", existing?.isActive ?? true),
+      sortOrder: getSubmittedNumber(formData, "sortOrder", existing?.sortOrder ?? 0),
     });
   }
 
@@ -2831,32 +2980,48 @@ export const autosaveLoanProgramDraft = async (formData: FormData) => {
     }),
     slug,
     lifecycleStatus: existing?.lifecycleStatus ?? "DRAFT",
-    highlightTitle: asOptionalString(formData.get("highlightTitle")),
-    titleTail: asOptionalString(formData.get("titleTail")),
-    heroBadgeOne: asOptionalString(formData.get("heroBadgeOne")),
-    heroBadgeTwo: asOptionalString(formData.get("heroBadgeTwo")),
-    heroBadgeThree: asOptionalString(formData.get("heroBadgeThree")),
+    highlightTitle: getSubmittedOptionalText(
+      formData,
+      "highlightTitle",
+      getFallbackOnlyLoanProgramHighlightTitle(existing),
+    ),
+    titleTail: getSubmittedOptionalText(formData, "titleTail", existing?.titleTail),
+    heroBadgeOne: getSubmittedOptionalText(formData, "heroBadgeOne", existing?.heroBadgeOne),
+    heroBadgeTwo: getSubmittedOptionalText(formData, "heroBadgeTwo", existing?.heroBadgeTwo),
+    heroBadgeThree: getSubmittedOptionalText(formData, "heroBadgeThree", existing?.heroBadgeThree),
     shortDescription,
     fullDescription,
     interestRate,
     ltv,
     loanTerm,
-    fees: asOptionalString(formData.get("fees")),
+    fees: getSubmittedOptionalText(formData, "fees", existing?.fees),
     minAmount,
     maxAmount,
     keyHighlights,
-    highlightSubheadline: asOptionalString(formData.get("highlightSubheadline")),
-    insightTitle: asOptionalString(formData.get("insightTitle")),
-    insightBody: asOptionalString(formData.get("insightBody")),
-    crmTag: asOptionalString(formData.get("crmTag")),
-    imageUrl: asOptionalString(formData.get("imageUrl")),
-    imageAlt: asOptionalString(formData.get("imageAlt")),
-    highlightImageUrl: asOptionalString(formData.get("highlightImageUrl")),
-    highlightImageAlt: asOptionalString(formData.get("highlightImageAlt")),
+    highlightSubheadline: getSubmittedOptionalText(
+      formData,
+      "highlightSubheadline",
+      existing?.highlightSubheadline,
+    ),
+    insightTitle: getSubmittedOptionalText(formData, "insightTitle", existing?.insightTitle),
+    insightBody: getSubmittedOptionalText(formData, "insightBody", existing?.insightBody),
+    crmTag: getSubmittedOptionalText(formData, "crmTag", existing?.crmTag),
+    imageUrl: getSubmittedOptionalText(formData, "imageUrl", existing?.imageUrl),
+    imageAlt: getSubmittedOptionalText(formData, "imageAlt", existing?.imageAlt),
+    highlightImageUrl: getSubmittedOptionalText(
+      formData,
+      "highlightImageUrl",
+      existing?.highlightImageUrl,
+    ),
+    highlightImageAlt: getSubmittedOptionalText(
+      formData,
+      "highlightImageAlt",
+      existing?.highlightImageAlt,
+    ),
     highlights,
     overviewItems,
-    isActive: Boolean(formData.get("isActive")),
-    sortOrder: Number(formData.get("sortOrder") ?? existing?.sortOrder ?? 0),
+    isActive: getSubmittedCheckbox(formData, "isActive", existing?.isActive ?? true),
+    sortOrder: getSubmittedNumber(formData, "sortOrder", existing?.sortOrder ?? 0),
   });
 
   return {
@@ -3362,12 +3527,18 @@ export const autosaveSingletonPageDraft = async (formData: FormData) => {
   });
 
   const groups = singletonPageGroups[key] ?? [];
+  const submittedGroups = groups.filter((group) => formData.has(`group_${group.key}`));
 
-  await prisma.singletonPageItem.deleteMany({
-    where: { pageId: currentPage.id },
-  });
+  if (submittedGroups.length) {
+    await prisma.singletonPageItem.deleteMany({
+      where: {
+        pageId: currentPage.id,
+        groupKey: { in: submittedGroups.map((group) => group.key) },
+      },
+    });
+  }
 
-  for (const group of groups) {
+  for (const group of submittedGroups) {
     const rows = parseSingletonPageGroupRows(
       group,
       asOptionalString(formData.get(`group_${group.key}`)),

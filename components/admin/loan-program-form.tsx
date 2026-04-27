@@ -76,10 +76,12 @@ export function LoanProgramForm({ errorMessage, loanProgram }: LoanProgramFormPr
               </label>
 
               <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700">
+                <input name="isActive" type="hidden" value="false" />
                 <input
                   defaultChecked={loanProgram?.isActive ?? true}
                   name="isActive"
                   type="checkbox"
+                  value="true"
                 />
                 Visible on public financing pages
               </label>

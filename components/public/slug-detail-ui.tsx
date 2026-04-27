@@ -3,6 +3,11 @@ import type { ReactNode } from "react";
 
 const joinClasses = (...classes: Array<string | undefined>) => classes.filter(Boolean).join(" ");
 
+const normalizeDetailHeadingTitle = (title: ReactNode) =>
+  typeof title === "string" && title.trim().toLowerCase() === "core underwriting snapshot"
+    ? "Investment Terms Overview"
+    : title;
+
 export const detailPrimaryButtonClassName =
   "inline-flex items-center justify-center rounded-full border border-[rgba(191,147,117,0.7)] bg-[linear-gradient(135deg,#18314b_0%,#1f4367_100%)] px-5 py-3 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_14px_32px_rgba(15,23,42,0.12)] transition duration-300 hover:brightness-[1.04]";
 
@@ -83,13 +88,15 @@ export function DetailSectionHeading({
   body?: ReactNode;
   className?: string;
 }) {
+  const displayTitle = normalizeDetailHeadingTitle(title);
+
   return (
     <div className={className}>
       {eyebrow ? (
         <p className="text-[12px] font-semibold uppercase tracking-[0.32em] text-[#bf9375]">{eyebrow}</p>
       ) : null}
       <h2 className="mt-3 text-[28px] font-semibold leading-[1.08] tracking-[-0.035em] text-[#111827] sm:text-[32px]">
-        {title}
+        {displayTitle}
       </h2>
       {body ? (
         <p className="mt-4 max-w-[720px] text-[15px] leading-[1.78] text-slate-600 sm:text-[16px]">{body}</p>

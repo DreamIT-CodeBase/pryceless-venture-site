@@ -188,13 +188,11 @@ export default async function LoanProgramDetailPage({
   const highlightImage = loanProgram.highlightImageUrl || heroImage;
   const heroHeadingTail = getCmsText(loanProgram.titleTail);
   const heroDescription = getCmsText(loanProgram.shortDescription);
-  const highlightSectionTitle = getCmsText(
-    replaceProgramToken(highlightSectionContent?.title, loanProgram.title),
-  );
+  const highlightSectionTitle = "Financing Overview";
   const highlightSectionBody = getCmsText(
     loanProgram.highlightSubheadline || highlightSectionContent?.body,
   );
-  const termsSectionTitle = getCmsText(termsSectionContent?.title);
+  const termsSectionTitle = "Investment Terms Overview";
   const termsSectionBody = getCmsText(termsSectionContent?.body);
   const offeringHighlights = highlights.length ? highlights : splitParagraphs(loanProgram.keyHighlights);
   const insightEyebrow = getCmsText(getPageGroupItem(page, "insight_section_eyebrow")?.title);
@@ -214,8 +212,7 @@ export default async function LoanProgramDetailPage({
     { label: termDetailLabels[1] ?? "Loan Term", value: loanProgram.loanTerm },
     { label: termDetailLabels[2] ?? "LTV / LTC", value: loanProgram.ltv },
   ].filter((item) => item.value);
-  const overviewSectionTitle =
-    getCmsText(getPageGroupItem(page, "overview_section_title")?.title) ?? "Loan Overview";
+  const overviewSectionTitle = "Financing Overview";
   const applicationEyebrow =
     getCmsText(getPageGroupItem(page, "application_section_eyebrow")?.title) ?? "Application";
   const applicationSubtitle = "Complete the short form below and our team will follow up.";
@@ -241,13 +238,10 @@ export default async function LoanProgramDetailPage({
     <SiteShell cta={{ href: pageCtaHref, label: pageCtaLabel }}>
       <div className="bg-white pb-20">
         <section className="overflow-hidden bg-[#11283e] text-white">
-          <div className="mx-auto w-full max-w-[1480px] px-4 py-8 sm:px-6 sm:py-10 lg:px-[125px] lg:py-[44px] 2xl:max-w-[1760px] 2xl:px-[164px] 2xl:py-[56px]">
+          <div className="mx-auto w-full max-w-[1480px] px-4 py-10 sm:px-6 sm:py-12 lg:px-[125px] lg:py-[64px] 2xl:max-w-[1760px] 2xl:px-[164px] 2xl:py-[76px]">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(400px,1.08fr)] lg:items-center lg:gap-9 2xl:gap-12">
               <div className="max-w-[500px]">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.3em] text-[var(--pv-sand)]">
-                  {getPageGroupItem(page, "hero_eyebrow")?.title ?? "Loan Program"}
-                </p>
-                <h1 className="mt-3 text-balance text-[26px] font-semibold leading-[1.1] tracking-[-0.04em] !text-white sm:text-[34px] lg:text-[40px] 2xl:text-[44px]">
+                <h1 className="text-balance text-[26px] font-semibold leading-[1.1] tracking-[-0.04em] !text-white sm:text-[34px] lg:text-[40px] 2xl:text-[44px]">
                   {loanProgram.title}
                   {heroHeadingTail ? (
                     <>
@@ -256,7 +250,10 @@ export default async function LoanProgramDetailPage({
                   ) : null}
                 </h1>
                 {heroDescription ? (
-                  <p className="mt-5 max-w-[510px] text-[14.5px] leading-[1.6] !text-white/90 sm:text-[15.5px] sm:leading-[1.68] lg:mt-6">
+                  <p
+                    className="max-w-[510px] text-[14.5px] leading-[1.6] !text-white/90 sm:text-[15.5px] sm:leading-[1.68]"
+                    style={{ marginTop: "22px" }}
+                  >
                     {heroDescription}
                   </p>
                 ) : null}
@@ -273,7 +270,7 @@ export default async function LoanProgramDetailPage({
               </div>
 
               <div className="relative mx-auto w-full max-w-[600px] lg:mx-0">
-                <div className="relative h-[270px] sm:h-[330px] lg:h-[390px] 2xl:h-[430px]">
+                <div className="relative h-[280px] sm:h-[350px] lg:h-[420px] 2xl:h-[460px]">
                   <div
                     className="absolute inset-0 bg-white p-[6px] shadow-[0_24px_60px_rgba(8,13,22,0.24)]"
                     style={{ clipPath: LOAN_PROGRAM_HERO_IMAGE_CLIP_PATH }}
