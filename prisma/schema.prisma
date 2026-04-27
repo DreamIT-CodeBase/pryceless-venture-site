@@ -362,6 +362,7 @@ model LoanProgram {
   title            String
   slug             String           @unique
   lifecycleStatus  String           @default("DRAFT")
+  highlightTitle   String?
   titleTail        String?
   heroBadgeOne     String?
   heroBadgeTwo     String?

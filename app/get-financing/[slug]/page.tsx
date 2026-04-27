@@ -188,7 +188,9 @@ export default async function LoanProgramDetailPage({
   const highlightImage = loanProgram.highlightImageUrl || heroImage;
   const heroHeadingTail = getCmsText(loanProgram.titleTail);
   const heroDescription = getCmsText(loanProgram.shortDescription);
-  const highlightSectionTitle = "Financing Overview";
+  const highlightSectionTitle =
+    getCmsText(replaceProgramToken(loanProgram.highlightTitle, loanProgram.title)) ??
+    "Financing Overview";
   const highlightSectionBody = getCmsText(
     loanProgram.highlightSubheadline || highlightSectionContent?.body,
   );

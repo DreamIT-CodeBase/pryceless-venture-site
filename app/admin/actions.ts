@@ -14,6 +14,7 @@ import { parseFormFieldsEditorValue } from "@/lib/form-fields";
 import {
   deleteFallbackLoanProgram,
   ensureUniqueFallbackLoanProgramSlug,
+  type FallbackLoanProgramRecord,
   getFallbackLoanProgram,
   upsertFallbackLoanProgram,
 } from "@/lib/loan-program-fallback-store";
@@ -679,9 +680,53 @@ const isLoanProgramSchemaCompatibilityError = (error: unknown) => {
   );
 };
 
+const applyLoanProgramFallbackContext = <T extends Record<string, any>>(
+  program: T,
+  fallbackProgram: FallbackLoanProgramRecord | null,
+): T => {
+  if (!fallbackProgram) {
+    return program;
+  }
+
+  return {
+    ...program,
+    baseSlug: fallbackProgram.baseSlug,
+    crmTag: fallbackProgram.crmTag ?? null,
+    fees: fallbackProgram.fees ?? null,
+    fullDescription: fallbackProgram.fullDescription ?? null,
+    heroBadgeOne: fallbackProgram.heroBadgeOne ?? null,
+    heroBadgeThree: fallbackProgram.heroBadgeThree ?? null,
+    heroBadgeTwo: fallbackProgram.heroBadgeTwo ?? null,
+    highlightImageAlt: fallbackProgram.highlightImageAlt ?? null,
+    highlightImageUrl: fallbackProgram.highlightImageUrl ?? null,
+    highlightSubheadline: fallbackProgram.highlightSubheadline ?? null,
+    highlightTitle: fallbackProgram.highlightTitle ?? null,
+    highlights: fallbackProgram.highlights,
+    imageAlt: fallbackProgram.imageAlt ?? null,
+    imageUrl: fallbackProgram.imageUrl ?? null,
+    insightBody: fallbackProgram.insightBody ?? null,
+    insightTitle: fallbackProgram.insightTitle ?? null,
+    interestRate: fallbackProgram.interestRate ?? null,
+    isActive: fallbackProgram.isActive,
+    keyHighlights: fallbackProgram.keyHighlights ?? null,
+    loanTerm: fallbackProgram.loanTerm ?? null,
+    ltv: fallbackProgram.ltv ?? null,
+    maxAmount: fallbackProgram.maxAmount ?? null,
+    minAmount: fallbackProgram.minAmount ?? null,
+    overviewItems: fallbackProgram.overviewItems,
+    shortDescription: fallbackProgram.shortDescription ?? null,
+    slug: fallbackProgram.slug,
+    sortOrder: fallbackProgram.sortOrder,
+    title: fallbackProgram.title,
+    titleTail: fallbackProgram.titleTail ?? null,
+  };
+};
+
 const getExistingLoanProgramContext = async (id: string) => {
+  const fallback = await getFallbackLoanProgram(id);
+
   try {
-    return await prisma.loanProgram.findUnique({
+    const loanProgram = await prisma.loanProgram.findUnique({
       where: { id },
       select: {
         crmTag: true,
@@ -721,12 +766,21 @@ const getExistingLoanProgramContext = async (id: string) => {
         },
       },
     });
+
+    if (!loanProgram) {
+      return fallback;
+    }
+
+    return applyLoanProgramFallbackContext(
+      loanProgram,
+      fallback ?? (await getFallbackLoanProgram(loanProgram.slug)),
+    );
   } catch (error) {
     if (!isLoanProgramSchemaCompatibilityError(error)) {
       throw error;
     }
 
-    return getFallbackLoanProgram(id);
+    return fallback;
   }
 };
 

@@ -110,6 +110,61 @@ const getSeedLoanProgramsForSelect = () =>
     title: program.title,
   }));
 
+const findLoanProgramFallback = (
+  fallbackPrograms: Awaited<ReturnType<typeof getFallbackLoanPrograms>>,
+  program: { id?: string | null; slug?: string | null },
+) =>
+  fallbackPrograms.find(
+    (fallbackProgram) =>
+      fallbackProgram.id === program.id ||
+      fallbackProgram.slug === program.slug ||
+      fallbackProgram.baseSlug === program.slug ||
+      (fallbackProgram.baseSlug ? `seed-${fallbackProgram.baseSlug}` === program.id : false),
+  ) ?? null;
+
+const applyLoanProgramFallbackOverride = <T extends Record<string, any>>(
+  program: T,
+  fallbackProgram: Awaited<ReturnType<typeof getFallbackLoanProgram>>,
+): T => {
+  if (!fallbackProgram) {
+    return program;
+  }
+
+  return {
+    ...program,
+    baseSlug: fallbackProgram.baseSlug,
+    crmTag: fallbackProgram.crmTag ?? null,
+    fees: fallbackProgram.fees ?? null,
+    fullDescription: fallbackProgram.fullDescription ?? null,
+    heroBadgeOne: fallbackProgram.heroBadgeOne ?? null,
+    heroBadgeThree: fallbackProgram.heroBadgeThree ?? null,
+    heroBadgeTwo: fallbackProgram.heroBadgeTwo ?? null,
+    highlightImageAlt: fallbackProgram.highlightImageAlt ?? null,
+    highlightImageUrl: fallbackProgram.highlightImageUrl ?? null,
+    highlightSubheadline: fallbackProgram.highlightSubheadline ?? null,
+    highlightTitle: fallbackProgram.highlightTitle ?? null,
+    highlights: fallbackProgram.highlights,
+    imageAlt: fallbackProgram.imageAlt ?? null,
+    imageUrl: fallbackProgram.imageUrl ?? null,
+    insightBody: fallbackProgram.insightBody ?? null,
+    insightTitle: fallbackProgram.insightTitle ?? null,
+    interestRate: fallbackProgram.interestRate ?? null,
+    isActive: fallbackProgram.isActive,
+    keyHighlights: fallbackProgram.keyHighlights ?? null,
+    loanTerm: fallbackProgram.loanTerm ?? null,
+    ltv: fallbackProgram.ltv ?? null,
+    maxAmount: fallbackProgram.maxAmount ?? null,
+    minAmount: fallbackProgram.minAmount ?? null,
+    overviewItems: fallbackProgram.overviewItems,
+    shortDescription: fallbackProgram.shortDescription ?? null,
+    slug: fallbackProgram.slug,
+    sortOrder: fallbackProgram.sortOrder,
+    title: fallbackProgram.title,
+    titleTail: fallbackProgram.titleTail ?? null,
+    updatedAt: fallbackProgram.updatedAt,
+  };
+};
+
 const getSeedFormsAdmin = () =>
   [...formDefinitionsSeed]
     .filter((form) => String(form.slug) !== "funding-info-request")
@@ -427,7 +482,7 @@ export const getLoanProgramsAdmin = async (): Promise<any[]> =>
     }
 
     try {
-      return await loanProgramDelegate.findMany({
+      const loanPrograms = await loanProgramDelegate.findMany({
         orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
         include: {
           forms: {
@@ -441,6 +496,13 @@ export const getLoanProgramsAdmin = async (): Promise<any[]> =>
           },
         },
       }) as any[];
+
+      return loanPrograms.map((loanProgram) =>
+        applyLoanProgramFallbackOverride(
+          loanProgram,
+          findLoanProgramFallback(fallback, loanProgram),
+        ),
+      );
     } catch (error) {
       if (isSchemaSyncFailure(error)) {
         warnAdminFallbackOnce(
@@ -493,10 +555,10 @@ export const getLoanProgramAdmin = async (id: string): Promise<any | null> =>
         return fallback;
       }
 
-      return {
-        ...loanProgram,
-        highlightTitle: fallback?.highlightTitle ?? null,
-      };
+      return applyLoanProgramFallbackOverride(
+        loanProgram,
+        fallback ?? (await getFallbackLoanProgram(loanProgram.slug)),
+      );
     } catch (error) {
       if (isSchemaSyncFailure(error)) {
         warnAdminFallbackOnce(
