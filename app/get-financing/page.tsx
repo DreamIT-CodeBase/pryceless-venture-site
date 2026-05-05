@@ -17,7 +17,7 @@ export const revalidate = 300;
 
 const legacyGetFinancingTitle = "Get Financing for Your Real Estate Deals";
 const defaultLoanOffersTitle = "Loan Offers for Your Real Estate Deals";
-const featuredLoanVideoSrc = "/videos/Video_Generation_with_Brand_Mention.mp4";
+const featuredLoanVideoSrc = "/videos/mp_.mp4";
 
 const formatAmountRange = (minAmount: string | null | undefined, maxAmount: string | null | undefined) => {
   if (minAmount && maxAmount) {

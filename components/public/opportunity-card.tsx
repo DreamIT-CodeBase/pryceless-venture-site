@@ -14,6 +14,7 @@ type OpportunityCardProps = {
   image: StaticImageData | string;
   imageAlt: string;
   metaIcon?: "briefcase" | "document" | "location";
+  metaWrap?: boolean;
   metaText?: string | null;
   statItems?: Array<{ label: string; value: string }>;
   summary?: string | null;
@@ -70,6 +71,7 @@ export function OpportunityCard({
   image,
   imageAlt,
   metaIcon = "location",
+  metaWrap = false,
   metaText,
   statItems = [],
   summary,
@@ -108,7 +110,7 @@ export function OpportunityCard({
         {metaText ? (
           <div className="mt-[7px] flex min-h-[16px] items-start gap-[6px] text-[12px] leading-[16px] text-[#6b7280] min-[1400px]:min-h-[18px] min-[1400px]:text-[13px]">
             <OpportunityMetaIcon kind={metaIcon} />
-            <p className="truncate">{metaText}</p>
+            <p className={metaWrap ? "break-words" : "truncate"}>{metaText}</p>
           </div>
         ) : null}
 

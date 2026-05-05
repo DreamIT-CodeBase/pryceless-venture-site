@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import MicrosoftEntraID, { type MicrosoftEntraIDProfile } from "next-auth/providers/microsoft-entra-id";
 
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
@@ -25,7 +26,7 @@ const extractEmailCandidates = (
 
 export const { handlers, auth, signIn, signOut } = NextAuth(() => {
   const allowedEmails = new Set(env.adminAllowedEmails);
-  const entraIssuer = `https://login.microsoftonline.com/${env.azureTenantId}/v2.0`;
+  const entraIssuer = `https://login.microsoftonline.com/${env.azureAuthTenantId}/v2.0`;
   const authOrigin = env.authOrigin;
 
   if (process.env.NODE_ENV === "production") {
@@ -35,12 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
       );
     }
 
-    const authHostname = new URL(authOrigin).hostname;
-    if (authHostname === "localhost" || authHostname === "127.0.0.1") {
-      throw new Error(
-        "AUTH_URL or NEXTAUTH_URL cannot use localhost in production. Set it to your deployed site origin, for example https://example.com.",
-      );
-    }
+    new URL(authOrigin);
   }
 
   return {
@@ -57,21 +53,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
       error: "/admin/login",
     },
     providers: [
-      {
-        id: "microsoft-entra-id",
-        name: "Microsoft Entra ID",
-        type: "oidc",
+      MicrosoftEntraID({
         clientId: env.azureClientId,
         clientSecret: env.azureClientSecret,
         issuer: entraIssuer,
-        wellKnown: `${entraIssuer}/.well-known/openid-configuration`,
         authorization: {
           params: {
+            prompt: "select_account",
             scope: "openid profile email User.Read",
           },
         },
-        profile(profile: Record<string, unknown>) {
-          const [email = ""] = extractEmailCandidates(undefined, profile);
+        profile(profile: MicrosoftEntraIDProfile) {
+          const profileRecord = profile as unknown as Record<string, unknown>;
+          const [email = ""] = extractEmailCandidates(undefined, profileRecord);
 
           return {
             id: String(profile.sub ?? profile.oid ?? ""),
@@ -80,7 +74,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
             image: null,
           };
         },
-      },
+      }),
     ],
     callbacks: {
       async signIn({ user, profile, account }) {

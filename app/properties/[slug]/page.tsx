@@ -515,7 +515,7 @@ export default async function PropertyDetailPage({
 
   const stage = getPropertyPortfolioStage(property.status);
   const statusLabel = formatPropertyStatusLabel(property.status || stage);
-  const locationLabel = [property.locationCity, property.locationState].filter(Boolean).join(", ");
+  const cityStateLocation = [property.locationCity, property.locationState].filter(Boolean).join(", ");
   const galleryImages = createGalleryImages(property);
   const galleryCarouselItems: DetailMediaCarouselItem[] = galleryImages.map((image, index) => ({
     alt: image.alt,
@@ -526,6 +526,7 @@ export default async function PropertyDetailPage({
   }));
   const heroImage = galleryImages[0] ?? null;
   const detailContent = parsePropertyDetailContent(property.detailContent);
+  const locationLabel = property.completeAddress || detailContent.completeAddress || cityStateLocation;
   const highlightContent = parsePropertyHighlights(
     property.highlights.map((highlight) => highlight.highlight),
   );

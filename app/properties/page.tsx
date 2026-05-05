@@ -203,11 +203,12 @@ export default async function PropertiesPage() {
       fallbackPortfolioCards[template][index % fallbackPortfolioCards[template].length];
     const propertyImage =
       resolvePrimaryImage(property) || fallbackImages[index % fallbackImages.length];
-    const location = [property.locationCity, property.locationState].filter(Boolean).join(", ");
+    const cityStateLocation = [property.locationCity, property.locationState].filter(Boolean).join(", ");
+    const detailContent = parsePropertyDetailContent(property.detailContent);
+    const displayAddress = property.completeAddress || detailContent.completeAddress || cityStateLocation;
     const propertyType = formatDisplayValue(property.propertyType) || fallbackCard.propertyType;
     const strategy = getPropertyDealTypeLabel(property.strategy) || fallbackCard.strategy;
     const statusLabel = formatPropertyStatusLabel(property.status);
-    const detailContent = parsePropertyDetailContent(property.detailContent);
     const parsedHighlights = parsePropertyHighlights(
       property.highlights.map((item) => item.highlight),
     );
@@ -219,7 +220,7 @@ export default async function PropertiesPage() {
     ).map((item) => truncate(item, 48));
 
     groupedCards[template].push({
-      address: truncate(location || property.title || fallbackCard.address, 34),
+      address: displayAddress || property.title || fallbackCard.address,
       bulletItems,
       ctaLabel:
         stage === "FOR_SALE"
@@ -268,17 +269,6 @@ export default async function PropertiesPage() {
               <div className="mx-auto w-full">
                 <PropertyTemplateFilter />
               </div>
-
-              {page?.disclaimer ? (
-                <div className="mx-auto mt-[30px] w-full max-w-[1080px] min-[1400px]:max-w-[1432px]">
-                  <p className="text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#555555]">
-                    Disclaimer:
-                  </p>
-                  <p className="mt-[7px] text-[14px] leading-[1.5] tracking-[-0.01em] text-[#6d6d6d] min-[1400px]:max-w-[1120px]">
-                    {page.disclaimer}
-                  </p>
-                </div>
-              ) : null}
             </div>
           </section>
         </div>

@@ -26,6 +26,7 @@ export type PropertyDetailNarrative = {
 };
 
 export type PropertyDetailContent = {
+  completeAddress: string | null;
   googleMapsUrl: string | null;
   locationBenefits: string[];
   narrative: PropertyDetailNarrative;
@@ -67,6 +68,7 @@ type PropertyDescriptionDerivatives = {
 };
 
 type PropertyDetailContentInput = {
+  completeAddress?: string | null;
   googleMapsUrl?: string | null;
   locationBenefits?: Array<string | null | undefined>;
   narrative?: Partial<PropertyDetailNarrative> | null;
@@ -96,6 +98,7 @@ const propertyDetailNarrativeSchema = z.object({
 });
 
 const propertyDetailContentSchema = z.object({
+  completeAddress: optionalString,
   googleMapsUrl: optionalString,
   locationBenefits: z.array(z.string()).optional(),
   narrative: propertyDetailNarrativeSchema.optional(),
@@ -232,6 +235,7 @@ const createEmptyNarrative = (): PropertyDetailNarrative => ({
 });
 
 const createEmptyContent = (): PropertyDetailContent => ({
+  completeAddress: null,
   googleMapsUrl: null,
   locationBenefits: [],
   narrative: createEmptyNarrative(),
@@ -477,6 +481,7 @@ const normalizePropertyDetailContent = (
   const storedStandoutItems = normalizeStandoutItems(value?.standoutItems);
 
   return {
+    completeAddress: normalizeOptionalString(value?.completeAddress),
     googleMapsUrl: normalizeOptionalString(value?.googleMapsUrl),
     locationBenefits: normalizeStringList(value?.locationBenefits),
     narrative: getNarrativeFromSources({
@@ -529,6 +534,7 @@ export const stringifyPropertyDetailContent = (
   const content = normalizePropertyDetailContent(value);
 
   const hasContent =
+    content.completeAddress ||
     content.googleMapsUrl ||
     content.rawDescription ||
     content.locationBenefits.length ||

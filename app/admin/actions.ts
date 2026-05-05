@@ -69,6 +69,7 @@ const baseEntitySchema = z.object({
 });
 
 const propertySchema = baseEntitySchema.extend({
+  completeAddress: z.string().optional(),
   status: z.enum(propertyStatusValues),
   locationCity: z.string().optional(),
   locationState: z.string().optional(),
@@ -253,6 +254,7 @@ const buildPropertyDetailContent = (
   strategy: PropertyDealType,
 ) =>
   stringifyPropertyDetailContent({
+    completeAddress: asOptionalString(formData.get("completeAddress")),
     googleMapsUrl: asOptionalString(formData.get("googleMapsUrl")),
     locationBenefits: parseSimpleLines(asOptionalString(formData.get("locationBenefitsText"))),
     overviewBulletPoints: parseSimpleLines(asOptionalString(formData.get("overviewBulletPointsText"))),
@@ -264,6 +266,80 @@ const buildPropertyDetailContent = (
     timelineLabel: asOptionalString(formData.get("timelineLabel")),
     templateType: strategy,
   });
+
+const isPropertyCompleteAddressCompatibilityError = (error: unknown) => {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "";
+
+  return (
+    message.includes("Unknown argument `completeAddress`") ||
+    message.includes("Unknown field `completeAddress`") ||
+    message.includes("Unknown selection field `completeAddress`") ||
+    message.includes("Invalid column name 'completeAddress'") ||
+    (message.includes("completeAddress") && message.includes("does not exist"))
+  );
+};
+
+const getPropertyWriteData = (
+  propertyData: {
+    buyerFit?: string | null;
+    completeAddress?: string | null;
+    detailContent?: string | null;
+    inquiryFormId?: string | null;
+    lifecycleStatus: string;
+    locationCity?: string | null;
+    locationState?: string | null;
+    propertyType: string;
+    slug: string;
+    status: string;
+    strategy: string;
+    summary: string;
+    title: string;
+  },
+  includeCompleteAddress = true,
+) => ({
+  title: propertyData.title,
+  slug: propertyData.slug,
+  lifecycleStatus: propertyData.lifecycleStatus,
+  status: propertyData.status,
+  ...(includeCompleteAddress ? { completeAddress: propertyData.completeAddress } : {}),
+  locationCity: propertyData.locationCity,
+  locationState: propertyData.locationState,
+  propertyType: propertyData.propertyType,
+  strategy: propertyData.strategy,
+  summary: propertyData.summary,
+  buyerFit: propertyData.buyerFit,
+  detailContent: propertyData.detailContent,
+  inquiryFormId: propertyData.inquiryFormId,
+});
+
+const writePropertyRecord = async (
+  propertyData: Parameters<typeof getPropertyWriteData>[0] & { id?: string },
+) => {
+  const write = (includeCompleteAddress: boolean) =>
+    propertyData.id
+      ? prisma.property.update({
+          where: { id: propertyData.id },
+          data: getPropertyWriteData(propertyData, includeCompleteAddress),
+        })
+      : prisma.property.create({
+          data: getPropertyWriteData(propertyData, includeCompleteAddress),
+        });
+
+  try {
+    return await write(true);
+  } catch (error) {
+    if (!isPropertyCompleteAddressCompatibilityError(error)) {
+      throw error;
+    }
+
+    return write(false);
+  }
+};
 
 const parseOptionalDateValue = (value: string | null | undefined) => {
   const trimmedValue = String(value ?? "").trim();
@@ -1280,6 +1356,7 @@ export const saveProperty = async (formData: FormData) => {
     slug: slugify(String(formData.get("slug") ?? formData.get("title") ?? "")),
     lifecycleStatus: intentToLifecycleStatus(formData),
     status: getPropertyEditorStatus(asOptionalString(formData.get("status"))),
+    completeAddress: asOptionalString(formData.get("completeAddress")),
     locationCity: asOptionalString(formData.get("locationCity")),
     locationState: asOptionalString(formData.get("locationState")),
     propertyType: String(formData.get("propertyType") ?? ""),
@@ -1315,40 +1392,7 @@ export const saveProperty = async (formData: FormData) => {
   let property;
 
   try {
-    property = propertyData.id
-      ? await prisma.property.update({
-          where: { id: propertyData.id },
-          data: {
-            title: propertyData.title,
-            slug: propertyData.slug,
-            lifecycleStatus: propertyData.lifecycleStatus,
-            status: propertyData.status,
-            locationCity: propertyData.locationCity,
-            locationState: propertyData.locationState,
-            propertyType: propertyData.propertyType,
-            strategy: propertyData.strategy,
-            summary: propertyData.summary,
-            buyerFit: propertyData.buyerFit,
-            detailContent: propertyData.detailContent,
-            inquiryFormId: propertyData.inquiryFormId,
-          },
-        })
-      : await prisma.property.create({
-          data: {
-            title: propertyData.title,
-            slug: propertyData.slug,
-            lifecycleStatus: propertyData.lifecycleStatus,
-            status: propertyData.status,
-            locationCity: propertyData.locationCity,
-            locationState: propertyData.locationState,
-            propertyType: propertyData.propertyType,
-            strategy: propertyData.strategy,
-            summary: propertyData.summary,
-            buyerFit: propertyData.buyerFit,
-            detailContent: propertyData.detailContent,
-            inquiryFormId: propertyData.inquiryFormId,
-          },
-        });
+    property = await writePropertyRecord(propertyData);
 
     await prisma.propertyHighlight.deleteMany({ where: { propertyId: property.id } });
     if (highlights.length) {
@@ -2557,30 +2601,46 @@ export const autosavePropertyDraft = async (formData: FormData) => {
   await requireAdminSession();
 
   const id = await getSubmittedId(formData, "properties");
+  const existingBaseSelect = {
+    id: true,
+    lifecycleStatus: true,
+    slug: true,
+    title: true,
+    status: true,
+    locationCity: true,
+    locationState: true,
+    propertyType: true,
+    strategy: true,
+    summary: true,
+    buyerFit: true,
+    detailContent: true,
+    inquiryFormId: true,
+  } as const;
   const existing = id
-    ? await prisma.property.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          lifecycleStatus: true,
-          slug: true,
-          title: true,
-          status: true,
-          locationCity: true,
-          locationState: true,
-          propertyType: true,
-          strategy: true,
-          summary: true,
-          buyerFit: true,
-          detailContent: true,
-          inquiryFormId: true,
-        },
-      })
+    ? await prisma.property
+        .findUnique({
+          where: { id },
+          select: {
+            ...existingBaseSelect,
+            completeAddress: true,
+          },
+        })
+        .catch((error) => {
+          if (!isPropertyCompleteAddressCompatibilityError(error)) {
+            throw error;
+          }
+
+          return prisma.property.findUnique({
+            where: { id },
+            select: existingBaseSelect,
+          });
+        })
     : null;
 
   const rawTitle = String(formData.get("title") ?? "").trim();
   const summary = String(formData.get("summary") ?? "").trim();
   const buyerFit = getPropertyDescriptionText(formData);
+  const completeAddress = asOptionalString(formData.get("completeAddress"));
   const locationCity = asOptionalString(formData.get("locationCity"));
   const locationState = asOptionalString(formData.get("locationState"));
   const strategy = coercePropertyDealType(
@@ -2596,6 +2656,7 @@ export const autosavePropertyDraft = async (formData: FormData) => {
     !rawTitle &&
     !summary &&
     !buyerFit &&
+    !completeAddress &&
     !locationCity &&
     !locationState &&
     !detailContent &&
@@ -2616,49 +2677,28 @@ export const autosavePropertyDraft = async (formData: FormData) => {
       }),
   });
 
-  const property = existing
-    ? await prisma.property.update({
-        where: { id: existing.id },
-      data: {
-          title: getAutosaveTitle({
-            rawTitle,
-            existingTitle: existing.title,
-            fallback: "Untitled property",
-          }),
-          slug,
-          lifecycleStatus: existing.lifecycleStatus ?? "DRAFT",
-          status: getPropertyEditorStatus(
-            asOptionalString(formData.get("status")) ?? existing.status ?? "FOR_SALE",
-          ),
-          locationCity,
-          locationState,
-          propertyType: String(formData.get("propertyType") ?? existing.propertyType ?? "SFR"),
-          strategy,
-          summary,
-          buyerFit,
-          detailContent,
-          inquiryFormId: asOptionalString(formData.get("inquiryFormId")),
-        },
-      })
-    : await prisma.property.create({
-        data: {
-          title: getAutosaveTitle({
-            rawTitle,
-            fallback: "Untitled property",
-          }),
-          slug,
-          lifecycleStatus: "DRAFT",
-          status: getPropertyEditorStatus(asOptionalString(formData.get("status")) ?? "FOR_SALE"),
-          locationCity,
-          locationState,
-          propertyType: String(formData.get("propertyType") ?? "SFR"),
-          strategy,
-          summary,
-          buyerFit,
-          detailContent,
-          inquiryFormId: asOptionalString(formData.get("inquiryFormId")),
-        },
-      });
+  const property = await writePropertyRecord({
+    id: existing?.id,
+    title: getAutosaveTitle({
+      rawTitle,
+      existingTitle: existing?.title,
+      fallback: "Untitled property",
+    }),
+    slug,
+    lifecycleStatus: existing?.lifecycleStatus ?? "DRAFT",
+    status: getPropertyEditorStatus(
+      asOptionalString(formData.get("status")) ?? existing?.status ?? "FOR_SALE",
+    ),
+    completeAddress,
+    locationCity,
+    locationState,
+    propertyType: String(formData.get("propertyType") ?? existing?.propertyType ?? "SFR"),
+    strategy,
+    summary,
+    buyerFit,
+    detailContent,
+    inquiryFormId: asOptionalString(formData.get("inquiryFormId")),
+  });
 
   await prisma.propertyHighlight.deleteMany({ where: { propertyId: property.id } });
   if (highlights.length) {

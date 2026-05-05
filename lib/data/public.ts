@@ -115,9 +115,13 @@ const isPropertyDetailSchemaSyncFailure = (error: unknown) => {
 
   return (
     message.includes("Invalid column name 'detailContent'") ||
+    message.includes("Invalid column name 'completeAddress'") ||
     message.includes("The column `detailContent` does not exist") ||
+    (message.includes("completeAddress") && message.includes("does not exist")) ||
     message.includes("Unknown field `detailContent`") ||
-    message.includes("Unknown selection field `detailContent`")
+    message.includes("Unknown field `completeAddress`") ||
+    message.includes("Unknown selection field `detailContent`") ||
+    message.includes("Unknown selection field `completeAddress`")
   );
 };
 
@@ -317,7 +321,7 @@ const propertyListImageSelect = {
   },
 } as const;
 
-const propertyListCoreSelect = {
+const propertyListLegacyCoreSelect = {
   id: true,
   locationCity: true,
   locationState: true,
@@ -338,16 +342,21 @@ const propertyListCoreSelect = {
   },
 } as const;
 
+const propertyListCoreSelect = {
+  ...propertyListLegacyCoreSelect,
+  completeAddress: true,
+} as const;
+
 const propertyListSelect = {
   ...propertyListCoreSelect,
   detailContent: true,
 } as const;
 
 const propertyListLegacySchemaSelect = {
-  ...propertyListCoreSelect,
+  ...propertyListLegacyCoreSelect,
 } as const;
 
-const propertyDetailCoreSelect = {
+const propertyDetailLegacyCoreSelect = {
   buyerFit: true,
   locationCity: true,
   locationState: true,
@@ -372,6 +381,11 @@ const propertyDetailCoreSelect = {
       mediaFile: mediaFileBlobSelect,
     },
   },
+} as const;
+
+const propertyDetailCoreSelect = {
+  ...propertyDetailLegacyCoreSelect,
+  completeAddress: true,
 } as const;
 
 const propertyDetailBaseSelect = {
@@ -414,7 +428,8 @@ const propertyDetailSelect = {
 } as const;
 
 const propertyDetailLegacyFormSelect = {
-  ...propertyDetailBaseSelect,
+  ...propertyDetailLegacyCoreSelect,
+  detailContent: true,
   inquiryForm: {
     select: {
       formName: true,
@@ -429,7 +444,7 @@ const propertyDetailLegacyFormSelect = {
 } as const;
 
 const propertyDetailLegacyContentSelect = {
-  ...propertyDetailCoreSelect,
+  ...propertyDetailLegacyCoreSelect,
   inquiryForm: {
     select: {
       formName: true,
@@ -444,7 +459,7 @@ const propertyDetailLegacyContentSelect = {
 } as const;
 
 const propertyDetailLegacySchemaSelect = {
-  ...propertyDetailCoreSelect,
+  ...propertyDetailLegacyCoreSelect,
   inquiryForm: {
     select: {
       formName: true,
@@ -861,6 +876,7 @@ const normalizePublishedPropertyRecord = (
 
   return {
     ...property,
+    completeAddress: "completeAddress" in property ? property.completeAddress ?? null : null,
     detailContent:
       options?.missingDetailContent || !("detailContent" in property)
         ? null
@@ -880,6 +896,7 @@ const normalizePublishedPropertyListRecord = (
   },
 ) => ({
   ...property,
+  completeAddress: "completeAddress" in property ? property.completeAddress ?? null : null,
   detailContent:
     options?.missingDetailContent || !("detailContent" in property)
       ? null

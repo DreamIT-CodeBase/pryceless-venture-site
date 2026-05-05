@@ -42,6 +42,9 @@ export const env = {
   get azureTenantId() {
     return requireEnv("AZURE_TENANT_ID");
   },
+  get azureAuthTenantId() {
+    return process.env.AZURE_AUTH_TENANT_ID?.trim() || "common";
+  },
   get azureClientSecret() {
     return requireEnv("AZURE_CLIENT_SECRET");
   },

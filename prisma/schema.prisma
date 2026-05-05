@@ -168,6 +168,7 @@ model Property {
   slug           String                  @unique
   lifecycleStatus String                 @default("DRAFT")
   status         String
+  completeAddress String?                @db.NVarChar(1000)
   locationCity   String?
   locationState  String?
   propertyType   String

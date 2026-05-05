@@ -292,6 +292,7 @@ export function PropertyTemplateFilter() {
               imageAlt={property.imageAlt}
               key={property.id}
               metaIcon="location"
+              metaWrap
               metaText={property.address}
               statItems={property.statItems}
               summary={property.summary}

@@ -126,6 +126,19 @@ export function PropertyForm({ property, forms, errorMessage }: PropertyFormProp
             </label>
 
             <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Complete Address</span>
+              <input
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                defaultValue={property?.completeAddress ?? detailContent.completeAddress ?? ""}
+                name="completeAddress"
+                placeholder="123 Main St, Atlanta, GA 30303"
+              />
+              <span className="mt-2 block text-xs leading-5 text-slate-500">
+                This appears on the public portfolio property cards. If left empty, the site uses city and state.
+              </span>
+            </label>
+
+            <label className="block md:col-span-2">
               <span className="mb-2 block text-sm font-medium text-slate-700">Overview Title</span>
               <input
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3"
