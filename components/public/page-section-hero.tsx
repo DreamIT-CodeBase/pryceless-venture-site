@@ -95,7 +95,7 @@ export function PageSectionHero({
 
               <h1
                 className={joinClasses(
-                  "pv-page-section-hero-title text-[28px] font-bold leading-[1.08] tracking-[-0.04em] text-white sm:text-[38px] min-[1025px]:max-w-[794px] min-[1025px]:text-[30.5px] min-[1025px]:leading-[42px] min-[1025px]:tracking-[0] 2xl:max-w-[900px] 2xl:text-[50px] 2xl:leading-[1.04] 2xl:tracking-[-0.04em]",
+                  "pv-page-section-hero-title text-[28px] font-medium leading-[1.08] tracking-[-0.04em] text-white sm:text-[38px] min-[1025px]:max-w-[794px] min-[1025px]:text-[30.5px] min-[1025px]:leading-[42px] min-[1025px]:tracking-[0] 2xl:max-w-[900px] 2xl:text-[50px] 2xl:leading-[1.04] 2xl:tracking-[-0.04em]",
                   titleClassName,
                 )}
                 style={{ color: "#ffffff" }}

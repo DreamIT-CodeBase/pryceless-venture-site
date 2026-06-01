@@ -320,13 +320,39 @@ export const getDashboardCounts = async () => {
   return { properties, investments, loanPrograms, caseStudies, blogs, forms, submissions };
 };
 
-export const getPropertiesAdmin = async () =>
-  prisma.property.findMany({
-    orderBy: { updatedAt: "desc" },
-    include: {
-      images: { select: { id: true }, take: 1 },
-    },
-  });
+const propertyAdminListSelect = {
+  id: true,
+  lifecycleStatus: true,
+  status: true,
+  title: true,
+  updatedAt: true,
+} as const;
+
+export const getPropertiesAdmin = async () => {
+  try {
+    return await prisma.property.findMany({
+      orderBy: { updatedAt: "desc" },
+      select: {
+        ...propertyAdminListSelect,
+        images: { select: { id: true }, take: 1 },
+      },
+    });
+  } catch (error) {
+    if (!isSchemaSyncFailure(error)) {
+      throw error;
+    }
+
+    warnAdminFallbackOnce(
+      "properties-admin",
+      "property schema has newer columns than the database, using the list-safe property query.",
+    );
+
+    return prisma.property.findMany({
+      orderBy: { updatedAt: "desc" },
+      select: propertyAdminListSelect,
+    });
+  }
+};
 
 export const getPropertyAdmin = async (id: string) =>
   prisma.property.findUnique({
