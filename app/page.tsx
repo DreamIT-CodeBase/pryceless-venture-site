@@ -39,6 +39,9 @@ import {
   getSingletonPage,
 } from "@/lib/data/public";
 import { resolvePrimaryImage } from "@/lib/media";
+import { parsePropertyDetailContent } from "@/lib/property-detail-content";
+import { parsePropertyHighlights } from "@/lib/property-portfolio";
+import { getPropertyDealTypeLabel } from "@/lib/property-templates";
 
 export const revalidate = 300;
 
@@ -172,6 +175,26 @@ const formatDisplayValue = (value: string | null | undefined) =>
 const truncate = (value: string, limit: number) =>
   value.length > limit ? `${value.slice(0, limit).trim()}...` : value;
 
+const getFeaturedPropertyStatItems = ({
+  fallbackStats,
+  highlightMetrics,
+  templateMetrics,
+}: {
+  fallbackStats: Array<{ label: string; value: string }>;
+  highlightMetrics: Array<{ label: string; value: string }>;
+  templateMetrics: Array<{ label: string; value: string }>;
+}) => {
+  const preferredMetrics = templateMetrics.length ? templateMetrics : highlightMetrics;
+
+  return [...preferredMetrics, ...fallbackStats]
+    .filter((item) => item.label && item.value)
+    .slice(0, 2)
+    .map((item) => ({
+      label: truncate(item.label, 22),
+      value: truncate(item.value, 24),
+    }));
+};
+
 const normalizeRemovedHref = (href: string | null | undefined, fallbackHref: string) =>
   href === "/capital-rates" || href === "/investments" ? fallbackHref : href ?? fallbackHref;
 
@@ -186,36 +209,6 @@ const isLenderAudienceSegment = (segment: {
   body?: string | null;
   ctaLabel?: string | null;
 }) => `${segment.title ?? ""} ${segment.body ?? ""} ${segment.ctaLabel ?? ""}`.toLowerCase().includes("lender");
-
-const getPropertyProgressPercent = (status: string | null | undefined) => {
-  const normalizedStatus = String(status ?? "").trim().toUpperCase();
-
-  if (normalizedStatus.includes("FOR_SALE") || normalizedStatus.includes("AVAILABLE")) {
-    return 64;
-  }
-
-  if (
-    normalizedStatus.includes("IN_PROGRESS") ||
-    normalizedStatus.includes("RENOV") ||
-    normalizedStatus.includes("REHAB")
-  ) {
-    return 76;
-  }
-
-  if (normalizedStatus.includes("COMING")) {
-    return 38;
-  }
-
-  if (normalizedStatus.includes("UNDER") || normalizedStatus.includes("PENDING")) {
-    return 82;
-  }
-
-  if (normalizedStatus.includes("SOLD") || normalizedStatus.includes("CLOSED")) {
-    return 100;
-  }
-
-  return 56;
-};
 
 const whoWeHelpVisuals = [
   {
@@ -266,49 +259,46 @@ const featuredPropertyListingCards = [
   {
     id: "fallback-property-1",
     address: "Illustrative property sourced through our network",
-    annualReturn: "Available",
     ctaLabel: "Request Details",
+    dealType: "Buy & Hold",
     href: "/properties",
     image: featuredPropertiesRightUpperImage,
-    leftMetricLabel: "Status",
-    propertyType: "Residential",
-    progressPercent: 64,
-    raisedSummary: "Representative opportunity shown for layout preview and launch readiness.",
-    rightMetricLabel: "Property Type",
-    timeLabel: "Strategy",
-    timeLeft: "Buy & Hold",
+    imageAlt: "Illustrative portfolio property",
+    statItems: [
+      { label: "Status", value: "Available" },
+      { label: "Property Type", value: "Residential" },
+    ],
+    summary: "Representative opportunity shown for layout preview and launch readiness.",
     title: "Illustrative Property",
   },
   {
     id: "fallback-property-2",
     address: "Illustrative property sourced through our network",
-    annualReturn: "Coming Soon",
     ctaLabel: "Request Details",
+    dealType: "Value-Add",
     href: "/properties",
     image: aboutSectionImage,
-    leftMetricLabel: "Status",
-    propertyType: "Multifamily",
-    progressPercent: 64,
-    raisedSummary: "Representative opportunity shown for layout preview and launch readiness.",
-    rightMetricLabel: "Property Type",
-    timeLabel: "Strategy",
-    timeLeft: "Value-Add",
+    imageAlt: "Illustrative multifamily portfolio property",
+    statItems: [
+      { label: "Status", value: "Coming Soon" },
+      { label: "Property Type", value: "Multifamily" },
+    ],
+    summary: "Representative opportunity shown for layout preview and launch readiness.",
     title: "Illustrative Property",
   },
   {
     id: "fallback-property-3",
     address: "Illustrative property sourced through our network",
-    annualReturn: "Available",
     ctaLabel: "Request Details",
+    dealType: "Turnkey",
     href: "/properties",
     image: featuredPropertiesLeftImage,
-    leftMetricLabel: "Status",
-    propertyType: "Commercial",
-    progressPercent: 64,
-    raisedSummary: "Representative opportunity shown for layout preview and launch readiness.",
-    rightMetricLabel: "Property Type",
-    timeLabel: "Strategy",
-    timeLeft: "Turnkey",
+    imageAlt: "Illustrative commercial portfolio property",
+    statItems: [
+      { label: "Status", value: "Available" },
+      { label: "Property Type", value: "Commercial" },
+    ],
+    summary: "Representative opportunity shown for layout preview and launch readiness.",
     title: "Illustrative Property",
   },
 ];
@@ -432,28 +422,42 @@ export default async function Home() {
     const mappedCards = publishedProperties.map((property, index) => {
       const fallbackCard = featuredPropertyListingCards[index % featuredPropertyListingCards.length];
       const location = [property.locationCity, property.locationState].filter(Boolean).join(", ");
-      const displayAddress = [property.title, location].filter(Boolean).join(", ");
-      const status = formatDisplayValue(property.status) || fallbackCard.timeLeft;
-      const propertyType = formatDisplayValue(property.propertyType) || fallbackCard.propertyType;
-      const strategy = formatDisplayValue(property.strategy) || fallbackCard.timeLeft;
+      const detailContent = parsePropertyDetailContent(property.detailContent);
+      const displayAddress = property.completeAddress || detailContent.completeAddress || location;
+      const propertyType = formatDisplayValue(property.propertyType);
+      const dealType = getPropertyDealTypeLabel(property.strategy) || fallbackCard.dealType;
       const propertyImage = resolvePrimaryImage(property) || fallbackCard.image;
+      const parsedHighlights = parsePropertyHighlights(
+        property.highlights.map((item) => item.highlight),
+      );
+      const fallbackStats =
+        fallbackCard.statItems.length
+          ? fallbackCard.statItems
+          : [
+              { label: "Property Type", value: propertyType || "Residential" },
+              { label: "Deal Type", value: dealType },
+            ];
+      const statItems = getFeaturedPropertyStatItems({
+        fallbackStats,
+        highlightMetrics: parsedHighlights.metrics,
+        templateMetrics: detailContent.templateMetrics,
+      });
 
       return {
         ...fallbackCard,
         address: displayAddress || fallbackCard.address,
-        annualReturn: status,
         ctaLabel: propertiesPage?.ctaLabel ?? fallbackCard.ctaLabel,
+        dealType,
         href: `/properties/${property.slug}`,
         id: property.id,
         image: propertyImage,
-        leftMetricLabel: fallbackCard.leftMetricLabel,
-        progressPercent: getPropertyProgressPercent(property.status),
-        propertyType,
-        raisedSummary: property.summary ? truncate(property.summary, 94) : fallbackCard.raisedSummary,
-        rightMetricLabel: fallbackCard.rightMetricLabel,
-        timeLabel: fallbackCard.timeLabel,
-        timeLeft: strategy,
-        title: property.locationCity?.trim() || fallbackCard.title,
+        imageAlt: `${property.title} featured portfolio property`,
+        statItems,
+        summary: truncate(
+          detailContent.overviewShortDescription || property.summary || fallbackCard.summary,
+          108,
+        ),
+        title: truncate(property.title || fallbackCard.title, 48),
       };
     });
 
@@ -917,7 +921,7 @@ export default async function Home() {
           <div className="absolute inset-x-0 top-0 h-[172px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.36)_50%,rgba(255,255,255,0)_100%)]" />
         </div>
 
-        <div className="relative mx-auto w-full max-w-[1119px] px-4 sm:px-6 lg:px-0 2xl:max-w-[1320px]">
+        <div className="relative mx-auto w-full max-w-[1119px] px-4 sm:px-6 lg:px-0 min-[1280px]:max-w-[1264px] 2xl:max-w-[1320px]">
           <div className="text-center">
             <h2 className={`${homeSectionTitleClassName} text-[rgba(15,23,42,1)]`}>
               Featured Properties

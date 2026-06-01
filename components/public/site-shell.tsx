@@ -106,7 +106,7 @@ export async function SiteShell({
     },
   ];
   const footerHeadingClassName =
-    "pv-site-footer-heading !text-white text-[24px] font-bold leading-[26px] tracking-[0]";
+    "pv-site-footer-heading !text-white text-[24px] !font-medium leading-[26px] tracking-[0]";
   const footerRuleClassName = "pv-site-footer-rule mt-[15px] h-px w-full bg-[#19a7df]";
   const footerListLinkClassName =
     "pv-site-footer-list-link block border-b border-white/18 text-[14px] leading-[30px] tracking-[0] !text-white transition hover:text-[var(--pv-sand)] sm:leading-[32px]";

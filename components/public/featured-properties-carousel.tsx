@@ -3,37 +3,33 @@
 import Image, { type StaticImageData } from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  StandardCollectionCardLink,
-} from "@/components/public/collection-card-layout";
+import { StandardCollectionCardLink } from "@/components/public/collection-card-layout";
 
 type FeaturedPropertyCarouselItem = {
   id: string;
   title: string;
   address: string;
   image: string | StaticImageData;
+  imageAlt?: string;
   href: string;
-  progressPercent: number;
-  raisedSummary: string;
-  leftMetricLabel: string;
-  annualReturn: string;
-  rightMetricLabel: string;
-  propertyType: string;
-  timeLabel: string;
-  timeLeft: string;
+  summary: string;
+  statItems: Array<{ label: string; value: string }>;
+  dealType: string;
   ctaLabel?: string;
 };
 
 const AUTO_PLAY_MS = 3800;
-const FEATURED_PROPERTY_DESKTOP_WIDTH = 310;
-const FEATURED_PROPERTY_2XL_WIDTH = 364;
+const FEATURED_PROPERTY_DESKTOP_WIDTH = 330;
+const FEATURED_PROPERTY_XL_WIDTH = 420;
+const FEATURED_PROPERTY_2XL_WIDTH = 420;
 const FEATURED_PROPERTY_TABLET_WIDTH = 278;
 const FEATURED_PROPERTY_DESKTOP_GAP = 38;
-const FEATURED_PROPERTY_2XL_GAP = 44;
+const FEATURED_PROPERTY_XL_GAP = 46;
+const FEATURED_PROPERTY_2XL_GAP = 50;
 const FEATURED_PROPERTY_TABLET_GAP = 26;
 const FEATURED_PROPERTY_MOBILE_GAP = 16;
 const featuredPropertyButtonClassName =
-  "inline-flex min-h-[44px] w-full max-w-[168px] items-center justify-center rounded-[8px] bg-[#18314b] px-[18px] py-2.5 text-center text-[12.5px] font-semibold leading-[1.2] text-white pv-interactive-button transition-[background-color,box-shadow,transform] duration-300 group-hover:-translate-y-[1px] group-hover:bg-[#234766] group-hover:shadow-[0_12px_24px_rgba(24,49,75,0.16)] hover:bg-[#234766]";
+  "inline-flex min-h-[55px] w-full max-w-[190px] items-center justify-center rounded-[8px] bg-[#14314f] px-5 py-3 text-center text-[14px] font-semibold leading-[1.2] text-white pv-interactive-button transition-[background-color,box-shadow,transform] duration-300 group-hover:-translate-y-[1px] group-hover:bg-[#234766] group-hover:shadow-[0_14px_28px_rgba(20,49,79,0.18)] hover:bg-[#234766]";
 
 function LocationPinIcon({ className = "" }: { className?: string }) {
   return (
@@ -53,27 +49,6 @@ function LocationPinIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function ClockIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      viewBox="0 0 14 14"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="7" cy="7" fill="currentColor" r="5.8" />
-      <path
-        d="M7 4.15v3.1l2.03 1.17"
-        stroke="#fff"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.25"
-      />
-    </svg>
-  );
-}
-
 const getVisibleCount = (width: number) => {
   if (width >= 1024) {
     return 3;
@@ -89,6 +64,10 @@ const getVisibleCount = (width: number) => {
 const getGap = (width: number) => {
   if (width >= 1536) {
     return FEATURED_PROPERTY_2XL_GAP;
+  }
+
+  if (width >= 1280) {
+    return FEATURED_PROPERTY_XL_GAP;
   }
 
   if (width >= 1024) {
@@ -166,7 +145,7 @@ export function FeaturedPropertiesCarousel({
 
   return (
     <div
-      className="mx-auto w-full max-w-full sm:max-w-[582px] lg:max-w-[1006px] 2xl:max-w-[1180px]"
+      className="mx-auto w-full max-w-full sm:max-w-[582px] lg:max-w-[1066px] min-[1280px]:max-w-[1352px] 2xl:max-w-[1360px]"
       onFocusCapture={() => setIsPaused(true)}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -174,30 +153,30 @@ export function FeaturedPropertiesCarousel({
       style={{ fontFamily: "var(--font-poppins), sans-serif" }}
     >
       <div
-        className="pv-hide-scrollbar flex snap-x snap-mandatory gap-[18px] overflow-x-auto pb-[12px] sm:gap-[26px] lg:gap-[38px] 2xl:gap-[44px]"
+        className="pv-hide-scrollbar flex snap-x snap-mandatory gap-[18px] overflow-x-auto pb-[22px] pt-[2px] sm:gap-[26px] lg:gap-[38px] min-[1280px]:gap-[46px] 2xl:gap-[50px]"
         ref={viewportRef}
       >
         {safeItems.map((item) => (
           <StandardCollectionCardLink
-            className="!min-h-[442px] h-auto min-w-full snap-start rounded-[18px] sm:!min-h-[486px] sm:h-auto sm:min-w-[278px] lg:!min-h-[486px] lg:h-auto lg:min-w-[310px] 2xl:!min-h-[516px] 2xl:h-auto 2xl:min-w-[364px]"
+            className="!min-h-[506px] h-auto min-w-full snap-start rounded-[22px] border-[#d7d7d7] shadow-[0_18px_42px_rgba(19,29,54,0.08)] sm:!min-h-[522px] sm:h-auto sm:min-w-[278px] lg:!min-h-[528px] lg:h-auto lg:min-w-[330px] min-[1280px]:!min-h-[610px] min-[1280px]:min-w-[420px] 2xl:!min-h-[610px] 2xl:h-auto 2xl:min-w-[420px]"
             href={item.href}
             key={item.id}
           >
-            <div className="px-[15px] pt-[15px]">
-              <div className="relative h-[198px] overflow-hidden rounded-[16px]">
+            <div className="px-[12px] pt-[12px] min-[1280px]:px-[20px] min-[1280px]:pt-[20px]">
+              <div className="relative h-[188px] overflow-hidden rounded-[15px] sm:h-[196px] lg:h-[198px] min-[1280px]:h-[224px]">
                 <Image
-                  alt={`${item.title} featured property`}
+                  alt={item.imageAlt ?? `${item.title} featured property`}
                   className="object-cover"
                   fill
-                  sizes={`(max-width: 639px) 100vw, (max-width: 1023px) ${FEATURED_PROPERTY_TABLET_WIDTH}px, (max-width: 1535px) ${FEATURED_PROPERTY_DESKTOP_WIDTH}px, ${FEATURED_PROPERTY_2XL_WIDTH}px`}
+                  sizes={`(max-width: 639px) 100vw, (max-width: 1023px) ${FEATURED_PROPERTY_TABLET_WIDTH}px, (max-width: 1279px) ${FEATURED_PROPERTY_DESKTOP_WIDTH}px, (max-width: 1535px) ${FEATURED_PROPERTY_XL_WIDTH}px, ${FEATURED_PROPERTY_2XL_WIDTH}px`}
                   src={item.image}
                 />
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col px-[16px] pb-[15px] pt-[14px]">
+            <div className="flex flex-1 flex-col px-[20px] pb-[18px] pt-[16px] min-[1280px]:px-[20px] min-[1280px]:pb-[17px] min-[1280px]:pt-[15px]">
               <h3
-                className="min-h-[40px] text-left text-[18px] font-bold leading-[1.12] tracking-[-0.02em] text-[rgba(15,23,42,1)] sm:min-h-[42px] sm:text-[19px]"
+                className="min-h-[48px] text-left text-[20px] font-normal leading-[1.16] tracking-[0] text-[#131d36] sm:min-h-[52px] sm:text-[21px] min-[1280px]:min-h-[58px] min-[1280px]:text-[25px]"
                 style={{
                   WebkitBoxOrient: "vertical",
                   WebkitLineClamp: 2,
@@ -208,55 +187,62 @@ export function FeaturedPropertiesCarousel({
                 {item.title}
               </h3>
 
-              <p className="mt-[6px] flex items-center gap-[5px] text-left text-[11.5px] font-normal leading-[16px] tracking-[0] text-[rgba(97,97,97,1)]">
-                <LocationPinIcon className="h-[12px] w-[10px] shrink-0 text-[rgba(43,47,56,1)]" />
-                <span className="truncate">{item.address}</span>
+              <p className="mt-[10px] flex min-h-[18px] items-start gap-[7px] text-left text-[13px] font-normal leading-[1.45] tracking-[0] text-[#6b7280] min-[1280px]:min-h-[20px] min-[1280px]:text-[15px]">
+                <LocationPinIcon className="mt-[1px] h-[13px] w-[11px] shrink-0 text-[#30343b] min-[1280px]:h-[14px] min-[1280px]:w-[12px]" />
+                <span className="break-words">{item.address}</span>
               </p>
 
-              <div className="mt-[12px] h-[8px] overflow-hidden rounded-full bg-[rgba(231,236,242,1)]">
-                <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#29d869_0%,#39cf7b_100%)]"
-                  style={{ width: `${item.progressPercent}%` }}
-                />
-              </div>
-
-              <p className="mt-[8px] min-h-[30px] overflow-hidden text-left text-[11px] font-normal leading-[15px] tracking-[0] text-[rgba(97,97,97,1)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
-                {item.raisedSummary}
+              <p className="mt-[8px] min-h-[44px] text-left text-[12px] font-normal leading-[1.62] tracking-[0] text-[#6b7280] min-[1280px]:min-h-[48px] min-[1280px]:text-[14px]">
+                <span
+                  style={{
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 2,
+                    display: "-webkit-box",
+                    overflow: "hidden",
+                  }}
+                >
+                  {item.summary}
+                </span>
               </p>
 
-              <div className="mt-[16px] grid grid-cols-2 border-y border-[rgba(215,215,215,1)]">
-                <div className="px-[13px] py-[11px]">
-                  <p className="text-left text-[11px] font-normal leading-[15px] tracking-[0] text-[rgba(97,97,97,1)]">
-                    {item.leftMetricLabel}
-                  </p>
-                  <p className="mt-[4px] text-left text-[11.5px] font-semibold leading-[16px] tracking-[0] text-[rgba(53,53,53,1)]">
-                    {item.annualReturn}
-                  </p>
-                </div>
-                <div className="border-l border-[rgba(215,215,215,1)] px-[13px] py-[11px]">
-                  <p className="text-left text-[11px] font-normal leading-[15px] tracking-[0] text-[rgba(97,97,97,1)]">
-                    {item.rightMetricLabel}
-                  </p>
-                  <p className="mt-[4px] truncate text-left text-[11.5px] font-semibold leading-[16px] tracking-[0] text-[rgba(53,53,53,1)]">
-                    {item.propertyType}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-auto flex flex-col gap-3 pt-[16px] sm:flex-row sm:items-end sm:justify-between sm:gap-[12px]">
-                <div className="min-w-0">
-                  <p className="text-left text-[10px] font-normal leading-[14px] tracking-[0] text-[rgba(97,97,97,1)]">
-                    {item.timeLabel}
-                  </p>
-                  <div className="mt-[4px] flex items-center gap-[4px]">
-                    <ClockIcon className="h-[10px] w-[10px] shrink-0 text-[rgba(43,47,56,1)]" />
-                    <p className="truncate text-left text-[12px] font-bold leading-[16px] tracking-[0] text-[rgba(15,23,42,1)]">
-                      {item.timeLeft}
+              <div className="mt-[12px] grid border-y border-[#d7d7d7] text-left sm:grid-cols-2 sm:min-h-[74px] min-[1280px]:mt-[16px] min-[1280px]:min-h-[86px]">
+                {item.statItems.slice(0, 2).map((stat, index) => (
+                  <div
+                    className={`flex min-h-[64px] flex-col justify-start px-[16px] py-[9px] sm:min-h-[74px] min-[1280px]:min-h-[86px] min-[1280px]:px-[16px] min-[1280px]:py-[11px] ${
+                      index === 0 && item.statItems.length > 1
+                        ? "border-b border-[#d7d7d7] sm:border-b-0 sm:border-r"
+                        : ""
+                    }`}
+                    key={`${item.id}-${stat.label}`}
+                  >
+                    <p className="text-[12px] font-normal leading-[16px] tracking-[0] text-[#6b7280] min-[1280px]:text-[14px]">
+                      {stat.label}
+                    </p>
+                    <p
+                      className="mt-[2px] text-[14px] font-semibold leading-[18px] tracking-[0] text-[#30343b] min-[1280px]:text-[16px]"
+                      style={{
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {stat.value}
                     </p>
                   </div>
-                </div>
+                ))}
+              </div>
 
-                <span className={`shrink-0 ${featuredPropertyButtonClassName}`}>{item.ctaLabel ?? ctaLabel}</span>
+              <div className="mt-auto pt-[12px]">
+                <p className="min-h-[16px] text-left text-[12px] font-normal leading-[16px] tracking-[0] text-[#6b7280] min-[1280px]:min-h-[18px] min-[1280px]:text-[14px]">
+                  <span className="font-medium text-[#30343b]">Deal Type:</span> {item.dealType}
+                </p>
+
+                <div className="pt-[16px]">
+                  <span className={featuredPropertyButtonClassName}>
+                    {item.ctaLabel ?? ctaLabel}
+                  </span>
+                </div>
               </div>
             </div>
           </StandardCollectionCardLink>
